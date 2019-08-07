@@ -1,0 +1,13 @@
+Combinatorial GoldenGate
+1. Setup PCR plate with (volumes) shown:
+	1.1. Dilute plasmid DNA to 75 ng/µL in 'water'
+	1.2. Create 'assembly-mix' from 1:1 T4 Ligase Buffer (10X) and NEB Golden Gate Assembly Mix
+2. Mix plasmids DNA (2 uL) 'assembly-mix' (4 uL) and 'water' (14 uL)
+3. Heat at 37 °C for 1 hour, 60 °C for 5 minutes, 4 °C hold
+4. Move 3 uL from each mixture well to new plate(s)
+5. Add 10 uL of competent E. coli to each well
+6. Heat shock:
+	6.1. Heat at 42 °C for 30 seconds
+7. Add 150 uL of SOC media to each well
+8. Incubate:
+	8.1. Heat at 37 °C for 1 hour

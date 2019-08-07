@@ -1,0 +1,66 @@
+LOCUS       E0030_CD                2831 bp ds-DNA     circular     12-MAY-2015
+DEFINITION  .
+KEYWORDS    "Antibiotic:Ampicillin (AMP)" "Backbone:DVA_CD" "Cloned by         
+            (Date):SI 4/6/2014" "Fusion site(s):CD" "Glycerol:--" "Part
+            Source:CIDAR" "Part subtype:Fluorescent reporter" "Part type :CDS"
+            "Plasmid:--" "Seq Source:parts.igem.org/Part\:Bba_E0030" "Seq
+            Verify:--"
+FEATURES             Location/Qualifiers
+     CDS             complement(1695..2555)
+                     /label="bla"
+                     /ApEinfo_revcolor=#faac61
+                     /ApEinfo_fwdcolor=#faac61
+     CDS             5..727
+                     /label="E0030"
+                     /ApEinfo_revcolor=#faac61
+                     /ApEinfo_fwdcolor=#faac61
+ORIGIN
+        1 AATGatggtg agcaagggcg aggagctgtt caccggggtg gtgcccatcc tggtcgagct
+       61 ggacggcgac gtaaacggcc acaagttcag cgtgtccggc gagggcgagg gcgatgccac
+      121 ctacggcaag ctgaccctga agttcatctg caccaccggc aagctgcccg tgccctggcc
+      181 caccctcgtg accaccttcg gctacggcct gcaatgcttc gcccgctacc ccgaccacat
+      241 gaagctgcac gacttcttca agtccgccat gcccgaaggc tacgtccagg agcgcaccat
+      301 cttcttcaag gacgacggca actacaagac ccgcgccgag gtgaagttcg agggcgacac
+      361 cctggtgaac cgcatcgagc tgaagggcat cgacttcaag gaggacggca acatcctggg
+      421 gcacaagctg gagtacaact acaacagcca caacgtctat atcatggccg acaagcagaa
+      481 gaacggcatc aaggtgaact tcaagatccg ccacaacatc gaggacggca gcgtgcagct
+      541 cgccgaccac taccagcaga acacccccat cggcgacggc cccgtgctgc tgcccgacaa
+      601 ccactacctg agctaccagt ccgccctgag caaagacccc aacgagaagc gcgatcacat
+      661 ggtcctgctg gagttcgtga ccgccgccgg gatcactctc ggcatggacg agctgtacaa
+      721 gtaataaAGG Tagagaccta ctagtagcgg ccgctgcagg cttcctcgct cactgactcg
+      781 ctgcgctcgg tcgttcggct gcggcgagcg gtatcagctc actcaaaggc ggtaatacgg
+      841 ttatccacag aatcagggga taacgcagga aagaacatgt gagcaaaagg ccagcaaaag
+      901 gccaggaacc gtaaaaaggc cgcgttgctg gcgtttttcc acaggctccg cccccctgac
+      961 gagcatcaca aaaatcgacg ctcaagtcag aggtggcgaa acccgacagg actataaaga
+     1021 taccaggcgt ttccccctgg aagctccctc gtgcgctctc ctgttccgac cctgccgctt
+     1081 accggatacc tgtccgcctt tctcccttcg ggaagcgtgg cgctttctca tagctcacgc
+     1141 tgtaggtatc tcagttcggt gtaggtcgtt cgctccaagc tgggctgtgt gcacgaaccc
+     1201 cccgttcagc ccgaccgctg cgccttatcc ggtaactatc gtcttgagtc caacccggta
+     1261 agacacgact tatcgccact ggcagcagcc actggtaaca ggattagcag agcgaggtat
+     1321 gtaggcggtg ctacagagtt cttgaagtgg tggcctaact acggctacac tagaagaaca
+     1381 gtatttggta tctgcgctct gctgaagcca gttaccttcg gaaaaagagt tggtagctct
+     1441 tgatccggca aacaaaccac cgctggtagc ggtggttttt ttgtttgcaa gcagcagatt
+     1501 acgcgcagaa aaaaaggatc tcaagaagat cctttgatct tttctacggg gtctgacgct
+     1561 cagtggaacg aaaactcacg ttaagggatt ttggtcatga gattatcaaa aaggatcttc
+     1621 acctagatcc ttttaaatta aaaatgaagt tttaaatcaa tctaaagtat atatgagtaa
+     1681 acttggtctg acagttacca atgcttaatc agtgaggcac ctatctcagc gatctgtcta
+     1741 tttcgttcat ccatagttgc ctgactcccc gtcgtgtaga taactacgat acgggagggc
+     1801 ttaccatctg gccccagtgc tgcaatgata ccgcgcgacc cacgctcacc ggctccagat
+     1861 ttatcagcaa taaaccagcc agccggaagg gccgagcgca gaagtggtcc tgcaacttta
+     1921 tccgcctcca tccagtctat taattgttgc cgggaagcta gagtaagtag ttcgccagtt
+     1981 aatagtttgc gcaacgttgt tgccattgct acaggcatcg tggtgtcacg ctcgtcgttt
+     2041 ggtatggctt cattcagctc cggttcccaa cgatcaaggc gagttacatg atcccccatg
+     2101 ttgtgcaaaa aagcggttag ctccttcggt cctccgatcg ttgtcagaag taagttggcc
+     2161 gcagtgttat cactcatggt tatggcagca ctgcataatt ctcttactgt catgccatcc
+     2221 gtaagatgct tttctgtgac tggtgagtac tcaaccaagt cattctgaga atagtgtatg
+     2281 cggcgaccga gttgctcttg cccggcgtca atacgggata ataccgcgcc acatagcaga
+     2341 actttaaaag tgctcatcat tggaaaacgt tcttcggggc gaaaactctc aaggatctta
+     2401 ccgctgttga gatccagttc gatgtaaccc actcgtgcac ccaactgatc ttcagcatct
+     2461 tttactttca ccagcgtttc tgggtgagca aaaacaggaa ggcaaaatgc cgcaaaaaag
+     2521 ggaataaggg cgacacggaa atgttgaata ctcatactct tcctttttca atattattga
+     2581 agcatttatc agggttattg tctcatgagc ggatacatat ttgaatgtat ttagaaaaat
+     2641 aaacaaatag gggttccgcg cacatttccc cgaaaagtgc cacctgacgt ctaagaaacc
+     2701 attattatca tgacattaac ctataaaaat aggcgtatca cgaggcagaa tttcagataa
+     2761 aaaaaatcct tagctttcgc taaggatgat ttctggaatt cgcggccgct tctagagact
+     2821 agtgggtctc a
+//
