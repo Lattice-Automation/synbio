@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Union
 
-from ..containers import Plates
+from ..containers import Layout
 from ..instructions import Instruction
 
 
@@ -47,7 +47,7 @@ def to_tecan(instruction: Instruction, existing_plates: int) -> str:
     ]
 
     # set each wells location in setup and destination plates
-    plates = Plates.from_instruction(
+    plates = Layout.from_instruction(
         instruction, src_containers=True, existing_plates=existing_plates
     )
 

@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Union
 
-from ..containers import Plates
+from ..containers import Layout
 from ..instructions import Instruction
 
 TRANSFER_MAX_VOLUME = 10.0
@@ -45,7 +45,7 @@ def to_labcyte(instruction: Instruction, existing_plates: int) -> str:
     ]
 
     # set each wells location in setup and destination plates
-    plates = Plates.from_instruction(
+    plates = Layout.from_instruction(
         instruction, src_containers=True, existing_plates=existing_plates
     )
 

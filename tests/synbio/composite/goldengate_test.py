@@ -20,6 +20,10 @@ class TestGoldenGate(unittest.TestCase):
     def test_moclo(self):
         """End to end GoldenGate test."""
 
+        # create the test directory for file output
+        if not os.path.exists(OUT_DIR):
+            os.mkdir(OUT_DIR)
+
         # create a library design with multiple "bins"
         design = Combinatorial()
 

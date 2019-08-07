@@ -9,7 +9,7 @@ from Bio.Restriction import EcoRI
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.containers import content_id, Plates, Well, Species, Reagent, Fridge
+from synbio.containers import content_id, Layout, Well, Species, Reagent, Fridge
 
 
 class TestContainers(unittest.TestCase):
@@ -38,10 +38,8 @@ class TestContainers(unittest.TestCase):
     def test_plates(self):
         """Plate creation and serialization to CSV format."""
 
-        plate_contents = [
-            Well(SeqRecord(Seq("ATGATAGAT"), id=str(i))) for i in range(140)
-        ]
-        plates = Plates(plate_contents, rows=8, cols=12)
+        plate_contents = [Well(SeqRecord(Seq("ATGATAGAT"))) for i in range(140)]
+        plates = Layout(plate_contents)
 
         plate_csv = plates.to_csv()
 
@@ -52,14 +50,13 @@ class TestContainers(unittest.TestCase):
         self.assertGreaterEqual(len(plate_csv.split("\n")), 9)
 
         # test plates name, well index (within plates) and well name (within plates)
-        content_2 = plate_contents[1]
-
-        self.assertEqual("Plate:1", plates.container_to_plate_name[content_2])
+        self.assertEqual("Plate:1", plates.container_to_plate_name[plate_contents[1]])
         self.assertEqual("Plate:1", plates.container_to_plate_name[plate_contents[95]])
         self.assertEqual("Plate:2", plates.container_to_plate_name[plate_contents[96]])
+
         self.assertEqual("Plate:2", plates.container_to_plate_name[plate_contents[105]])
-        self.assertEqual(2, plates.container_to_well_index[content_2])
-        self.assertEqual("B1", plates.container_to_well_name[content_2])
+        self.assertEqual(2, plates.container_to_well_index[plate_contents[1]])
+        self.assertEqual("B1", plates.container_to_well_name[plate_contents[1]])
         self.assertEqual(2, len(plates))  # two plates
 
     def test_hash(self):
@@ -71,7 +68,8 @@ class TestContainers(unittest.TestCase):
     def test_withdraw(self):
         """Withdraw from a well, know when 'empty'"""
 
-        c1 = Well([Reagent("e coli"), Reagent("water")], [50.0, 30.0], volume_max=100.0)
+        c1 = Well([Reagent("e coli"), Reagent("water")], [50.0, 30.0])
+        c1.volume_max = 100.0
 
         self.assertFalse(c1.empty())
         self.assertEqual(80.0, c1.volume())
@@ -99,7 +97,7 @@ class TestContainers(unittest.TestCase):
         )
 
         with self.assertRaises(ValueError):
-            Well(volumes=[40, 80, 90], volume_max=50.0)
+            Well(volumes=[40, 80, 90, 130])
 
         with self.assertRaises(ValueError):  # only one reagent, two volumes
             Well(volumes=[2.0, 5.0], contents=Reagent("e coli"))

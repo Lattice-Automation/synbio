@@ -26,7 +26,9 @@ class TestRestriction(unittest.TestCase):
         DE = read("B0015_DE.gb")
         AE = read("DVK_AE.gb")
 
-        assemblies = _valid_assemblies([AB, BC, CD, DE, AE], [BsaI, BpiI], "KanR")
+        assemblies = _valid_assemblies(
+            [AB, BC, CD, DE, AE], [BsaI, BpiI], "KanR", min_count=5
+        )
 
         self.assertEqual(1, len(assemblies))
 
