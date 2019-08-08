@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="synbio",
-    version="0.2.1",
+    version="0.3.0",
     author="JJTimmons",
     author_email="jtimmons@latticeautomation.com",
     description="Synbio design and build library",
