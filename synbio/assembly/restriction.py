@@ -10,6 +10,8 @@ import networkx as nx
 from networkx.algorithms.cycles import simple_cycles
 from networkx.exception import NetworkXNoCycle
 
+from ..design import Plasmid
+
 
 CATALYZE_CACHE: Dict[str, List[Tuple[str, SeqRecord, str]]] = {}
 """Store the catalyze results of each SeqRecord. Avoid lots of string searches."""
@@ -88,6 +90,13 @@ def simulate(
         valid_assemblies.extend(
             _valid_assemblies(combination, enzymes, resistance, min_count)
         )
+
+    if isinstance(design, Plasmid) and valid_assemblies:
+        if len(valid_assemblies) > 1:
+            raise RuntimeWarning(
+                f"Plasmid design specified using only first valid assembly"
+            )
+        valid_assemblies = valid_assemblies[:1]
 
     return valid_assemblies
 

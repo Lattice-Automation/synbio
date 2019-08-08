@@ -1,50 +1,41 @@
-"""Example of a Combinatorial MoClo assembly with steps and output.
-
-All possible assemblies from combinations of all SeqRecords across
-multiple bins are tested and those that will successfully linearize
-are combined into composite plasmids.
-"""
+"""Example of a Combinatorial Golden Gate assembly with steps and output."""
 
 import os
 
 from Bio.SeqIO import parse
 
-from synbio import Protocol, Combinatorial
+from synbio import Combinatorial, Protocol
 from synbio.composite import GoldenGate
 
 
 def read_all_records():
     """Gather all SeqRecords from "goldengate" dir in examples."""
 
+    gg_dir = os.path.join(".", "goldengate")
+
     records = []
-    for file in os.listdir(os.path.join(".", "goldengate")):
+    for file in os.listdir(gg_dir):
         if file.endswith(".gb"):
-            records.extend(parse(os.path.join(".", "goldengate", file), "genbank"))
+            records.extend(parse(os.path.join(gg_dir, file), "genbank"))
     return records
 
 
 # create a combinatorial library design from multiple "bins"
-design = Combinatorial()
-gg_records = read_all_records()
-for type in ["promoter", "RBS", "CDS", "terminator"]:
-    record_bin = [r for r in gg_records if any(f.type == type for f in r.features)]
-    design.append(record_bin)  # add a new cominatorial bin
+design = Combinatorial(read_all_records())
 
-# create a protocol using GoldenGate as the sole composite step and run
+# create a protocol using Golden Gate as the sole composite step and run
 protocol = Protocol(name="Combinatorial Golden Gate", design=design)
-
-# filter on plasmids with a KanR feature in the backbone and at least 5 consituent SeqRecords
-protocol.add(GoldenGate(resistance="KanR", min_count=5))
+protocol.add(GoldenGate())
 protocol.run()
 
 # export all the output plasmids to a multi-FASTA
-protocol.to_fasta("plasmids.fasta")
+protocol.to_fasta("composite_parts.fasta")
 
 # export plate layouts
-protocol.to_csv("plates.csv")
+protocol.to_csv("plate_layouts.csv")
 
-# export protocol
+# export human protocol
 protocol.to_txt("protocol.txt")
 
-# because this is a larger assembly, make robotic instructions
+# export a hamilton picklist
 protocol.to_picklists("robotic_picklist.gwl", platform="tecan")

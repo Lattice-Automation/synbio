@@ -26,17 +26,26 @@ Behind the scenes, `synbio` is filtering all combinations of `SeqRecords` from t
 ```python
 """Example of a Combinatorial Golden Gate assembly with steps and output."""
 
+import os
+
 from Bio.SeqIO import parse
 
 from synbio import Combinatorial, Protocol
 from synbio.composite import GoldenGate
 
+def read_all_records():
+    """Gather all SeqRecords from "goldengate" dir in examples."""
+
+    GG_DIR = os.path.join(".", "examples", "goldengate")
+
+    records = []
+    for file in os.listdir(GG_DIR):
+        if file.endswith(".gb"):
+            records.extend(parse(os.path.join(GG_DIR, file), "genbank"))
+    return records
+
 # create a combinatorial library design from multiple "bins"
-design = Combinatorial()
-records = parse("./moclo_parts.fa", "fasta")
-for type in ["promoter", "RBS", "CDS", "terminator"]:
-    record_bin = [r for r in records if any(f.type == type for f in r.features)]
-    design.append(record_bin)  # add a new cominatorial bin
+design = Combinatorial(read_all_records())
 
 # create a protocol using Golden Gate as the sole composite step and run
 protocol = Protocol(name="Combinatorial Golden Gate", design=design)
@@ -96,7 +105,7 @@ W;;;;;;;;;
 
 ## Alternatives
 
-This is a non-exhaustive list. Contact me for a comparison of these libraries/platforms.
+This is a non-exhaustive list. Contact me for a comparison of these libraries/platforms and `synbio`.
 
 - [Aquarium](https://www.aquarium.bio/) is an extensive library/application for LIMS, protocol definition/execution, and workflow design.
 - [Autoprotocol](https://github.com/autoprotocol/autoprotocol-python) is a specification standard for experiments in the life sciences.

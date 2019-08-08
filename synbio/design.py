@@ -24,7 +24,7 @@ class Design:
         """Return all unique SeqRecords across all designs.
 
         Returns:
-            {List[SeqRecord]} -- a unique list of SeqRecords used across designs
+            List[SeqRecord] -- a unique list of SeqRecords used across designs
         """
 
         id_to_record: Dict[str, SeqRecord] = {}
@@ -54,7 +54,7 @@ class Plasmid(Design):
         """Return the ids of each piece of DNA in this plasmid
 
         Returns:
-            [str] -- high level description of this plasmid's design
+            str -- high level description of this plasmid's design
         """
 
         if not self.records:
@@ -89,16 +89,40 @@ class Plasmid(Design):
             self.records.append(record)
 
 
-class Combinatorial(Design):
-    """Create a Plasmid design specification from a list of SeqRecords
+class Combinatorial(Plasmid):
+    """A list of SeqRecords. Find and use all valid combinations.
+
+    Structure-wise it's the same as a Plasmid but multiple assemblies
+    are possible given a single set of SeqRecords. List of SeqRecords in,
+    list of SeqRecords out. Versus List of SeqRecords in one SeqRecord
+    out for a Plasmid design
+
+    Arguments:
+        records {Iterable[SeqRecord]} -- list of SeqRecord
+    """
+
+    __name__ = "combinatorial"
+
+
+class CombinatorialBins(Design):
+    """A list of bins of SeqRecords. All combinations between bins are attempted.
 
     Arguments:
         bins {Iterable[List[SeqRecord]]} -- list of SeqRecord bins
     """
 
-    __name__ = "combinatorial"
+    __name__ = "combinatorial_bins"
 
     def __init__(self, bins: Iterable[List[SeqRecord]] = None):
+        if bins:
+            first_bin = list(bins)[0]
+
+            if not isinstance(first_bin, list):
+                raise ValueError(
+                    "CombinatorialBins requires a list of SeqRecord bins (lists).\n"
+                    + f"First bin is: {type(first_bin)}"
+                )
+
         self.bins = list(bins) if bins else []
 
     def __iter__(self) -> Iterable[List[SeqRecord]]:

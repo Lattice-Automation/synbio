@@ -8,13 +8,12 @@ from Bio.Alphabet.IUPAC import unambiguous_dna
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.design import Plasmid, Combinatorial
+from synbio.design import Plasmid, CombinatorialBins
 
 
 class TestDesign(unittest.TestCase):
     def setUp(self):
-        """Instantiate test records.
-        """
+        """Instantiate test records."""
 
         self.r1 = SeqRecord(Seq("AGATAGACCAGAAGATAGA", unambiguous_dna))
         self.r2 = SeqRecord(Seq("GGGGGGAGAGAAACCCACAATAT", unambiguous_dna))
@@ -34,9 +33,9 @@ class TestDesign(unittest.TestCase):
         self.assertEqual("plasmid", plasmid.__name__)
 
     def test_combinatorial(self):
-        """Test instantiation and iteration over Combinatorial design."""
+        """Test instantiation and iteration over CombinatorialBins design."""
 
-        comb = Combinatorial([[self.r1, self.r2], [self.r3, self.r4]])
+        comb = CombinatorialBins([[self.r1, self.r2], [self.r3, self.r4]])
         expected = [
             [self.r1, self.r3],
             [self.r1, self.r4],
@@ -54,7 +53,7 @@ class TestDesign(unittest.TestCase):
             return [str(r.seq) for r in records]
 
         plasmid = Plasmid([self.r1, self.r2, self.r3, self.r4])
-        comb = Combinatorial([[self.r1, self.r2], [self.r3, self.r4]])
+        comb = CombinatorialBins([[self.r1, self.r2], [self.r3, self.r4]])
 
         plasmid_records = set(seq_only(plasmid.get_all_records()))
         comb_records = set(seq_only(comb.get_all_records()))
@@ -76,7 +75,7 @@ class TestDesign(unittest.TestCase):
     def test_combinatorial_append(self):
         """Add a new bin and record to a combinatorial design."""
 
-        comb = Combinatorial()
+        comb = CombinatorialBins()
         self.assertEqual(0, len(comb))
         comb.append([self.r1, self.r3])
         self.assertEqual(1, len(comb))
