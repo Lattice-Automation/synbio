@@ -32,10 +32,12 @@ design = Plasmid(
 )
 
 # create a protocol using GoldenGate as the sole composite step and run
-protocol = Protocol(name="Plasmid Golden Gate", design=design)
-
 # filter on KanR in a backbone
-protocol.add(GoldenGate(resistance="KanR"))
+protocol = Protocol(
+    name="CombinatorialBins Golden Gate",
+    design=design,
+    how=GoldenGate(resistance="KanR", min_count=5),
+)
 protocol.run()
 
 # export the composite plasmid

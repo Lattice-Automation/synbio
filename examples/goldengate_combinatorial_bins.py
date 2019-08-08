@@ -31,10 +31,13 @@ for type in ["promoter", "RBS", "CDS", "terminator"]:
     design.append(record_bin)  # add a new cominatorial bin
 
 # create a protocol using GoldenGate as the sole composite step and run
-protocol = Protocol(name="CombinatorialBins Golden Gate", design=design)
-
 # filter on plasmids with a KanR feature in the backbone and at least 5 consituent SeqRecords
-protocol.add(GoldenGate(resistance="KanR", min_count=5))
+protocol = Protocol(
+    name="CombinatorialBins Golden Gate",
+    design=design,
+    how=GoldenGate(resistance="KanR", min_count=5),
+)
+
 protocol.run()
 
 # export all the output plasmids to a multi-FASTA

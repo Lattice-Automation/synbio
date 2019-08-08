@@ -9,4 +9,12 @@ class Reagent:
     """
 
     def __init__(self, name: str = ""):
+        assert name
+
         self.name = name
+
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other) -> bool:
+        return hash(self) == hash(other)

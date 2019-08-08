@@ -8,6 +8,7 @@ from ..assembly import goldengate
 from ..containers import Container, content_id, Well
 from ..design import Design
 from ..instructions import Temperature
+from ..mix import Mix
 from ..protocol import Protocol
 from ..reagents import Reagent
 from ..species import Species
@@ -33,18 +34,26 @@ class GoldenGate(Step):
     Keyword Arguments:
         resistance {str} -- resistance to use in backbone selection (default: {"KanR"}),
             remove all circularizable assemblies missing resistance to this backbone
+        mix {Mix} -- the assembly mix to use when mixing the GoldenGate assemblies
         min_count {int} -- the minimum number of SeqRecords in an assembly for it to
             be considered valid. smaller assemblies are ignored
     """
 
-    assembly_mix = Reagent("assembly-mix")  # has both enzymes plus T4, NEB
-    water = Reagent("water")
-
-    def __init__(self, resistance: str = "", min_count: int = -1):
+    def __init__(
+        self,
+        resistance: str = "",
+        mix: Mix = Mix(
+            {Reagent("master mix"): 4.0, SeqRecord: 2.0},
+            fill_with=Reagent("water"),
+            fill_to=20.0,
+        ),
+        min_count: int = -1,
+    ):
         super().__init__()
 
         # search for this. must be in some SeqRecords features
         self.resistance = resistance
+        self.mix = mix
         self.min_count = min_count
         self.id_to_well: Dict[str, Container] = {}
 
@@ -118,15 +127,14 @@ class GoldenGate(Step):
 
         mixed_wells: List[Container] = []
         for assembly in goldengate(design, resistance=self.resistance):
-            # 2 uL of each plasmid + 4 uL of assembly mix
-            volumes = [2.0] * len(assembly) + [4.0]
-            volume_water = 20.0 - sum(volumes)
-            volumes.append(max(volume_water, 0.0))
+            # add reaction mix and water
+            well_contents, well_volumes = self.mix(assembly)
 
             # create a well that mixes the assembly mix, plasmids, and reagents
-            well = Well(assembly + [self.assembly_mix, self.water], volumes=volumes)
+            well = Well(contents=well_contents, volumes=well_volumes)
 
-            self.id_to_well[str(well.id)] = well  # used in self.mutate
+            # used in self.mutate
+            self.id_to_well[str(well.id)] = well
             mixed_wells.append(well)
 
         if not mixed_wells:

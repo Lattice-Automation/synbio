@@ -5,7 +5,7 @@ import logging
 import os
 import string
 import unicodedata
-from typing import Dict, List, Iterable, Tuple
+from typing import Dict, List, Iterable, Tuple, Union
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
@@ -17,7 +17,7 @@ from .picklists import to_labcyte, to_tecan
 
 
 class Step:
-    """A single Step in a Protocol."""
+    """A single Step of a Protocol."""
 
     def __init__(self):
         self.transfers: List[Transfer] = []
@@ -37,15 +37,23 @@ class Protocol:
     Arguments:
         name {str} -- the name of the protocol
         design {Design} -- the design specification for the build
+        how {Union[Step, Iterable[Step]]} -- a single composite step for assembling the Design
     """
 
-    def __init__(self, design: Design, name: str = ""):
+    def __init__(
+        self, design: Design, name: str = "", how: Union[Step, Iterable[Step]] = None
+    ):
         self.name = name  # name of the protocol
         self.design = design  # the design specification
         self.steps: List[Step] = []  # list of steps for this assembly
         self.output: List[SeqRecord] = []
 
-        self.how = design.__name__  # ex: plasmid, combinatorial
+        # set steps from "how" if they were provided
+        if how:
+            if isinstance(how, Step):
+                self.steps = [how]
+            else:
+                self.steps = list(how)
 
         # each of the below is set during a 'run()'
         self.containers: List[Container] = []
@@ -373,7 +381,7 @@ class Protocol:
         """
 
         name = self.name
-        how = f"\thow: {self.how}"
+        how = f"\thow: {self.design.__name__}"
         design = f"\tdesign: {str(self.design)}"
 
         return "\n".join([name, how, design])

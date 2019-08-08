@@ -34,7 +34,6 @@ class TestProtocol(unittest.TestCase):
 
         self.assertEqual("test plasmid", protocol.name)
         self.assertEqual(0, len(protocol))  # no steps yet
-        self.assertEqual("plasmid", protocol.how)
 
     def test_add(self):
         """Add a new step to a Protocol."""

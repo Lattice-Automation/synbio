@@ -7,7 +7,7 @@ from Bio.Alphabet.IUPAC import unambiguous_dna
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.design import Plasmid, CombinatorialBins
+from synbio.design import Plasmid, Combinatorial, CombinatorialBins
 
 
 class TestDesign(unittest.TestCase):
@@ -34,6 +34,15 @@ class TestDesign(unittest.TestCase):
         self.assertEqual("plasmid", plasmid.__name__)
 
     def test_combinatorial(self):
+        """Create a combinatorial design."""
+
+        combinations = Combinatorial([self.r1, self.r2, self.r3])
+        expected = [[self.r1, self.r2, self.r3]]
+
+        self.assertEqual(self.seq_list(expected), self.seq_list(combinations))
+        self.assertEqual("combinatorial", combinations.__name__)
+
+    def test_combinatorial_bins(self):
         """Test instantiation and iteration over CombinatorialBins design."""
 
         bins = CombinatorialBins([[self.r1, self.r2], [self.r3, self.r4]])
@@ -88,4 +97,3 @@ class TestDesign(unittest.TestCase):
         """Map a list of SeqRecords to a list of Seq strings (comparable)."""
 
         return [r.seq for l in records for r in l]
-
