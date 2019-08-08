@@ -10,14 +10,14 @@ from synbio import Protocol, Combinatorial
 from synbio.composite import GoldenGate
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(DIR_NAME, "..", "..", "moclo")
+TEST_DIR = os.path.join(DIR_NAME, "..", "..", "goldengate")
 OUT_DIR = os.path.join(DIR_NAME, "..", "..", "output")
 
 
 class TestGoldenGate(unittest.TestCase):
     """Test GoldenGate class methods."""
 
-    def test_moclo(self):
+    def test_goldengate(self):
         """End to end GoldenGate test."""
 
         # create the test directory for file output

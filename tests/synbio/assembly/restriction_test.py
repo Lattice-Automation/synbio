@@ -1,4 +1,4 @@
-"""Test MoClo Assembly."""
+"""Test Restriction Assembly."""
 
 import os
 import unittest
@@ -11,11 +11,11 @@ from Bio.SeqRecord import SeqRecord
 from synbio.assembly.restriction import _valid_assemblies, _catalyze, _has_resistance
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(DIR_NAME, "..", "..", "moclo")
+TEST_DIR = os.path.join(DIR_NAME, "..", "..", "goldengate")
 
 
 class TestRestriction(unittest.TestCase):
-    """Test MoClo assembly."""
+    """Test Restriction based assembly."""
 
     def test_valid_assemblies(self):
         """Find valid sets of fragments that will circularize"""

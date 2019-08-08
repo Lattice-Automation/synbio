@@ -1,5 +1,6 @@
 """Restriction and ligation similatuion."""
 
+import logging
 from typing import Dict, List, Set, Tuple, Iterable
 
 from Bio.Restriction import RestrictionBatch
@@ -91,10 +92,12 @@ def simulate(
             _valid_assemblies(combination, enzymes, resistance, min_count)
         )
 
-    if isinstance(design, Plasmid) and valid_assemblies:
+    if type(design) == Plasmid and valid_assemblies:
         if len(valid_assemblies) > 1:
-            raise RuntimeWarning(
-                f"Plasmid design specified using only first valid assembly"
+            logging.warning(
+                RuntimeWarning(
+                    f"Plasmid design specified using only first valid assembly"
+                )
             )
         valid_assemblies = valid_assemblies[:1]
 

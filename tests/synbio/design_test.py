@@ -1,5 +1,4 @@
-"""Test Design classes
-"""
+"""Test Design classes."""
 
 from typing import Iterable, List
 import unittest
@@ -12,6 +11,8 @@ from synbio.design import Plasmid, CombinatorialBins
 
 
 class TestDesign(unittest.TestCase):
+    """Design specification."""
+
     def setUp(self):
         """Instantiate test records."""
 
@@ -35,7 +36,7 @@ class TestDesign(unittest.TestCase):
     def test_combinatorial(self):
         """Test instantiation and iteration over CombinatorialBins design."""
 
-        comb = CombinatorialBins([[self.r1, self.r2], [self.r3, self.r4]])
+        bins = CombinatorialBins([[self.r1, self.r2], [self.r3, self.r4]])
         expected = [
             [self.r1, self.r3],
             [self.r1, self.r4],
@@ -43,8 +44,8 @@ class TestDesign(unittest.TestCase):
             [self.r2, self.r4],
         ]
 
-        self.assertEqual(self.seq_list(expected), self.seq_list(list(comb)))
-        self.assertEqual("combinatorial", comb.__name__)
+        self.assertEqual(self.seq_list(expected), self.seq_list(list(bins)))
+        self.assertEqual("combinatorial_bins", bins.__name__)
 
     def test_get_all_records(self):
         """Get all unique records out of a design."""
