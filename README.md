@@ -19,7 +19,7 @@ Designed to have a minimalist API, `synbio` only expects the user to define thei
 
 ## Example
 
-In the example below, the user specifies a combinatorial library design. Each list (`record_bin`) appended to the design is another bin of `SeqRecords` to try concatenating with all other `SeqRecords` in adjacent bins.
+In the example below, the user specifies a combinatorial library design. All SeqRecords are tested for circularization with other SeqRecords. New and valid plasmids are assembled.
 
 Behind the scenes, `synbio` is filtering all combinations of `SeqRecords` from the design that will circularize into valid plasmids (via [circuits in a graph](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0544-x/figures/1)). After running the `protocol`, users can export plate maps (`to_csv()`), composite plasmids (`to_fasta()`, `to_genbank()`), and assembly instructions (`to_txt()`, `to_picklists()`).
 
