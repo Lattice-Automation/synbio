@@ -5,7 +5,7 @@ import unittest
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 
-from synbio import Mix, Reagent, Species
+from synbio import Mix, Reagent
 from synbio.containers import content_id
 
 

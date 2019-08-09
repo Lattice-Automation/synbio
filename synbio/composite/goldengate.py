@@ -19,8 +19,7 @@ class GoldenGate(Step):
     """GoldenGate assembly.
 
     Takes the design of a protocol and finds combinations of
-    SeqRecords that will circularize into valid plasmids. The plasmids are
-    filtered for those that will come together to make valid and new designs.
+    SeqRecords that will circularize into valid new plasmids.
 
     Full responsibilities include:
         1. subselecting the input designs that will form valid plasmids

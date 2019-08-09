@@ -204,12 +204,8 @@ class Protocol:
 
         Example:
         ```py
-        protocol.to_csv('instructions')
+        protocol.to_csv('instructions.csv')
         ```
-
-        The `.csv` extension is unnecessary and will be added. For most
-        multi-step protocols, this method will write multiple CSV files
-        appended with each step's 1-based index.
 
         Arguments:
             filename {str} -- the name of the CSV(s) to write
