@@ -1,7 +1,8 @@
-"""Piece records together via Gibson."""
+"""Create primers to assembly SeqRecords via Gibson Assembly."""
 
-from typing import Tuple, List, Set, Optional
+from typing import Tuple, List, Set, Optional, Iterable
 
+from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
@@ -20,6 +21,24 @@ OFFTARGET_CHECK_LEN = 9
 Any other sequence spans in the template or reverse complement sequence
 within 1 hamming distance of those bp is considered an off-target.
 """
+
+
+def gibson_many(
+    design: Iterable[List[SeqRecord]], hifi: bool = False
+) -> List[Tuple[SeqRecord, List[Primers]]]:
+    """Create many Gibson assemblies for each combination of SeqRecords
+
+    Arguments:
+        design {Iterable[List[SeqRecord]]} -- the list of seqrecord combinations to circularize
+
+    Keyword Arguments:
+        hifi {bool} -- whether to use NEB's HiFi DNA ssembly (default: {False})
+
+    Returns:
+        List[Tuple[SeqRecord, List[Primers]]] -- a list of assembled Plasmids and Primers
+    """
+
+    return [gibson(rs, hifi=hifi) for rs in design]
 
 
 def gibson(
@@ -66,11 +85,16 @@ def gibson(
             f2.seq = f2.seq[f2_mm_length:]
 
         if homology:  # homology already exists between records.
-            plasmid += f2[homology_length:]
+            plasmid += f2[homology_length:].upper()
+            plasmid.id += f"|{f2.id}"
         else:
             # homology does not exist between records, introduce it to primers
-            plasmid += f2
+            plasmid += f2.upper()
+            plasmid.id += f"|{f2.id}"
             _mutate_primers(primers[i], primers[j], MIN_HOMOLOGY // 2)
+
+    plasmid.id = "|".join(r.id for r in records if r.id != "<unknown id>")
+    plasmid.seq = Seq(str(plasmid.seq.upper()), alphabet=IUPACUnambiguousDNA())
 
     _fix_duplicate_junctions(records, primers)
     _fix_offtarget_primers(records, primers)
@@ -93,9 +117,8 @@ def _record_homology(
             length of homologous sequence
             number of mismatches on either side
     """
-    # last MAX_HOMOLOGY bp of record 1
+
     f1 = f1[-MAX_HOMOLOGY:]
-    # first MAX_HOMOLOGY bp of record 2
     f2 = f2[:MAX_HOMOLOGY]
     common_substrings = _common_substring_table(f1, f2, hifi)
 
@@ -109,8 +132,7 @@ def _record_homology(
         f2_length = len(last_11[0])
         # flattens last 11 rows into one list
         indices = [j for i in last_11 for j in i]
-    # otherwise the last row is enough
-    else:
+    else:  # otherwise the last row is enough
         indices = common_substrings[-1]
     while indices:
         # the length of the longest substring in the selected
@@ -340,7 +362,7 @@ def _fix_offtarget(primers: Primers, seq: Seq, fwd_direction: bool) -> bool:
         fwd_direction {bool} -- whether we're checking the FWD primer
 
     Returns:
-        bool -- whether an off-target binding site was found/fixed
+        bool -- whether an off-target binding site was found+fixed
     """
 
     primer = primers.fwd if fwd_direction else primers.rev

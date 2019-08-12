@@ -1,4 +1,4 @@
-"""Output of a python script for the OpenTrons platform."""
+"""Scripting for Labcyte robots."""
 
 from typing import Dict, List, Union
 

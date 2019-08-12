@@ -23,7 +23,7 @@ class TestSteps(unittest.TestCase):
         self.r3 = SeqRecord(Seq("TTTTGAGAGAGATTTAGAGATA", unambiguous_dna), id="r3")
         self.r4 = SeqRecord(Seq("GAGATAGATAGACCAGATAGA", unambiguous_dna), id="r4")
 
-        self.protocol = Protocol(Combinatorial())
+        self.protocol = Protocol("", Combinatorial())
 
         self.protocol.containers = [
             Well([self.r1, self.r2], volumes=[50.0, 50.0]),
@@ -43,7 +43,7 @@ class TestSteps(unittest.TestCase):
 
         target = [w1, w2]
 
-        protocol = Protocol(Plasmid())
+        protocol = Protocol("", Plasmid())
 
         Setup(target).execute(protocol)
 

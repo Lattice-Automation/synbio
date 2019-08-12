@@ -7,9 +7,9 @@ import uuid
 
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.SeqRecord import SeqRecord
-from Bio.Emboss.Primer3 import Primers
 
 from .instructions import Instruction
+from .primers import Primers
 from .reagents import Reagent
 from .species import Species
 
@@ -37,7 +37,7 @@ def content_id(content: Content) -> str:
     elif isinstance(content, RestrictionType):
         return str(content)  # get enzyme cut seq
     elif isinstance(content, Primers):
-        return "primers:" + content.forward_seq + ";" + content.reverse_seq
+        return "primers:" + str(content.fwd) + ";" + str(content.rev)
     elif isinstance(content, Reagent):
         return content.name
     elif isinstance(content, Species):
@@ -354,7 +354,7 @@ class Layout:
                 [
                     content_id(c)
                     if not self.log_volume
-                    else content_id(c) + f"({round(container.volumes[k])})"
+                    else content_id(c) + f"({round(container.volumes[k], 1)})"
                     for k, c in enumerate(container)
                 ]
             )

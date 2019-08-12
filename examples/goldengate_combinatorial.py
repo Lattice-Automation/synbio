@@ -4,8 +4,8 @@ import os
 
 from Bio.SeqIO import parse
 
-from synbio import Combinatorial, Protocol
-from synbio.composite import GoldenGate
+from synbio import Combinatorial
+from synbio.protocols import GoldenGate
 
 
 def read_all_records():
@@ -24,10 +24,8 @@ def read_all_records():
 design = Combinatorial(read_all_records())
 
 # create a protocol using Golden Gate as the sole composite step and run
-protocol = Protocol(
-    name="CombinatorialBins Golden Gate",
-    design=design,
-    how=GoldenGate(resistance="KanR", min_count=5),
+protocol = GoldenGate(
+    name="Combinatorial Golden Gate", design=design, resistance="KanR", min_count=5
 )
 protocol.run()
 

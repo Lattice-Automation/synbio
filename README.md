@@ -31,8 +31,8 @@ import os
 
 from Bio.SeqIO import parse
 
-from synbio import Combinatorial, Protocol
-from synbio.composite import GoldenGate
+from synbio import Combinatorial
+from synbio.protocols import GoldenGate
 
 def read_all_records():
     """Gather all SeqRecords from "goldengate" dir in examples."""
@@ -49,10 +49,11 @@ def read_all_records():
 design = Combinatorial(read_all_records())
 
 # create a protocol using Golden Gate as the sole composite step and run
-protocol = Protocol(
+protocol = GoldenGate(
     name="CombinatorialBins Golden Gate",
     design=design,
-    how=GoldenGate(resistance="KanR", min_count=5),
+    resistance="KanR",  # only keep circularized plasmids with KanR
+    min_count=5,  # only keep circularized plasmids from >=5 SeqRecords
 )
 
 protocol.run()

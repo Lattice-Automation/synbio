@@ -8,8 +8,8 @@ import os
 
 from Bio.SeqIO import parse
 
-from synbio import Plasmid, Protocol
-from synbio.composite import GoldenGate
+from synbio import Plasmid
+from synbio.protocols import GoldenGate
 
 
 def read(filename):
@@ -33,10 +33,8 @@ design = Plasmid(
 
 # create a protocol using GoldenGate as the sole composite step and run
 # filter on KanR in a backbone
-protocol = Protocol(
-    name="CombinatorialBins Golden Gate",
-    design=design,
-    how=GoldenGate(resistance="KanR", min_count=5),
+protocol = GoldenGate(
+    name="Golden Gate Plasmid", design=design, resistance="KanR", min_count=5
 )
 protocol.run()
 

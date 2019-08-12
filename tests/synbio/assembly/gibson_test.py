@@ -6,6 +6,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 
 from synbio.assembly import gibson
+from synbio.assembly.gibson import _hamming_set
 
 
 class TestGibson(unittest.TestCase):
@@ -46,6 +47,16 @@ class TestGibson(unittest.TestCase):
         r3 = SeqRecord(s3)
 
         self._run_and_verify([r1, r2, r3])
+
+    def test_hamming_set(self):
+        """Create a set of off-by-one DNA sequences."""
+
+        hset = _hamming_set("ATG")
+
+        self.assertEqual(10, len(hset))
+        self.assertTrue(all(len(s) == 3 for s in hset))
+        self.assertIn("TTG", hset)
+        self.assertNotIn("TAG", hset)
 
     def _run_and_verify(self, records):
         """Verify the primers and plasmid sequence are correct."""

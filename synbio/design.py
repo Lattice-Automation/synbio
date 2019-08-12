@@ -34,6 +34,9 @@ class Design:
                 id_to_record[record_id] = record
         return list(id_to_record.values())
 
+    def __len__(self) -> int:
+        return 0
+
 
 class Plasmid(Design):
     """Create a plasmid from a list of SeqRecords
@@ -92,7 +95,7 @@ class Plasmid(Design):
 class Combinatorial(Plasmid):
     """A list of SeqRecords. Find and use all valid combinations.
 
-    Structure-wise it's the same as a Plasmid but multiple assemblies
+    Code structure-wise it's the same as a Plasmid but multiple assemblies
     are possible given a single set of SeqRecords. List of SeqRecords in,
     list of SeqRecords out. Versus List of SeqRecords in one SeqRecord
     out for a Plasmid design

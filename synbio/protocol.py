@@ -41,7 +41,10 @@ class Protocol:
     """
 
     def __init__(
-        self, design: Design, name: str = "", how: Union[Step, Iterable[Step]] = None
+        self,
+        name: str = "",
+        design: Design = Design(),
+        how: Union[Step, Iterable[Step]] = None,
     ):
         self.name = name  # name of the protocol
         self.design = design  # the design specification

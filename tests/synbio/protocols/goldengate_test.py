@@ -6,8 +6,8 @@ import unittest
 from Bio import SeqIO
 from Bio.SeqIO import parse
 
-from synbio import Protocol, Combinatorial
-from synbio.composite import GoldenGate
+from synbio import Combinatorial
+from synbio.protocols import GoldenGate
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(DIR_NAME, "..", "..", "goldengate")
@@ -49,9 +49,10 @@ class TestGoldenGate(unittest.TestCase):
         # add a backbone
         design.append(self.read("DVK_AE.gb"))
 
-        # create a protocol, add GoldenGate as the sole composite step, and run
-        protocol = Protocol(name="Combinatorial GoldenGate", design=design)
-        protocol.add(GoldenGate(resistance="KanR"))
+        # create a protocol, add GoldenGate as the sole protocol step, and run
+        protocol = GoldenGate(
+            name="Combinatorial GoldenGate", design=design, resistance="KanR"
+        )
         protocol.run()
 
         # export human and robotic instructions

@@ -6,16 +6,15 @@ from Bio.SeqRecord import SeqRecord
 
 from ..assembly import goldengate
 from ..containers import Container, content_id, Well
-from ..design import Design
 from ..instructions import Temperature
 from ..mix import Mix
 from ..protocol import Protocol
 from ..reagents import Reagent
 from ..species import Species
-from ..steps import Step, Setup, Pipette, Add, ThermoCycle, Incubate, Move
+from ..steps import Setup, Pipette, Add, ThermoCycle, Incubate, Move
 
 
-class GoldenGate(Step):
+class GoldenGate(Protocol):
     """GoldenGate assembly.
 
     Takes the design of a protocol and finds combinations of
@@ -40,6 +39,7 @@ class GoldenGate(Step):
 
     def __init__(
         self,
+        *args,
         resistance: str = "",
         mix: Mix = Mix(
             {Reagent("master mix"): 4.0, SeqRecord: 2.0},
@@ -47,8 +47,9 @@ class GoldenGate(Step):
             fill_to=20.0,
         ),
         min_count: int = -1,
+        **kwargs,
     ):
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
         # search for this. must be in some SeqRecords features
         self.resistance = resistance
@@ -56,23 +57,15 @@ class GoldenGate(Step):
         self.min_count = min_count
         self.id_to_well: Dict[str, Container] = {}
 
-    def execute(self, protocol: Protocol):
+    def run(self):
         """Filter designs to those that will form valid and new GoldenGate devices.
 
         Run each GoldenGate step on the protocol. See:
         https://www.neb.com/protocols/2018/10/02/golden-gate-assembly-protocol-for-using-neb-golden-gate-assembly-mix-e1601
-
-        Arguments:
-            protocol {Protocol} -- the protocol to add to
         """
 
-        # GoldenGate must be the first step of a protocol because it uses
-        # protocol.design to make assemblies, rather than protocol.containers
-        if protocol.steps[0] != self:
-            raise RuntimeError("GoldenGate must be the first step of a protocol.")
-
         # get all the unique contents and set them up in their own wells
-        mixed_wells = self._create_mixed_wells(protocol.design)
+        mixed_wells = self._create_mixed_wells()
 
         for step in [
             Setup(
@@ -109,23 +102,20 @@ class GoldenGate(Step):
             ),
             Incubate(name="Incubate", temp=Temperature(temp=37, time=3600)),
         ]:
-            step.execute(protocol)
+            step.execute(self)
 
-    def _create_mixed_wells(self, design: Design) -> List[Container]:
+    def _create_mixed_wells(self) -> List[Container]:
         """Return the valid circularizable assemblies.
 
         Also build up the dictionary for `self.id_to_well`, a map from sorted
         Fragment IDs to the SeqRecord that they will form after digestion and ligation.
-
-        Arguments:
-            design {Design} -- the design specification (iterable)
 
         Returns:
             List[Container] -- list of wells to mix fragments for GoldenGate
         """
 
         mixed_wells: List[Container] = []
-        for assembly in goldengate(design, resistance=self.resistance):
+        for assembly in goldengate(self.design, resistance=self.resistance):
             # add reaction mix and water
             well_contents, well_volumes = self.mix(assembly)
 

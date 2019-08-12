@@ -10,7 +10,7 @@ import os
 from Bio.SeqIO import parse
 
 from synbio import Protocol, CombinatorialBins
-from synbio.composite import GoldenGate
+from synbio.protocols import GoldenGate
 
 
 def read_all_records():
@@ -32,10 +32,8 @@ for type in ["promoter", "RBS", "CDS", "terminator"]:
 
 # create a protocol using GoldenGate as the sole composite step and run
 # filter on plasmids with a KanR feature in the backbone and at least 5 consituent SeqRecords
-protocol = Protocol(
-    name="CombinatorialBins Golden Gate",
-    design=design,
-    how=GoldenGate(resistance="KanR", min_count=5),
+protocol = GoldenGate(
+    name="CombinatorialBins Golden Gate", design=design, resistance="KanR", min_count=5
 )
 
 protocol.run()

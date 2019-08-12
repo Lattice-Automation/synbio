@@ -293,13 +293,22 @@ class Incubate(Step):
     Keyword Arguments:
         name {str} -- the name of this step in the protocol
         temp {Temperature} -- the target the container should be in (default: {None})
+        mutate {Optional[Callable[Container], List[Content]]]} --
+            a function to mutate the contents of a container after thermo cycling.
+            Used to anneal digested/ligated fragments or amplify DNA with primers
     """
 
-    def __init__(self, temp: Temperature, name: str = ""):
+    def __init__(
+        self,
+        temp: Temperature,
+        name: str = "",
+        mutate: Optional[Callable[[Container], Container]] = None,
+    ):
         super().__init__()
 
         self.name = name
         self.temps = [temp]
+        self.mutate = mutate
 
     def execute(self, protocol: Protocol):
         """Create an instruction for temperatures and their durations.
@@ -307,6 +316,12 @@ class Incubate(Step):
         Arguments:
             protocol {Protocol} -- the protocol to add an incubtion step to
         """
+
+        if self.mutate:
+            new_containers: List[Container] = []
+            for container in protocol.containers:
+                new_containers.append(self.mutate(container))
+            protocol.containers = new_containers
 
         protocol.add_instruction(Instruction(name=self.name, temps=self.temps))
 

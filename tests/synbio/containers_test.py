@@ -4,7 +4,6 @@
 import unittest
 
 from Bio.Alphabet.IUPAC import unambiguous_dna
-from Bio.Emboss.Primer3 import Primers
 from Bio.Restriction import EcoRI
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
@@ -20,15 +19,9 @@ class TestContainers(unittest.TestCase):
 
         enzyme = EcoRI
         record = SeqRecord(Seq("AGATAGACCAGAAGATAGA", unambiguous_dna))
-        primers = Primers()
-        primers.forward_seq = "AGATGATAGAT"
-        primers.reverse_seq = "AGATGAGCCAG"
-
-        expected_primer_id = f"primers:{primers.forward_seq};{primers.reverse_seq}"
 
         self.assertEqual(str(EcoRI), content_id(enzyme))
         self.assertEqual(str(record.seq), content_id(record))
-        self.assertEqual(expected_primer_id, content_id(primers))
         self.assertEqual("e_coli", content_id(Species("e_coli")))
         self.assertEqual("water", content_id(Reagent("water")))
 

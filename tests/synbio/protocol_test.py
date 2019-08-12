@@ -30,7 +30,7 @@ class TestProtocol(unittest.TestCase):
     def test_init(self):
         """Create a new Protocol."""
 
-        protocol = Protocol(Plasmid([self.r1, self.r2]), "test plasmid")
+        protocol = Protocol("test plasmid", Plasmid([self.r1, self.r2]))
 
         self.assertEqual("test plasmid", protocol.name)
         self.assertEqual(0, len(protocol))  # no steps yet
@@ -62,7 +62,7 @@ class TestProtocol(unittest.TestCase):
     def test_inputs(self):
         """Get a name,value map for protocol inputs."""
 
-        protocol = Protocol(Plasmid([]), "input test")
+        protocol = Protocol("input test", Plasmid([]))
         protocol.instructions.append(
             Instruction(
                 transfers=[
