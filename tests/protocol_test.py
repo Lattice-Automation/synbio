@@ -8,7 +8,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from synbio.containers import Reagent, Well, Fridge
-from synbio.design import Plasmid
+from synbio.designs import Plasmid
 from synbio.protocol import Protocol
 from synbio.steps import Pipette
 from synbio.instructions import Instruction, Transfer

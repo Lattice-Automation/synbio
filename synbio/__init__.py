@@ -1,8 +1,8 @@
 """Library for synthetic biology design and build."""
 
-from .design import Combinatorial
-from .design import CombinatorialBins
-from .design import Plasmid
+from .designs import Combinatorial
+from .designs import CombinatorialBins
+from .designs import Plasmid
 from .primers import Primers
 from .protocol import Protocol
 from .mix import Mix

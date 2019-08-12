@@ -4,7 +4,7 @@ import os
 
 from Bio.SeqIO import parse
 
-from synbio import Combinatorial
+from synbio.designs import Combinatorial
 from synbio.protocols import GoldenGate
 
 

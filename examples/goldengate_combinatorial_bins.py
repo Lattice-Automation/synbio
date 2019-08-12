@@ -9,7 +9,7 @@ import os
 
 from Bio.SeqIO import parse
 
-from synbio import CombinatorialBins
+from synbio.designs import CombinatorialBins
 from synbio.protocols import GoldenGate
 
 

@@ -8,7 +8,7 @@ import os
 
 from Bio.SeqIO import parse
 
-from synbio import Plasmid
+from synbio.designs import Plasmid
 from synbio.protocols import GoldenGate
 
 

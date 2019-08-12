@@ -5,7 +5,7 @@ import unittest
 
 from Bio.SeqIO import parse
 
-from synbio import Plasmid
+from synbio.designs import Plasmid
 from synbio.protocols import Gibson
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))

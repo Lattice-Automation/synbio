@@ -11,7 +11,7 @@ from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 
 from .containers import Container, Content, Fridge, Layout, content_id
-from .design import Design
+from .designs import Design
 from .instructions import Transfer, Temperature, Instruction, to_txt
 from .picklists import to_labcyte, to_tecan
 

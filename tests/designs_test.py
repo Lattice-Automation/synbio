@@ -7,7 +7,7 @@ from Bio.Alphabet.IUPAC import unambiguous_dna
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.design import Plasmid, Combinatorial, CombinatorialBins
+from synbio.designs import Plasmid, Combinatorial, CombinatorialBins
 
 
 class TestDesign(unittest.TestCase):

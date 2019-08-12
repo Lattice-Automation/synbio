@@ -15,7 +15,7 @@ import networkx as nx
 from networkx.algorithms.cycles import simple_cycles
 from networkx.exception import NetworkXNoCycle
 
-from ..design import Plasmid
+from ..designs import Plasmid
 
 
 CATALYZE_CACHE: Dict[str, List[Tuple[str, SeqRecord, str]]] = {}
