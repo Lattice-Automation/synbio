@@ -36,7 +36,6 @@ design = Plasmid(
 protocol = GoldenGate(
     name="Golden Gate Plasmid", design=design, resistance="KanR", min_count=5
 )
-protocol.run()
 
 # export the composite plasmid
 protocol.to_fasta("plasmid.fasta")

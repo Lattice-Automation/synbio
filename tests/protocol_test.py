@@ -9,9 +9,9 @@ from Bio.SeqRecord import SeqRecord
 
 from synbio.containers import Reagent, Well, Fridge
 from synbio.designs import Plasmid
+from synbio.instructions import Instruction, Transfer
 from synbio.protocol import Protocol
 from synbio.steps import Pipette
-from synbio.instructions import Instruction, Transfer
 
 
 class TestProtocol(unittest.TestCase):

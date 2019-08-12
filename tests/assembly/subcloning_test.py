@@ -8,7 +8,12 @@ from Bio.Restriction import BsaI, BpiI
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.assembly.subcloning import _valid_assemblies, _catalyze, _has_resistance
+from synbio.assembly.subcloning import (
+    goldengate,
+    _valid_assemblies,
+    _catalyze,
+    _has_resistance,
+)
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(DIR_NAME, "..", "..", "data", "goldengate")
@@ -17,17 +22,42 @@ TEST_DIR = os.path.join(DIR_NAME, "..", "..", "data", "goldengate")
 class TestRestriction(unittest.TestCase):
     """Test Restriction based assembly."""
 
+    def setUp(self):
+        """Read in MoClo parts."""
+
+        self.AB = read("J23102_AB.gb")
+        self.BC = read("B0032m_BC.gb")
+        self.CD = read("C0080_CD.gb")
+        self.DE = read("B0015_DE.gb")
+        self.AE = read("DVK_AE.gb")
+
+    def test_goldengate(self):
+        """Subclone the fragments together."""
+
+        results = goldengate(
+            [self.AB, self.BC, self.CD, self.DE, self.AE],
+            resistance="KanR",
+            min_count=5,
+        )
+
+        self.assertEqual(1, len(results))
+
+        plasmid, fragments = results[0]
+
+        self.assertLess(  # subcloned plasmid is from pieces of others
+            len(plasmid), len(self.AB + self.BC + self.CD + self.DE + self.AE)
+        )
+        self.assertEqual(5, len(fragments))
+        self.assertEqual("J23102_AB|B0032m_BC|C0080_CD|B0015_DE|DVK_AE", plasmid.id)
+
     def test_valid_assemblies(self):
         """Find valid sets of fragments that will circularize"""
 
-        AB = read("J23102_AB.gb")
-        BC = read("B0032m_BC.gb")
-        CD = read("C0080_CD.gb")
-        DE = read("B0015_DE.gb")
-        AE = read("DVK_AE.gb")
-
         assemblies = _valid_assemblies(
-            [AB, BC, CD, DE, AE], [BsaI, BpiI], "KanR", min_count=5
+            [self.AB, self.BC, self.CD, self.DE, self.AE],
+            [BsaI, BpiI],
+            "KanR",
+            min_count=5,
         )
 
         self.assertEqual(1, len(assemblies))

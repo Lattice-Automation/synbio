@@ -94,7 +94,10 @@ class Protocol:
 
     @property
     def inputs(self) -> Dict[str, float]:
-        """Return a map from protocol inputs to volumes in milliters.
+        """Return a map from protocol 'inputs' to volumes in milliters.
+
+        Inputs are SeqRecord (DNA), Primers, Reagents and Species required
+        to carry out the protocol.
 
         Returns:
             Dict[str, float] -- key, value map from input name to volume

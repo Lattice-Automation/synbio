@@ -135,7 +135,7 @@ def to_txt(name: str, instructions: List[Instruction]) -> str:
         str -- a string representation of the protocol
     """
 
-    txt = name + "\n"
+    txt = name + ":\n" if name else ""
     i = 1
     for instruction in instructions:
         instruction_txt = instruction.to_txt(i)

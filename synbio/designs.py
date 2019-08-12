@@ -131,7 +131,7 @@ class CombinatorialBins(Design):
                     + f"First bin is: {type(first_bin)}"
                 )
 
-        self.bins = list(bins) if bins else []
+        self.bins: List[List[SeqRecord]] = list(bins) if bins else []
 
     def __iter__(self) -> Iterable[List[SeqRecord]]:
         """Create all combinations of bin SeqRecords. Return each combo as a list."""
@@ -186,3 +186,66 @@ class CombinatorialBins(Design):
             records = [records]
 
         self.bins.append(records)
+
+
+class Library(Design):
+    """An Iterable of SeqRecord lists. Each list of combined via the assembly method.
+
+    Arguments:
+        sets {Iterable[List[SeqRecord]]} -- Iterable of SeqRecord sets
+    """
+
+    __name__ = "library"
+
+    def __init__(self, sets: Iterable[List[SeqRecord]] = None):
+        if sets:
+            first_bin = list(sets)[0]
+
+            if not isinstance(first_bin, list):
+                raise ValueError(
+                    "Library requires a list of SeqRecord sets (lists).\n"
+                    + f"First bin is: {type(first_bin)}"
+                )
+
+        self.sets: List[List[SeqRecord]] = list(sets) if sets else []
+
+    def __iter__(self) -> Iterable[List[SeqRecord]]:
+        """Return an iterator over the sets"""
+
+        if not self.sets:
+            return iter([])
+        return iter(self.sets)
+
+    def __str__(self) -> str:
+        """Return high level description of the number of records at each bin
+
+        Example:
+        ```[[4 x SeqRecord], [500 x SeqRecord], [3 x SeqRecord]]```
+
+        Returns:
+            str -- high level overview of the number of SeqRecords in each bin
+        """
+
+        return f"[{len(self.sets)} x [SeqRecord]]"
+
+    def __len__(self) -> int:
+        """Return the number of library members."""
+
+        return len(self.sets)
+
+    def append(self, records: Union[SeqRecord, List[SeqRecord]]):
+        """Add a new set or SeqRecord to the library
+
+        Arguments:
+            records {Union[SeqRecord, List[SeqRecord]]} -- the records to add as a set
+        """
+
+        if not records:
+            raise ValueError(
+                f"Can only add SeqRecords or non-empty lists of SeqRecords to Design"
+            )
+
+        if not isinstance(records, list):
+            records = [records]
+
+        self.sets.append(records)

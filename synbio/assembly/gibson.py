@@ -79,7 +79,7 @@ def gibson(
         )
 
         # remove mismatches up to 10 bp if doing HiFi DNA assembly
-        if hifi:
+        if hifi and mismatch_lengths:
             f1_mm_length, f2_mm_length = mismatch_lengths
             f1.seq = f1.seq[: len(f1.seq) - MAX_HOMOLOGY + f1_mm_length - 1]
             f2.seq = f2.seq[f2_mm_length:]

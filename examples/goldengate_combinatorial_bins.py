@@ -37,8 +37,6 @@ protocol = GoldenGate(
     name="CombinatorialBins Golden Gate", design=design, resistance="KanR", min_count=5
 )
 
-protocol.run()
-
 # export all the output plasmids to a multi-FASTA
 protocol.to_fasta("plasmids.fasta")
 

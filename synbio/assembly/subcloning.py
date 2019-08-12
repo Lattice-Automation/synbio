@@ -4,7 +4,7 @@ see: https://en.wikipedia.org/wiki/Subcloning
 """
 
 import logging
-from typing import Dict, List, Set, Tuple, Iterable
+from typing import Dict, List, Set, Tuple, Iterable, Union
 
 from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Restriction import RestrictionBatch, BsaI, BpiI
@@ -22,8 +22,10 @@ CATALYZE_CACHE: Dict[str, List[Tuple[str, SeqRecord, str]]] = {}
 """Store the catalyze results of each SeqRecord. Avoid lots of string searches."""
 
 
-def goldengate_many(
-    design: Iterable[List[SeqRecord]], resistance: str = "", min_count: int = -1
+def goldengate(
+    design: Union[List[SeqRecord], Iterable[List[SeqRecord]]],
+    resistance: str = "",
+    min_count: int = -1,
 ) -> List[Tuple[SeqRecord, List[SeqRecord]]]:
     """Simulate a digestion and ligation using BsaI and BpiI.
 
@@ -41,16 +43,16 @@ def goldengate_many(
         List[List[SeqRecord]] -- list of combinations of digested SeqRecords
     """
 
-    return simulate(design, [BsaI, BpiI], resistance, min_count)
+    return subclone(design, [BsaI, BpiI], resistance, min_count)
 
 
-def simulate(
-    design: Iterable[List[SeqRecord]],
+def subclone(
+    design: Union[List[SeqRecord], Iterable[List[SeqRecord]]],
     enzymes: List[RestrictionType],
     resistance: str = "",
     min_count: int = -1,
 ) -> List[Tuple[SeqRecord, List[SeqRecord]]]:
-    """Return lists of combinations of fragments that will circularize
+    """Return lists of combinations of fragments that will circularize. One to many.
 
     Given a list of SeqRecord combinations return combinations that will circularize
     into new plasmids. Simulate a digest of each fragment with all enzymes,
@@ -71,6 +73,12 @@ def simulate(
             2. list of linearized SeqRecords that went into the design
     """
 
+    assert design, f"Cannot subclone. List of SeqRecords required."
+
+    design = list(design)
+    if not isinstance(design[0], list):
+        design = [design]  # make a list of lists
+
     valid_assemblies: List[Tuple[SeqRecord, List[SeqRecord]]] = []
     for combination in design:
         for assembly in _valid_assemblies(combination, enzymes, resistance, min_count):
@@ -81,13 +89,11 @@ def simulate(
 
             valid_assemblies.append((plasmid, assembly))
 
-    if type(design) == Plasmid and valid_assemblies:
-        if len(valid_assemblies) > 1:
-            logging.warning(
-                RuntimeWarning(
-                    f"Plasmid design specified using only first valid assembly"
-                )
-            )
+    if type(design) == Plasmid and len(valid_assemblies) > 1:
+        warn = RuntimeWarning(
+            f"Plasmid design specified using only first valid assembly"
+        )
+        logging.warning(warn)
         valid_assemblies = valid_assemblies[:1]
 
     return valid_assemblies

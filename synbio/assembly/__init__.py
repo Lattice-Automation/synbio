@@ -2,5 +2,5 @@
 
 from .gibson import gibson
 from .gibson import gibson_many
-from .subcloning import goldengate_many
-from .subcloning import simulate
+from .subcloning import goldengate
+from .subcloning import subclone

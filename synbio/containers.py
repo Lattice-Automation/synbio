@@ -401,12 +401,12 @@ class Layout:
         Each reservoir takes up one plate space.
         Tubes and wells take up a variable number of space, depending on
         the number or rows/columns of their respective rack/plate
-        
+
         Arguments:
             reservoirs {List[Reservoir]} -- large liquid reservoirs
             tubes {List[Tube]} -- list of tubes for a rack
             wells {List[Well]} -- list of wells for a plate
-        
+
         Returns:
             int -- the number of "plate" spaces this layout requires
         """

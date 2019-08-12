@@ -7,7 +7,7 @@ from Bio.Alphabet.IUPAC import unambiguous_dna
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.designs import Plasmid, Combinatorial, CombinatorialBins
+from synbio.designs import Plasmid, Combinatorial, CombinatorialBins, Library
 
 
 class TestDesign(unittest.TestCase):
@@ -93,7 +93,23 @@ class TestDesign(unittest.TestCase):
         self.assertEqual(2, len(comb))
         self.assertIsInstance(comb.bins[1], list)
 
+    def test_library(self):
+        """Create and traverse a library of SeqRecords/SeqRecord-lists."""
+
+        lib = Library([[self.r1, self.r2]])
+        lib.append([self.r3, self.r4])
+        lib.append(self.r5)
+
+        self.assertEqual("[3 x [SeqRecord]]", str(lib))
+
+        lib_list = list(lib)
+        self.assertEqual(3, len(lib_list))
+        self.assertTrue(all(isinstance(l, list) for l in lib_list))
+        self.assertEqual(
+            self.seq_list([[self.r1, self.r2]]), self.seq_list([lib_list[0]])
+        )
+
     def seq_list(self, records: Iterable[List[SeqRecord]]):
-        """Map a list of SeqRecords to a list of Seq strings (comparable)."""
+        """Map a list of list of SeqRecords to a list of Seq strings (comparable)."""
 
         return [r.seq for l in records for r in l]
