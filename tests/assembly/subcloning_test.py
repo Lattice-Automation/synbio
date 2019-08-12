@@ -8,10 +8,10 @@ from Bio.Restriction import BsaI, BpiI
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.assembly.restriction import _valid_assemblies, _catalyze, _has_resistance
+from synbio.assembly.subcloning import _valid_assemblies, _catalyze, _has_resistance
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(DIR_NAME, "..", "..", "goldengate")
+TEST_DIR = os.path.join(DIR_NAME, "..", "..", "data", "goldengate")
 
 
 class TestRestriction(unittest.TestCase):

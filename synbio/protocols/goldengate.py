@@ -4,8 +4,8 @@ from typing import Dict, List
 
 from Bio.SeqRecord import SeqRecord
 
-from ..assembly import goldengate
-from ..containers import Container, content_id, Well
+from ..assembly import goldengate_many
+from ..containers import Container, Well
 from ..instructions import Temperature
 from ..mix import Mix
 from ..protocol import Protocol
@@ -55,7 +55,7 @@ class GoldenGate(Protocol):
         self.resistance = resistance
         self.mix = mix
         self.min_count = min_count
-        self.id_to_well: Dict[str, Container] = {}
+        self.wells_to_construct: Dict[Container, Container] = {}
 
     def run(self):
         """Filter designs to those that will form valid and new GoldenGate devices.
@@ -107,7 +107,7 @@ class GoldenGate(Protocol):
     def _create_mixed_wells(self) -> List[Container]:
         """Return the valid circularizable assemblies.
 
-        Also build up the dictionary for `self.id_to_well`, a map from sorted
+        Also build up the dictionary for `self.wells_to_construct`, a map from sorted
         Fragment IDs to the SeqRecord that they will form after digestion and ligation.
 
         Returns:
@@ -115,15 +115,17 @@ class GoldenGate(Protocol):
         """
 
         mixed_wells: List[Container] = []
-        for assembly in goldengate(self.design, resistance=self.resistance):
+        for plasmid, fragments in goldengate_many(
+            self.design, resistance=self.resistance
+        ):
             # add reaction mix and water
-            well_contents, well_volumes = self.mix(assembly)
+            well_contents, well_volumes = self.mix(fragments)
 
             # create a well that mixes the assembly mix, plasmids, and reagents
             well = Well(contents=well_contents, volumes=well_volumes)
 
             # used in self.mutate
-            self.id_to_well[str(well.id)] = well
+            self.wells_to_construct[well] = Well(plasmid, [sum(well_volumes)])
             mixed_wells.append(well)
 
         if not mixed_wells:
@@ -134,17 +136,7 @@ class GoldenGate(Protocol):
     def mutate(self, well: Container) -> Container:
         """Given the contents of a well, return single SeqRecord after digest/ligation."""
 
-        well_id = str(well.id)
-        if well_id not in self.id_to_well:
-            raise KeyError(f"{well_id} not recognized as a GoldenGate assembly")
+        if well in self.wells_to_construct:
+            return self.wells_to_construct[well]
 
-        # create hew new composite SeqRecord after digestion/ligation
-        records = [c for c in well if isinstance(c, SeqRecord)]
-        record_ids = [content_id(r) for r in records]
-        record_combined = records[0].upper()
-        for other_record in records[1:]:
-            record_combined += other_record.upper()
-        record_combined.id = "|".join(record_ids)
-
-        # return a new well with the new combined SeqRecord
-        return well.create([record_combined])
+        raise KeyError(f"{well} not recognized as a GoldenGate assembly")

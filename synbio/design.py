@@ -35,6 +35,8 @@ class Design:
         return list(id_to_record.values())
 
     def __len__(self) -> int:
+        """Return the number of SeqRecord combinations."""
+
         return 0
 
 
@@ -84,7 +86,10 @@ class Plasmid(Design):
             record {SeqRecord} -- the SeqRecord to add to the plasmid specification
         """
 
-        assert records
+        if not records:
+            raise ValueError(
+                f"Can only add SeqRecords or non-empty lists of SeqRecords to Design"
+            )
 
         if not isinstance(records, list):
             records = [records]
@@ -172,7 +177,10 @@ class CombinatorialBins(Design):
             record {Union[SeqRecord, List[SeqRecord]]} -- the records to add as a bin
         """
 
-        assert records
+        if not records:
+            raise ValueError(
+                f"Can only add SeqRecords or non-empty lists of SeqRecords to Design"
+            )
 
         if not isinstance(records, list):
             records = [records]

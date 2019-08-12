@@ -1,7 +1,7 @@
 .PHONY: test
 
 test:
-	python3 -m unittest discover tests/synbio -p '*_test.py'
+	python3 -m unittest discover tests -p '*_test.py'
 
 install:
 	pip install -e .

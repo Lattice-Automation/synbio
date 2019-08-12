@@ -9,17 +9,18 @@ import os
 
 from Bio.SeqIO import parse
 
-from synbio import Protocol, CombinatorialBins
+from synbio import CombinatorialBins
 from synbio.protocols import GoldenGate
 
 
 def read_all_records():
     """Gather all SeqRecords from "goldengate" dir in examples."""
 
+    data_dir = os.path.join("..", "data", "goldengate")
     records = []
-    for file in os.listdir(os.path.join(".", "goldengate")):
+    for file in os.listdir(data_dir):
         if file.endswith(".gb"):
-            records.extend(parse(os.path.join(".", "goldengate", file), "genbank"))
+            records.extend(parse(os.path.join(data_dir, file), "genbank"))
     return records
 
 

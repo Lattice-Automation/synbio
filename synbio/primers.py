@@ -2,6 +2,7 @@
 
 from typing import Dict, Tuple
 
+from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from primer3.bindings import designPrimers
@@ -83,8 +84,7 @@ class Primers:
             assert side in ("LEFT", "RIGHT")
             seq = p3_output[f"PRIMER_{side}_0_SEQUENCE"]
             seq_tm = p3_output[f"PRIMER_{side}_0_TM"]
-
-            return Seq(seq), float(seq_tm)
+            return Seq(seq, alphabet=IUPACUnambiguousDNA()), float(seq_tm)
 
         fwd_seq, fwd_tm = primer("LEFT")
         rev_seq, rev_tm = primer("RIGHT")

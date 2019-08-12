@@ -11,12 +11,11 @@ from synbio.protocols import GoldenGate
 def read_all_records():
     """Gather all SeqRecords from "goldengate" dir in examples."""
 
-    gg_dir = os.path.join(".", "goldengate")
-
+    data_dir = os.path.join("..", "data", "goldengate")
     records = []
-    for file in os.listdir(gg_dir):
+    for file in os.listdir(data_dir):
         if file.endswith(".gb"):
-            records.extend(parse(os.path.join(gg_dir, file), "genbank"))
+            records.extend(parse(os.path.join(data_dir, file), "genbank"))
     return records
 
 

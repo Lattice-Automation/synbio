@@ -10,8 +10,8 @@ from synbio import Combinatorial
 from synbio.protocols import GoldenGate
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(DIR_NAME, "..", "..", "goldengate")
-OUT_DIR = os.path.join(DIR_NAME, "..", "..", "output")
+TEST_DIR = os.path.join(DIR_NAME, "..", "..", "data", "goldengate")
+OUT_DIR = os.path.join(DIR_NAME, "..", "output")
 
 
 class TestGoldenGate(unittest.TestCase):

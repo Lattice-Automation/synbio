@@ -3,15 +3,14 @@
 import os
 import unittest
 
-from Bio import SeqIO
 from Bio.SeqIO import parse
 
 from synbio import Plasmid
 from synbio.protocols import Gibson
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(DIR_NAME, "..", "..", "gibson")
-OUT_DIR = os.path.join(DIR_NAME, "..", "..", "output")
+TEST_DIR = os.path.join(DIR_NAME, "..", "..", "data", "gibson")
+OUT_DIR = os.path.join(DIR_NAME, "..", "output")
 
 
 class TestGibsonProtocol(unittest.TestCase):

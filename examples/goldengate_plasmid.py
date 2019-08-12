@@ -15,7 +15,7 @@ from synbio.protocols import GoldenGate
 def read(filename):
     """read a SeqRecord from a file from a Genbank in the "goldengate" dir"""
 
-    filename = os.path.join(".", "goldengate", filename)
+    filename = os.path.join("..", "data", "goldengate", filename)
     return next(parse(filename, "genbank"))
 
 

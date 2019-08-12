@@ -1,11 +1,15 @@
-"""Restriction and ligation similatuion."""
+"""Subcloning for digestion and ligation of SeqRecords together.
+
+see: https://en.wikipedia.org/wiki/Subcloning
+"""
 
 import logging
 from typing import Dict, List, Set, Tuple, Iterable
 
-from Bio.Restriction import RestrictionBatch
-from Bio.Restriction import BsaI, BpiI, EcoRI, XbaI, SpeI, PstI
+from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
+from Bio.Restriction import RestrictionBatch, BsaI, BpiI
 from Bio.Restriction.Restriction import RestrictionType
+from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 import networkx as nx
 from networkx.algorithms.cycles import simple_cycles
@@ -18,13 +22,13 @@ CATALYZE_CACHE: Dict[str, List[Tuple[str, SeqRecord, str]]] = {}
 """Store the catalyze results of each SeqRecord. Avoid lots of string searches."""
 
 
-def goldengate(
+def goldengate_many(
     design: Iterable[List[SeqRecord]], resistance: str = "", min_count: int = -1
-) -> List[List[SeqRecord]]:
+) -> List[Tuple[SeqRecord, List[SeqRecord]]]:
     """Simulate a digestion and ligation using BsaI and BpiI.
 
     Accepts lists of SeqRecords that may combine and returns the lists
-    of SeqRecord design that may circularize into new vectors
+    of SeqRecord design that may circularize into new vectors.
 
     Arguments:
         design {Iterable[List[SeqRecord]]} -- possible combinations of fragments
@@ -40,33 +44,12 @@ def goldengate(
     return simulate(design, [BsaI, BpiI], resistance, min_count)
 
 
-def igem(
-    design: Iterable[List[SeqRecord]], resistance: str = "", min_count: int = -1
-) -> List[List[SeqRecord]]:
-    """Simulate a digestion and ligation using iGEM enzymes
-
-    http://parts.igem.org/Help:Protocols/3A_Assembly
-
-    Arguments:
-        design {Iterable[List[SeqRecord]]} -- possible combinations of fragments
-
-    Keyword Arguments:
-        resistance {str} -- the feature to filter assemblies on (default: {""})
-        min_count {int} -- minimum number of SeqRecords for an assembly to be considered
-
-    Returns:
-        List[List[SeqRecord]] -- list of combinations of digested SeqRecords
-    """
-
-    return simulate(design, [EcoRI, XbaI, SpeI, PstI], resistance, min_count)
-
-
 def simulate(
     design: Iterable[List[SeqRecord]],
     enzymes: List[RestrictionType],
     resistance: str = "",
     min_count: int = -1,
-) -> List[List[SeqRecord]]:
+) -> List[Tuple[SeqRecord, List[SeqRecord]]]:
     """Return lists of combinations of fragments that will circularize
 
     Given a list of SeqRecord combinations return combinations that will circularize
@@ -83,14 +66,20 @@ def simulate(
         min_count {int} -- mininum number of SeqRecords for an assembly to be considered
 
     Returns:
-        List[List[SeqRecord]] -- list of combinations of digested SeqRecords
+        List[Tuple[SeqRecord, List[SeqRecord]]] -- list of tuples with:
+            1. composite plasmids expected after subcloning
+            2. list of linearized SeqRecords that went into the design
     """
 
-    valid_assemblies: List[List[SeqRecord]] = []
+    valid_assemblies: List[Tuple[SeqRecord, List[SeqRecord]]] = []
     for combination in design:
-        valid_assemblies.extend(
-            _valid_assemblies(combination, enzymes, resistance, min_count)
-        )
+        for assembly in _valid_assemblies(combination, enzymes, resistance, min_count):
+            plasmid = SeqRecord(Seq("", IUPACUnambiguousDNA()))
+            for fragment in assembly:
+                plasmid += fragment.upper()
+            plasmid.id = "|".join(f.id for f in assembly if f.id != "<unknown id>")
+
+            valid_assemblies.append((plasmid, assembly))
 
     if type(design) == Plasmid and valid_assemblies:
         if len(valid_assemblies) > 1:
