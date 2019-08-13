@@ -24,7 +24,7 @@ design = Combinatorial(read_all_records())
 
 # create a protocol using Golden Gate as the sole composite step and run
 protocol = GoldenGate(
-    name="Combinatorial Golden Gate", design=design, resistance="KanR", min_count=5
+    name="Combinatorial Golden Gate", design=design, include=["KanR"], min_count=5
 )
 
 # export all the output plasmids to a multi-FASTA

@@ -1,8 +1,6 @@
-"""Subcloning for digestion and ligation of SeqRecords together.
+"""Subcloning for digestion and ligation of SeqRecords together."""
 
-see: https://en.wikipedia.org/wiki/Subcloning
-"""
-
+from collections import defaultdict
 import logging
 from typing import Dict, List, Set, Tuple, Iterable, Union
 
@@ -15,7 +13,8 @@ import networkx as nx
 from networkx.algorithms.cycles import simple_cycles
 from networkx.exception import NetworkXNoCycle
 
-from ..designs import Plasmid
+from ..containers import content_id
+from ..designs import Plasmid, CombinatorialBins
 
 
 CATALYZE_CACHE: Dict[str, List[Tuple[str, SeqRecord, str]]] = {}
@@ -23,88 +22,37 @@ CATALYZE_CACHE: Dict[str, List[Tuple[str, SeqRecord, str]]] = {}
 
 
 def goldengate(
-    design: Union[List[SeqRecord], Iterable[List[SeqRecord]]],
-    resistance: str = "",
+    record_set: Iterable[List[SeqRecord]],
+    include: List[str] = None,
     min_count: int = -1,
-) -> List[Tuple[SeqRecord, List[SeqRecord]]]:
+) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Simulate a digestion and ligation using BsaI and BpiI.
 
     Accepts lists of SeqRecords that may combine and returns the lists
-    of SeqRecord design that may circularize into new vectors.
+    of SeqRecords that may circularize into new vectors.
 
     Arguments:
-        design {Iterable[List[SeqRecord]]} -- possible combinations of fragments
+        record_set {Iterable[List[SeqRecord]]} -- possible combinations of fragments
 
     Keyword Arguments:
-        resistance {str} -- the feature to filter assemblies on (default: {""})
+        include {List[str]} -- the feature to filter assemblies on (default: {""})
         min_count {int} -- minimum number of SeqRecords for an assembly to be considered
 
     Returns:
-        List[List[SeqRecord]] -- list of combinations of digested SeqRecords
+        List[Tuple[List[SeqRecord], List[SeqRecord]]] -- list of tuples with:
+            1. plasmids that will form
+            2. SeqRecords that went into each formed plasmid
     """
 
-    return subclone(design, [BsaI, BpiI], resistance, min_count)
+    return subclone_many(record_set, [BsaI, BpiI], include, min_count)
 
 
-def subclone(
-    design: Union[List[SeqRecord], Iterable[List[SeqRecord]]],
+def subclone_many(
+    design: Iterable[List[SeqRecord]],
     enzymes: List[RestrictionType],
-    resistance: str = "",
+    include: List[str] = None,
     min_count: int = -1,
-) -> List[Tuple[SeqRecord, List[SeqRecord]]]:
-    """Return lists of combinations of fragments that will circularize. One to many.
-
-    Given a list of SeqRecord combinations return combinations that will circularize
-    into new plasmids. Simulate a digest of each fragment with all enzymes,
-    check overhangs with other SeqRecords in the same well, and check what may
-    form during ligation.
-
-    Arguments:
-        design {List[List[SeqRecord]]} -- list of possible SeqRecord combinations
-        enzymes {List[Enzyme]} -- list of enzymes to digest the input records with
-
-    Keyword Arguments:
-        resistance {str} -- the resistance to filter assemblies against (ex: 'KanR')
-        min_count {int} -- mininum number of SeqRecords for an assembly to be considered
-
-    Returns:
-        List[Tuple[SeqRecord, List[SeqRecord]]] -- list of tuples with:
-            1. composite plasmids expected after subcloning
-            2. list of linearized SeqRecords that went into the design
-    """
-
-    assert design, f"Cannot subclone. List of SeqRecords required."
-
-    design = list(design)
-    if not isinstance(design[0], list):
-        design = [design]  # make a list of lists
-
-    valid_assemblies: List[Tuple[SeqRecord, List[SeqRecord]]] = []
-    for combination in design:
-        for assembly in _valid_assemblies(combination, enzymes, resistance, min_count):
-            plasmid = SeqRecord(Seq("", IUPACUnambiguousDNA()))
-            for fragment in assembly:
-                plasmid += fragment.upper()
-            plasmid.id = "|".join(f.id for f in assembly if f.id != "<unknown id>")
-
-            valid_assemblies.append((plasmid, assembly))
-
-    if type(design) == Plasmid and len(valid_assemblies) > 1:
-        warn = RuntimeWarning(
-            f"Plasmid design specified using only first valid assembly"
-        )
-        logging.warning(warn)
-        valid_assemblies = valid_assemblies[:1]
-
-    return valid_assemblies
-
-
-def _valid_assemblies(
-    record_set: List[SeqRecord],
-    enzymes: List[RestrictionType],
-    resistance: str,
-    min_count: int,
-) -> List[List[SeqRecord]]:
+) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
     Turn each SeqRecord's post-digest seqs into a graph where the nodes are
@@ -114,64 +62,145 @@ def _valid_assemblies(
     Arguments:
         record_set {List[SeqRecord]} -- single record set that might circularize
         enzymes {List[Enzyme]} -- list of enzymes to digest the input records with
-        resistance {str} -- the resistance to filter assemblies
+        include {str} -- the include to filter assemblies
         min_count {int} -- mininum number of SeqRecords for an assembly to be considered
 
     Returns:
-        List[List[SeqRecord]] -- a list of SeqRecords/fragment combos to mix for MoClo
+        List[Tuple[List[SeqRecord], List[SeqRecord]]] -- list of tuples with:
+            1. plasmids that will form
+            2. SeqRecords that went into each formed plasmid
     """
 
-    graph = nx.DiGraph()
+    seen_fragment_ids: Set[str] = set()
+    all_plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
+    for record_set in design:
+        plasmids_and_fragments = subclone(record_set, enzymes, include, min_count)
+        for plasmids, fragments in plasmids_and_fragments:
 
-    input_seqs: Set[str] = set()  # stored list of input seqs (not new combinations)
+            # we don't want to re-use the fragment combination more than once
+            fragment_ids = _hash_fragments(fragments)
+            if fragment_ids in seen_fragment_ids:
+                continue
+            seen_fragment_ids.add(fragment_ids)
+
+            all_plasmids_and_fragments.append((plasmids, fragments))
+    return all_plasmids_and_fragments
+
+
+def subclone(
+    record_set: List[SeqRecord],
+    enzymes: List[RestrictionType],
+    include: List[str] = None,
+    min_count: int = -1,
+) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
+    """Parse a single list of SeqRecords to find all circularizable plasmids.
+
+    Turn each SeqRecord's post-digest seqs into a graph where the nodes are
+    the overhangs and the edges are the linear fragments
+    post-digest/catalyzing with BsaI/BpiI.
+
+    Arguments:
+        record_set {List[SeqRecord]} -- single record set that might circularize
+        enzymes {List[Enzyme]} -- list of enzymes to digest the input records with
+        include {str} -- the include to filter assemblies
+        min_count {int} -- mininum number of SeqRecords for an assembly to be considered
+
+    Returns:
+        List[Tuple[List[SeqRecord], List[SeqRecord]]] -- list of tuples with:
+            1. plasmids that will form
+            2. SeqRecords that went into each formed plasmid
+    """
+
+    graph = nx.MultiDiGraph()
+
+    include = include or []
+    seen_seqs: Set[str] = set()  # stored list of input seqs (not new combinations)
     for record in record_set:
-        input_seqs.add(str(record.seq + record.seq))
+        seen_seqs.add(str(record.seq + record.seq))
+        seen_seqs.add(str((record.seq + record.seq).reverse_complement()))
+
         for left, frag, right in _catalyze(record, enzymes):
+            # print(left, right, record.id)
             graph.add_node(left)
             graph.add_node(right)
             graph.add_edge(left, right, frag=frag)
 
     try:  # find all circularizable cycles
+        # print(enzymes, graph.nodes)
         cycles = simple_cycles(graph)
     except NetworkXNoCycle:
         return []
 
     # get the fragments, enzymes back out of the cycle
-    assemblies: List[List[SeqRecord]] = []
+    ids_to_fragments: Dict[str, List[SeqRecord]] = defaultdict(list)
+    ids_to_plasmids: Dict[str, List[SeqRecord]] = defaultdict(list)
     for cycle in cycles:
         if min_count > 0 and len(cycle) < min_count:
             continue
 
-        fragments = []
+        combinations = CombinatorialBins()
         for i, overhang in enumerate(cycle):
             next_overhang = cycle[(i + 1) % len(cycle)]
-            fragments.append(graph.edges[overhang, next_overhang]["frag"])
+            record_bin = []
+            for out_edge in graph.out_edges:
+                src, dest, index = out_edge
+                if src != overhang or dest != next_overhang:
+                    continue
+                record_bin.append(graph.edges[src, dest, index]["frag"])
+            combinations.append(record_bin)
 
-        # make sure it's not just a re-ligation of insert + backbone
-        new_plasmid = "".join([str(f.seq) for f in fragments])
-        if any(new_plasmid in seq for seq in input_seqs):
-            continue
-
-        # filter for plasmids that have the resistance feature
-        if resistance:
-            has_resistance = False
-            for fragment in fragments:
-                if _has_resistance(fragment, resistance):
-                    has_resistance = True
-                    break
-
-            if not has_resistance:
+        for fragments in combinations:
+            # make sure it's not just a re-ligation of insert + backbone
+            new_plasmid = "".join([str(f.seq) for f in fragments])
+            if any(new_plasmid in seq for seq in seen_seqs):
                 continue
 
-        # try and re-order the fragments to match the input order
-        record_set_ids = [r.id for r in record_set]
-        fragment_indexes = [record_set_ids.index(f.id) for f in fragments]
-        fragment_min_index = min(fragment_indexes)
-        fragment_first = fragment_indexes.index(fragment_min_index)
-        fragments = fragments[fragment_first:] + fragments[:fragment_first]
+            # filter for plasmids that have the include feature
+            if include:
+                has_include = any(_has_feature(f, include) for f in fragments)
+                if not has_include:
+                    continue
 
-        assemblies.append(fragments)
-    return assemblies
+            # try and re-order the fragments to match the input order
+            fragment_ids = [content_id(r) for r in record_set]
+            fragment_indexes = [fragment_ids.index(f.id) for f in fragments]
+            fragment_min_index = min(fragment_indexes)
+            fragment_first = fragment_indexes.index(fragment_min_index)
+            fragments = fragments[fragment_first:] + fragments[:fragment_first]
+
+            # create the composite plasmid
+            plasmid = SeqRecord(Seq("", IUPACUnambiguousDNA()))
+            for fragment in fragments:
+                plasmid += fragment.upper()
+            plasmid.id = "+".join(f.id for f in fragments if f.id != "<unknown id>")
+            seen_seqs.add(str(plasmid.seq + plasmid.seq))
+            seen_seqs.add(str((plasmid.seq + plasmid.seq).reverse_complement()))
+
+            # make a unique id for the fragments
+            fragments_id = _hash_fragments(fragments)
+            ids_to_fragments[fragments_id] = fragments
+            ids_to_plasmids[fragments_id].append(plasmid)
+
+    plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
+    for ids, fragments in ids_to_fragments.items():
+        plasmids = ids_to_plasmids[ids]
+        plasmids_and_fragments.append((plasmids, fragments))
+    return plasmids_and_fragments
+
+
+def _hash_fragments(record_set: List[SeqRecord]) -> str:
+    """Create a unique ID for a list of records
+    
+    Arguments:
+        record_set {List[SeqRecord]} -- set of Records to make unique ID for
+    
+    Returns:
+        str -- unique ID concatenating records IDs/Seqs
+    """
+
+    fragment_ids = [content_id(f) for f in record_set]
+    fragment_ids = sorted(fragment_ids)
+    return "".join(fragment_ids)
 
 
 def _catalyze(
@@ -193,9 +222,10 @@ def _catalyze(
     """
 
     record_id = _record_id(record)
-    if record_id in CATALYZE_CACHE:
+    if record_id != "<unknown id>" and record_id in CATALYZE_CACHE:
         return CATALYZE_CACHE[record_id]
 
+    record = record.upper()
     batch = RestrictionBatch(enzymes)
     batch_sites = batch.search(record.seq, linear=False)
 
@@ -214,50 +244,93 @@ def _catalyze(
     frag_w_overhangs: List[Tuple[str, SeqRecord, str]] = []
     for i, (enzyme, cut) in enumerate(enzyme_cuts):
         next_enzyme, next_cut = enzyme_cuts[(i + 1) % len(enzyme_cuts)]
-        frag = record[cut:next_cut]
 
-        # calculate the junction on the left-hand side
-        len_ovhg = len(enzyme.ovhgseq)
-        left_overhang = (
-            record[cut - len_ovhg : cut] + "^"
+        enzyme_len = len(enzyme.ovhgseq)
+        next_enzyme_len = len(next_enzyme.ovhgseq)
+
+        cut = cut + enzyme_len if enzyme.is_3overhang() else cut
+        next_cut = (
+            next_cut + next_enzyme_len if next_enzyme.is_3overhang() else next_cut
+        )
+
+        cut_rc = cut if enzyme.is_3overhang() else cut + enzyme_len
+        next_cut_rc = (
+            next_cut if next_enzyme.is_3overhang() else next_cut + next_enzyme_len
+        )
+
+        # find the cutsite sequences
+        left = (
+            record[cut : cut - enzyme_len]
             if enzyme.is_3overhang()
-            else "^" + record[cut : cut + len_ovhg]
+            else record[cut : cut + enzyme_len]
         )
-
-        # calculate the junction on the right-hand side
-        right_overhang = (
-            record[next_cut - len_ovhg : next_cut] + "^"
+        right = (
+            record[next_cut : next_cut - next_enzyme_len]
             if next_enzyme.is_3overhang()
-            else "^" + record[next_cut : next_cut + len_ovhg]
+            else record[next_cut : next_cut + next_enzyme_len]
         )
+        left_rc = right.reverse_complement()
+        right_rc = left.reverse_complement()
+
+        left = str(left.seq)
+        right = str(right.seq)
+        left_rc = str(left_rc.seq)
+        right_rc = str(right_rc.seq)
+
+        if next_enzyme.is_3overhang():
+            left += "^"
+            right += "^"
+            left_rc += "^"
+            right_rc += "^"
+        else:
+            left = "^" + left
+            right = "^" + right
+            left_rc = "^" + left_rc
+            right_rc = "^" + right_rc
+
+        frag = record[cut:next_cut]
+        frag_rc = record[cut_rc:next_cut_rc].reverse_complement()
+        frag_rc.id = record.id
 
         if next_cut < cut:  # wraps around the zero-index
             frag = (record + record)[cut : next_cut + len(record)]
+            frag.id = record.id
+            frag_rc = (record + record)[
+                cut_rc : next_cut_rc + len(record)
+            ].reverse_complement()
+            frag_rc.id = record.id
 
-        frag_w_overhangs.append((str(left_overhang.seq), frag, str(right_overhang.seq)))
+        frag_w_overhangs.append((left, frag, right))
+        frag_w_overhangs.append((left_rc, frag_rc, right_rc))
 
     CATALYZE_CACHE[record_id] = frag_w_overhangs  # store for future look-ups
 
     return frag_w_overhangs
 
 
-def _has_resistance(record: SeqRecord, resistance: str) -> bool:
-    """Return whether any of a record's features/qualifiers match the resistance specified.
+def _has_feature(record: SeqRecord, include: List[str]) -> bool:
+    """Return whether any of a record's features/qualifiers match the include specified.
 
     Arguments:
-        record {SeqRecord} -- the record being checked for resistance
-        resistance {str} -- the resistance to filter for
+        record {SeqRecord} -- the record being checked for include
+        include {List[str]} -- the include to filter for
 
     Returns:
-        bool -- whether the record has any features or qualifiers with specified resistance
+        bool -- whether the record has any features or qualifiers with specified include
     """
 
+    features: Set[str] = set()
     for feature in record.features:
-        if feature.id is resistance:
-            return True
+        features.add(feature.id.lower())
         for _, value in feature.qualifiers.items():
-            if resistance in value:
+            for v in value:
+                features.add(v.lower())
+
+    for feature in features:
+        for keyword in include:
+            if keyword.lower() in feature:
                 return True
+
     return False
 
 

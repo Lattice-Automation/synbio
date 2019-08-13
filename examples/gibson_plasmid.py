@@ -1,5 +1,4 @@
-"""Example of a Gibson Assembly from two fragments.
-"""
+"""Example of a Gibson Assembly from two fragments."""
 
 import os
 

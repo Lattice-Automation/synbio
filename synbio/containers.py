@@ -48,7 +48,7 @@ def content_id(content: Content) -> str:
 class Container:
     """A container with contents.
 
-    TODO: make contents a set
+    TODO: make contents a set for uniqueness
 
     Keyword Arguments:
         contents {List[Content]} -- the contents of the container (default: {None})
@@ -74,9 +74,6 @@ class Container:
             self.contents = contents
 
         self.volumes = volumes if volumes else [-1] * len(self.contents)
-        if len(self.volumes) != len(self.contents):
-            raise ValueError
-
         self.withdrawn = 0.0  # volume with withdraws during pipette sim
 
     def add(self, contents: Union[Content, List[Content]]):
@@ -350,7 +347,7 @@ class Layout:
                 for j in range(well.rows):  # add row headers
                     csv_wells[j + 1].append(rows[j])
 
-            contents = " ".join(  # add contents to a well
+            contents = "|".join(  # add contents to a well
                 [
                     content_id(c)
                     if not self.log_volume

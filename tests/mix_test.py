@@ -2,6 +2,8 @@
 
 import unittest
 
+from Bio.Restriction import BsaI, BpiI
+from Bio.Restriction.Restriction import RestrictionType
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 
@@ -37,6 +39,17 @@ class TestMix(unittest.TestCase):
             self._content_ids([f1, f2, master_mix, water]), self._content_ids(contents)
         )
         self.assertEqual([2.0, 2.0, 4.0, 12.0], volumes)
+
+    def test_call_enzymes(self):
+        """Find the volume of a enzymes using RestrictionType."""
+
+        mix = Mix({RestrictionType: 1.0}, fill_to=10.0, fill_with=Reagent("water"))
+
+        contents, volumes = mix([BsaI, BpiI])
+
+        self.assertEqual(3, len(contents))
+        self.assertEqual(3, len(volumes))
+        self.assertEqual(BsaI, contents[0])
 
     def _content_ids(self, contents):
         return [content_id(c) for c in contents]

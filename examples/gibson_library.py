@@ -1,5 +1,4 @@
-"""Example of a Gibson Assembly for a library of assemblies
-"""
+"""Example of a Gibson Assembly for a library of assemblies."""
 
 import os
 

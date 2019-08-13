@@ -10,13 +10,23 @@ pip install synbio
 
 ## Models
 
-Designed to have a minimalist API, `synbio` only expects the user to define their `Design` and `Protocol` (list of steps). Several protocols are pre-defined.
+Designed to have a minimalist API, `synbio` only expects the user to define their `Design` and `Protocol`. Several protocols are pre-defined.
 
-- `SeqRecord` - of [BioPython](https://biopython.org/)
-- `Design`
-  - `Plasmid` - single list of SeqRecords to combine into a plasmid
-  - `Combinatorial` - list of SeqRecords to combine into all valid assemblies
-  - `CombinatorialBins` - list of bins for combinatorial assembly between bins
+### Designs
+
+All are in `synbio.designs`:
+
+- `Plasmid` - single list of SeqRecords to combine into a plasmid
+- `Library` - list of list of SeqRecords to combine into plasmids
+- `Combinatorial` - list of SeqRecords to combine into all valid assemblies
+- `CombinatorialBins` - list of bins of SeqRecords for combinatorial assembly between bins
+
+### Protocols
+
+All are in `synbio.protocols`:
+
+- `GoldenGate` - Golden Gate assembly based on [NEB's E1601](https://www.neb.com/products/e1601-neb-golden-gate-assembly-mix#Product%20Information)
+- `Gibson` - Gibson assembly based on [NEB's E5510](https://www.neb.com/protocols/2012/12/11/gibson-assembly-protocol-e5510)
 
 ## Example
 
@@ -31,7 +41,7 @@ import os
 
 from Bio.SeqIO import parse
 
-from synbio import Combinatorial
+from synbio.designs import Combinatorial
 from synbio.protocols import GoldenGate
 
 def read_all_records():
@@ -45,14 +55,14 @@ def read_all_records():
             records.extend(parse(os.path.join(GG_DIR, file), "genbank"))
     return records
 
-# create a combinatorial library design from multiple "bins"
+# create a combinatorial library design from all valid combinations
 design = Combinatorial(read_all_records())
 
 # create a protocol using Golden Gate as the sole composite step and run
 protocol = GoldenGate(
     name="CombinatorialBins Golden Gate",
     design=design,
-    resistance="KanR",  # only keep circularized plasmids with KanR
+    include=["KanR"],  # only keep circularized plasmids with KanR
     min_count=5,  # only keep circularized plasmids from >=5 SeqRecords
 )
 

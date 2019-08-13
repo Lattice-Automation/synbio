@@ -7,7 +7,7 @@ from synbio.instructions import Instruction, Transfer
 from synbio.picklists import to_tecan
 
 
-class TestLabcyte(unittest.TestCase):
+class TestTecan(unittest.TestCase):
     """Tecan picklist generation."""
 
     def test_to_tecan(self):

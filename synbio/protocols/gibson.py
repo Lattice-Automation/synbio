@@ -68,6 +68,7 @@ class Gibson(Protocol):
                 name="Setup PCR plate with fragments and primers at the (volumes) shown",
                 target=pcr_wells,
             ),
+            Pipette(name="Mix DNA, assembly-mix and water", target=pcr_wells),
             ThermoCycle(
                 name="PCR fragments with added homology",
                 temps=[
@@ -78,7 +79,7 @@ class Gibson(Protocol):
                 cycles=30,
             ),
             Pipette(
-                name="Mix PCR'ed fragments together for Gibson, along with Gibson master mix",
+                name="Mix PCR'ed fragments together for Gibson along with Gibson master mix",
                 target=gibson_wells,
             ),
             Incubate(
@@ -87,13 +88,13 @@ class Gibson(Protocol):
             Move(name="Move 3 uL from each mixture well to new plate(s)", volume=3.0),
             Add(
                 name="Add 10 uL of competent E. coli to each well",
-                add=Species("competent_e_coli"),
+                add=Species("E coli"),
                 volume=10.0,
             ),
             ThermoCycle(name="Heat shock", temps=[Temperature(temp=42, time=30)]),
             Add(
                 name="Add 150 uL of SOC media to each well",
-                add=Reagent("soc_media"),
+                add=Reagent("SOC"),
                 volume=150.0,
             ),
             Incubate(name="Incubate", temp=Temperature(temp=37, time=3600)),
@@ -128,15 +129,17 @@ class Gibson(Protocol):
             gibson_wells.append(gibson_well)
 
             # map input well to it's output contents after Gibson Assembly
-            self.gibson_product[gibson_well] = Well(plasmid)
+            self.gibson_product[gibson_well] = Well(
+                plasmid, volumes=[sum(gibson_volumes)]
+            )
 
         if not pcr_wells:
-            raise RuntimeError(f"Failed to create any Gibson assemblies")
+            raise RuntimeError(f"Failed to create any Gibson assemblies.")
 
         return sorted(pcr_wells), sorted(gibson_wells)
 
     def mutate(self, well: Container) -> Container:
-        """Given the contents of a well, return single SeqRecord after digest/ligation."""
+        """Given the contents of a well, return single SeqRecord after Gibson Assembly."""
 
         if well in self.gibson_product:
             return self.gibson_product[well]

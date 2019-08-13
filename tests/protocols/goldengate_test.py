@@ -42,7 +42,7 @@ class TestGoldenGate(unittest.TestCase):
                     f.type == f_type and f.location.start < 50 for f in r.features
                 )
 
-            new_bin = [r for r in records if test(r)][:10]
+            new_bin = [r for r in records if test(r)][:5]
 
             design.append(new_bin)  # add a new bin
 
@@ -51,7 +51,7 @@ class TestGoldenGate(unittest.TestCase):
 
         # create a protocol, add GoldenGate as the sole protocol step, and run
         protocol = GoldenGate(
-            name="Combinatorial GoldenGate", design=design, resistance="KanR"
+            name="Combinatorial GoldenGate", design=design, include=["KanR"]
         )
         protocol.run()
 

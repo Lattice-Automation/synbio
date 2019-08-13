@@ -133,7 +133,7 @@ class CombinatorialBins(Design):
 
         self.bins: List[List[SeqRecord]] = list(bins) if bins else []
 
-    def __iter__(self) -> Iterable[List[SeqRecord]]:
+    def __iter__(self):
         """Create all combinations of bin SeqRecords. Return each combo as a list."""
 
         if not self.bins:

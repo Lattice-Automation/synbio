@@ -17,7 +17,7 @@ class Transfer:
         volume {float} -- the volume to transfer in microliters
     """
 
-    def __init__(self, src, dest, volume: float = 0.0):
+    def __init__(self, src, dest, volume: float = 10.0):
         self.src = src
         self.dest = dest
         self.volume = volume
@@ -37,6 +37,8 @@ class Transfer:
         """
 
         transfer_count = math.ceil(self.volume / max_volume)
+        if transfer_count == 0:
+            print(self)
         volume_per_transfer = self.volume / transfer_count
         volume_per_transfer = round(volume_per_transfer / multiple_of) * multiple_of
 

@@ -4,16 +4,11 @@ import os
 import unittest
 
 from Bio import SeqIO
-from Bio.Restriction import BsaI, BpiI
+from Bio.Restriction import BsaI, BpiI, BamHI, NotI
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.assembly.subcloning import (
-    goldengate,
-    _valid_assemblies,
-    _catalyze,
-    _has_resistance,
-)
+from synbio.assembly.subcloning import goldengate, subclone, _catalyze, _has_feature
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(DIR_NAME, "..", "..", "data", "goldengate")
@@ -34,36 +29,25 @@ class TestRestriction(unittest.TestCase):
     def test_goldengate(self):
         """Subclone the fragments together."""
 
-        results = goldengate(
-            [self.AB, self.BC, self.CD, self.DE, self.AE],
-            resistance="KanR",
-            min_count=5,
-        )
+        fragments = [self.AB, self.BC, self.CD, self.DE, self.AE]
+        results = goldengate([fragments], include=["KanR"], min_count=5)
 
         self.assertEqual(1, len(results))
 
-        plasmid, fragments = results[0]
-
-        self.assertLess(  # subcloned plasmid is from pieces of others
-            len(plasmid), len(self.AB + self.BC + self.CD + self.DE + self.AE)
-        )
-        self.assertEqual(5, len(fragments))
-        self.assertEqual("J23102_AB|B0032m_BC|C0080_CD|B0015_DE|DVK_AE", plasmid.id)
-
-    def test_valid_assemblies(self):
+    def test_subclone(self):
         """Find valid sets of fragments that will circularize"""
 
-        assemblies = _valid_assemblies(
+        results = subclone(
             [self.AB, self.BC, self.CD, self.DE, self.AE],
             [BsaI, BpiI],
             "KanR",
             min_count=5,
         )
 
-        self.assertEqual(1, len(assemblies))
+        self.assertTrue(results)
 
-    def test_catalyze(self):
-        """Catalyze/digest a sequence with BsaI/BpiI."""
+    def test_catalyze1(self):
+        """Catalyze a sequence with BsaI/BpiI."""
 
         mock = SeqRecord(
             Seq(
@@ -71,10 +55,7 @@ class TestRestriction(unittest.TestCase):
             )
         )
         digest = _catalyze(mock, [BsaI, BpiI])
-        self.assertEqual(4, len(digest))  # 4 cutsites total, 3 BsaI and 1 BpiI
-        self.assertIn(  # original sequence should still be constructable
-            "".join(str(r.seq) for _, r, _ in digest), str(mock.seq + mock.seq)
-        )
+        self.assertEqual(8, len(digest))  # 4 cutsites total, 3 BsaI and 1 BpiI
 
         mock2 = SeqRecord(
             Seq(
@@ -82,8 +63,8 @@ class TestRestriction(unittest.TestCase):
             )
         )
         digest2 = _catalyze(mock2, [BsaI, BpiI])
-        self.assertEqual(2, len(digest2))
-        expected_overhangs = {"^GGAG", "^TACT"}
+        self.assertEqual(4, len(digest2))
+        expected_overhangs = {"^GGAG", "^TACT", "^AGTA", "^CTCC"}
         for left, _, right in digest2:
             self.assertIn(left, expected_overhangs)
             self.assertIn(right, expected_overhangs)
@@ -94,13 +75,55 @@ class TestRestriction(unittest.TestCase):
             )
         )
         digest3 = _catalyze(mock3, [BsaI, BpiI])
-        self.assertEqual(2, len(digest3))
+        self.assertEqual(4, len(digest3))
 
-    def test_has_resistance(self):
-        """Find a KanR resistance feature in a DVK sequence."""
+    def test_catalyze2(self):
+        """Catalyze a plasmid with NotI and BamHI."""
+
+        mock = SeqRecord(
+            Seq(
+                "agcgcccaatacgcaaaccgcctctccccgcgcgttggccgattcattaatgcagctggcacgacaggtttcccgactggaaagcgggcagtgagcgcaacgcaattaatgtgagttagctcactcattaggcaccccaggctttacactttatgcttccggctcgtatgttgtgtggaattgtgagcggataacaatttcacacaggaaacagctatgaccatgattacgccaagcttgcatgcctgcaggtcgactctagaggatccccgggtaccggtcgccaccatggcctcctccgagaacgtcatcaccgagttcatgcgcttcaaggtgcgcatggagggcaccgtgaacggccacgagttcgagatcgagggcgagggcgagggccgcccctacgagggccacaacaccgtgaagctgaaggtgaccaagggcggccccctgcccttcgcctgggacatcctgtccccccagttccagtacggctccaaggtgtacgtgaagcaccccgccgacatccccgactacaagaagctgtccttccccgagggcttcaagtgggagcgcgtgatgaacttcgaggacggcggcgtggcgaccgtgacccaggactcctccctgcaggacggctgcttcatctacaaggtgaagttcatcggcgtgaacttcccctccgacggccccgtgatgcagaagaagaccatgggctgggaggcctccaccgagcgcctgtacccccgcgacggcgtgctgaagggcgagacccacaaggccctgaagctgaaggacggcggccactacctggtggagttcaagtccatctacatggccaagaagcccgtgcagctgcccggctactactacgtggacgccaagctggacatcacctcccacaacgaggactacaccatcgtggagcagtacgagcgcaccgagggccgccaccacctgttcctgtagcggccgcgactctagaattccaactgagcgccggtcgctaccattaccaacttgtctggtgtcaaaaataataggcctactagtcggccgtacgggccctttcgtctcgcgcgtttcggtgatgacggtgaaaacctctgacacatgcagctcccggagacggtcacagcttgtctgtaagcggatgccgggagcagacaagcccgtcagggcgcgtcagcgggtgttggcgggtgtcggggctggcttaactatgcggcatcagagcagattgtactgagagtgcaccatatgcggtgtgaaataccgcacagatgcgtaaggagaaaataccgcatcaggcggccttaagggcctcgtgatacgcctatttttataggttaatgtcatgataataatggtttcttagacgtcaggtggcacttttcggggaaatgtgcgcggaacccctatttgtttatttttctaaatacattcaaatatgtatccgctcatgagacaataaccctgataaatgcttcaataatattgaaaaaggaagagtatgagtattcaacatttccgtgtcgcccttattcccttttttgcggcattttgccttcctgtttttgctcacccagaaacgctggtgaaagtaaaagatgctgaagatcagttgggtgcacgagtgggttacatcgaactggatctcaacagcggtaagatccttgagagttttcgccccgaagaacgttttccaatgatgagcacttttaaagttctgctatgtggcgcggtattatcccgtattgacgccgggcaagagcaactcggtcgccgcatacactattctcagaatgacttggttgagtactcaccagtcacagaaaagcatcttacggatggcatgacagtaagagaattatgcagtgctgccataaccatgagtgataacactgcggccaacttacttctgacaacgatcggaggaccgaaggagctaaccgcttttttgcacaacatgggggatcatgtaactcgccttgatcgttgggaaccggagctgaatgaagccataccaaacgacgagcgtgacaccacgatgcctgtagcaatggcaacaacgttgcgcaaactattaactggcgaactacttactctagcttcccggcaacaattaatagactggatggaggcggataaagttgcaggaccacttctgcgctcggcccttccggctggctggtttattgctgataaatctggagccggtgagcgtgggtctcgcggtatcattgcagcactggggccagatggtaagccctcccgtatcgtagttatctacacgacggggagtcaggcaactatggatgaacgaaatagacagatcgctgagataggtgcctcactgattaagcattggtaactgtcagaccaagtttactcatatatactttagattgatttaaaacttcatttttaatttaaaaggatctaggtgaagatcctttttgataatctcatgaccaaaatcccttaacgtgagttttcgttccactgagcgtcagaccccgtagaaaagatcaaaggatcttcttgagatcctttttttctgcgcgtaatctgctgcttgcaaacaaaaaaaccaccgctaccagcggtggtttgtttgccggatcaagagctaccaactctttttccgaaggtaactggcttcagcagagcgcagataccaaatactgttcttctagtgtagccgtagttaggccaccacttcaagaactctgtagcaccgcctacatacctcgctctgctaatcctgttaccagtggctgctgccagtggcgataagtcgtgtcttaccgggttggactcaagacgatagttaccggataaggcgcagcggtcgggctgaacggggggttcgtgcacacagcccagcttggagcgaacgacctacaccgaactgagatacctacagcgtgagctatgagaaagcgccacgcttcccgaagggagaaaggcggacaggtatccggtaagcggcagggtcggaacaggagagcgcacgagggagcttccagggggaaacgcctggtatctttatagtcctgtcgggtttcgccacctctgacttgagcgtcgatttttgtgatgctcgtcaggggggcggagcctatggaaaaacgccagcaacgcggcctttttacggttcctggccttttgctggccttttgctcacatgttctttcctgcgttatcccctgattctgtggataaccgtattaccgcctttgagtgagctgataccgctcgccgcagccgaacgaccgagcgcagcgagtcagtgagcgaggaagcggaag"
+            )
+        )
+        digested = _catalyze(mock, [BamHI, NotI])
+        expected = [
+            (
+                "^GATC",
+                "GATCCCCGGGTACCGGTCGCCACCATGGCCTCCTCCGAGAACGTCATCACCGAGTTCATGCGCTTCAAGGTGCGCATGGAGGGCACCGTGAACGGCCACGAGTTCGAGATCGAGGGCGAGGGCGAGGGCCGCCCCTACGAGGGCCACAACACCGTGAAGCTGAAGGTGACCAAGGGCGGCCCCCTGCCCTTCGCCTGGGACATCCTGTCCCCCCAGTTCCAGTACGGCTCCAAGGTGTACGTGAAGCACCCCGCCGACATCCCCGACTACAAGAAGCTGTCCTTCCCCGAGGGCTTCAAGTGGGAGCGCGTGATGAACTTCGAGGACGGCGGCGTGGCGACCGTGACCCAGGACTCCTCCCTGCAGGACGGCTGCTTCATCTACAAGGTGAAGTTCATCGGCGTGAACTTCCCCTCCGACGGCCCCGTGATGCAGAAGAAGACCATGGGCTGGGAGGCCTCCACCGAGCGCCTGTACCCCCGCGACGGCGTGCTGAAGGGCGAGACCCACAAGGCCCTGAAGCTGAAGGACGGCGGCCACTACCTGGTGGAGTTCAAGTCCATCTACATGGCCAAGAAGCCCGTGCAGCTGCCCGGCTACTACTACGTGGACGCCAAGCTGGACATCACCTCCCACAACGAGGACTACACCATCGTGGAGCAGTACGAGCGCACCGAGGGCCGCCACCACCTGTTCCTGTAGC",
+                "^GGCC",
+            ),
+            (
+                "^GGCC",
+                "GGCCGCTACAGGAACAGGTGGTGGCGGCCCTCGGTGCGCTCGTACTGCTCCACGATGGTGTAGTCCTCGTTGTGGGAGGTGATGTCCAGCTTGGCGTCCACGTAGTAGTAGCCGGGCAGCTGCACGGGCTTCTTGGCCATGTAGATGGACTTGAACTCCACCAGGTAGTGGCCGCCGTCCTTCAGCTTCAGGGCCTTGTGGGTCTCGCCCTTCAGCACGCCGTCGCGGGGGTACAGGCGCTCGGTGGAGGCCTCCCAGCCCATGGTCTTCTTCTGCATCACGGGGCCGTCGGAGGGGAAGTTCACGCCGATGAACTTCACCTTGTAGATGAAGCAGCCGTCCTGCAGGGAGGAGTCCTGGGTCACGGTCGCCACGCCGCCGTCCTCGAAGTTCATCACGCGCTCCCACTTGAAGCCCTCGGGGAAGGACAGCTTCTTGTAGTCGGGGATGTCGGCGGGGTGCTTCACGTACACCTTGGAGCCGTACTGGAACTGGGGGGACAGGATGTCCCAGGCGAAGGGCAGGGGGCCGCCCTTGGTCACCTTCAGCTTCACGGTGTTGTGGCCCTCGTAGGGGCGGCCCTCGCCCTCGCCCTCGATCTCGAACTCGTGGCCGTTCACGGTGCCCTCCATGCGCACCTTGAAGCGCATGAACTCGGTGATGACGTTCTCGGAGGAGGCCATGGTGGCGACCGGTACCCGGG",
+                "^GATC",
+            ),
+            (
+                "^GGCC",
+                "GGCCGCGACTCTAGAATTCCAACTGAGCGCCGGTCGCTACCATTACCAACTTGTCTGGTGTCAAAAATAATAGGCCTACTAGTCGGCCGTACGGGCCCTTTCGTCTCGCGCGTTTCGGTGATGACGGTGAAAACCTCTGACACATGCAGCTCCCGGAGACGGTCACAGCTTGTCTGTAAGCGGATGCCGGGAGCAGACAAGCCCGTCAGGGCGCGTCAGCGGGTGTTGGCGGGTGTCGGGGCTGGCTTAACTATGCGGCATCAGAGCAGATTGTACTGAGAGTGCACCATATGCGGTGTGAAATACCGCACAGATGCGTAAGGAGAAAATACCGCATCAGGCGGCCTTAAGGGCCTCGTGATACGCCTATTTTTATAGGTTAATGTCATGATAATAATGGTTTCTTAGACGTCAGGTGGCACTTTTCGGGGAAATGTGCGCGGAACCCCTATTTGTTTATTTTTCTAAATACATTCAAATATGTATCCGCTCATGAGACAATAACCCTGATAAATGCTTCAATAATATTGAAAAAGGAAGAGTATGAGTATTCAACATTTCCGTGTCGCCCTTATTCCCTTTTTTGCGGCATTTTGCCTTCCTGTTTTTGCTCACCCAGAAACGCTGGTGAAAGTAAAAGATGCTGAAGATCAGTTGGGTGCACGAGTGGGTTACATCGAACTGGATCTCAACAGCGGTAAGATCCTTGAGAGTTTTCGCCCCGAAGAACGTTTTCCAATGATGAGCACTTTTAAAGTTCTGCTATGTGGCGCGGTATTATCCCGTATTGACGCCGGGCAAGAGCAACTCGGTCGCCGCATACACTATTCTCAGAATGACTTGGTTGAGTACTCACCAGTCACAGAAAAGCATCTTACGGATGGCATGACAGTAAGAGAATTATGCAGTGCTGCCATAACCATGAGTGATAACACTGCGGCCAACTTACTTCTGACAACGATCGGAGGACCGAAGGAGCTAACCGCTTTTTTGCACAACATGGGGGATCATGTAACTCGCCTTGATCGTTGGGAACCGGAGCTGAATGAAGCCATACCAAACGACGAGCGTGACACCACGATGCCTGTAGCAATGGCAACAACGTTGCGCAAACTATTAACTGGCGAACTACTTACTCTAGCTTCCCGGCAACAATTAATAGACTGGATGGAGGCGGATAAAGTTGCAGGACCACTTCTGCGCTCGGCCCTTCCGGCTGGCTGGTTTATTGCTGATAAATCTGGAGCCGGTGAGCGTGGGTCTCGCGGTATCATTGCAGCACTGGGGCCAGATGGTAAGCCCTCCCGTATCGTAGTTATCTACACGACGGGGAGTCAGGCAACTATGGATGAACGAAATAGACAGATCGCTGAGATAGGTGCCTCACTGATTAAGCATTGGTAACTGTCAGACCAAGTTTACTCATATATACTTTAGATTGATTTAAAACTTCATTTTTAATTTAAAAGGATCTAGGTGAAGATCCTTTTTGATAATCTCATGACCAAAATCCCTTAACGTGAGTTTTCGTTCCACTGAGCGTCAGACCCCGTAGAAAAGATCAAAGGATCTTCTTGAGATCCTTTTTTTCTGCGCGTAATCTGCTGCTTGCAAACAAAAAAACCACCGCTACCAGCGGTGGTTTGTTTGCCGGATCAAGAGCTACCAACTCTTTTTCCGAAGGTAACTGGCTTCAGCAGAGCGCAGATACCAAATACTGTTCTTCTAGTGTAGCCGTAGTTAGGCCACCACTTCAAGAACTCTGTAGCACCGCCTACATACCTCGCTCTGCTAATCCTGTTACCAGTGGCTGCTGCCAGTGGCGATAAGTCGTGTCTTACCGGGTTGGACTCAAGACGATAGTTACCGGATAAGGCGCAGCGGTCGGGCTGAACGGGGGGTTCGTGCACACAGCCCAGCTTGGAGCGAACGACCTACACCGAACTGAGATACCTACAGCGTGAGCTATGAGAAAGCGCCACGCTTCCCGAAGGGAGAAAGGCGGACAGGTATCCGGTAAGCGGCAGGGTCGGAACAGGAGAGCGCACGAGGGAGCTTCCAGGGGGAAACGCCTGGTATCTTTATAGTCCTGTCGGGTTTCGCCACCTCTGACTTGAGCGTCGATTTTTGTGATGCTCGTCAGGGGGGCGGAGCCTATGGAAAAACGCCAGCAACGCGGCCTTTTTACGGTTCCTGGCCTTTTGCTGGCCTTTTGCTCACATGTTCTTTCCTGCGTTATCCCCTGATTCTGTGGATAACCGTATTACCGCCTTTGAGTGAGCTGATACCGCTCGCCGCAGCCGAACGACCGAGCGCAGCGAGTCAGTGAGCGAGGAAGCGGAAGAGCGCCCAATACGCAAACCGCCTCTCCCCGCGCGTTGGCCGATTCATTAATGCAGCTGGCACGACAGGTTTCCCGACTGGAAAGCGGGCAGTGAGCGCAACGCAATTAATGTGAGTTAGCTCACTCATTAGGCACCCCAGGCTTTACACTTTATGCTTCCGGCTCGTATGTTGTGTGGAATTGTGAGCGGATAACAATTTCACACAGGAAACAGCTATGACCATGATTACGCCAAGCTTGCATGCCTGCAGGTCGACTCTAGAG",
+                "^GATC",
+            ),
+            (
+                "^GATC",
+                "GATCCTCTAGAGTCGACCTGCAGGCATGCAAGCTTGGCGTAATCATGGTCATAGCTGTTTCCTGTGTGAAATTGTTATCCGCTCACAATTCCACACAACATACGAGCCGGAAGCATAAAGTGTAAAGCCTGGGGTGCCTAATGAGTGAGCTAACTCACATTAATTGCGTTGCGCTCACTGCCCGCTTTCCAGTCGGGAAACCTGTCGTGCCAGCTGCATTAATGAATCGGCCAACGCGCGGGGAGAGGCGGTTTGCGTATTGGGCGCTCTTCCGCTTCCTCGCTCACTGACTCGCTGCGCTCGGTCGTTCGGCTGCGGCGAGCGGTATCAGCTCACTCAAAGGCGGTAATACGGTTATCCACAGAATCAGGGGATAACGCAGGAAAGAACATGTGAGCAAAAGGCCAGCAAAAGGCCAGGAACCGTAAAAAGGCCGCGTTGCTGGCGTTTTTCCATAGGCTCCGCCCCCCTGACGAGCATCACAAAAATCGACGCTCAAGTCAGAGGTGGCGAAACCCGACAGGACTATAAAGATACCAGGCGTTTCCCCCTGGAAGCTCCCTCGTGCGCTCTCCTGTTCCGACCCTGCCGCTTACCGGATACCTGTCCGCCTTTCTCCCTTCGGGAAGCGTGGCGCTTTCTCATAGCTCACGCTGTAGGTATCTCAGTTCGGTGTAGGTCGTTCGCTCCAAGCTGGGCTGTGTGCACGAACCCCCCGTTCAGCCCGACCGCTGCGCCTTATCCGGTAACTATCGTCTTGAGTCCAACCCGGTAAGACACGACTTATCGCCACTGGCAGCAGCCACTGGTAACAGGATTAGCAGAGCGAGGTATGTAGGCGGTGCTACAGAGTTCTTGAAGTGGTGGCCTAACTACGGCTACACTAGAAGAACAGTATTTGGTATCTGCGCTCTGCTGAAGCCAGTTACCTTCGGAAAAAGAGTTGGTAGCTCTTGATCCGGCAAACAAACCACCGCTGGTAGCGGTGGTTTTTTTGTTTGCAAGCAGCAGATTACGCGCAGAAAAAAAGGATCTCAAGAAGATCCTTTGATCTTTTCTACGGGGTCTGACGCTCAGTGGAACGAAAACTCACGTTAAGGGATTTTGGTCATGAGATTATCAAAAAGGATCTTCACCTAGATCCTTTTAAATTAAAAATGAAGTTTTAAATCAATCTAAAGTATATATGAGTAAACTTGGTCTGACAGTTACCAATGCTTAATCAGTGAGGCACCTATCTCAGCGATCTGTCTATTTCGTTCATCCATAGTTGCCTGACTCCCCGTCGTGTAGATAACTACGATACGGGAGGGCTTACCATCTGGCCCCAGTGCTGCAATGATACCGCGAGACCCACGCTCACCGGCTCCAGATTTATCAGCAATAAACCAGCCAGCCGGAAGGGCCGAGCGCAGAAGTGGTCCTGCAACTTTATCCGCCTCCATCCAGTCTATTAATTGTTGCCGGGAAGCTAGAGTAAGTAGTTCGCCAGTTAATAGTTTGCGCAACGTTGTTGCCATTGCTACAGGCATCGTGGTGTCACGCTCGTCGTTTGGTATGGCTTCATTCAGCTCCGGTTCCCAACGATCAAGGCGAGTTACATGATCCCCCATGTTGTGCAAAAAAGCGGTTAGCTCCTTCGGTCCTCCGATCGTTGTCAGAAGTAAGTTGGCCGCAGTGTTATCACTCATGGTTATGGCAGCACTGCATAATTCTCTTACTGTCATGCCATCCGTAAGATGCTTTTCTGTGACTGGTGAGTACTCAACCAAGTCATTCTGAGAATAGTGTATGCGGCGACCGAGTTGCTCTTGCCCGGCGTCAATACGGGATAATACCGCGCCACATAGCAGAACTTTAAAAGTGCTCATCATTGGAAAACGTTCTTCGGGGCGAAAACTCTCAAGGATCTTACCGCTGTTGAGATCCAGTTCGATGTAACCCACTCGTGCACCCAACTGATCTTCAGCATCTTTTACTTTCACCAGCGTTTCTGGGTGAGCAAAAACAGGAAGGCAAAATGCCGCAAAAAAGGGAATAAGGGCGACACGGAAATGTTGAATACTCATACTCTTCCTTTTTCAATATTATTGAAGCATTTATCAGGGTTATTGTCTCATGAGCGGATACATATTTGAATGTATTTAGAAAAATAAACAAATAGGGGTTCCGCGCACATTTCCCCGAAAAGTGCCACCTGACGTCTAAGAAACCATTATTATCATGACATTAACCTATAAAAATAGGCGTATCACGAGGCCCTTAAGGCCGCCTGATGCGGTATTTTCTCCTTACGCATCTGTGCGGTATTTCACACCGCATATGGTGCACTCTCAGTACAATCTGCTCTGATGCCGCATAGTTAAGCCAGCCCCGACACCCGCCAACACCCGCTGACGCGCCCTGACGGGCTTGTCTGCTCCCGGCATCCGCTTACAGACAAGCTGTGACCGTCTCCGGGAGCTGCATGTGTCAGAGGTTTTCACCGTCATCACCGAAACGCGCGAGACGAAAGGGCCCGTACGGCCGACTAGTAGGCCTATTATTTTTGACACCAGACAAGTTGGTAATGGTAGCGACCGGCGCTCAGTTGGAATTCTAGAGTCGC",
+                "^GGCC",
+            ),
+        ]
+        for i, (left, record, right) in enumerate(digested):
+            self.assertEqual(left, expected[i][0])
+            self.assertEqual(str(record.seq), expected[i][1])
+            self.assertEqual(right, expected[i][2])
+
+    def test_has_feature(self):
+        """Find a KanR include feature in a DVK sequence."""
 
         backbone = read("DVK_AE.gb")
-        self.assertTrue(_has_resistance(backbone, "KanR"))
+        self.assertTrue(_has_feature(backbone, "KanR"))
+        self.assertTrue(_has_feature(backbone, "kanr"))  # all lower
+
+        backbone2 = next(  # regression test, this had been failing
+            SeqIO.parse(os.path.join(TEST_DIR, "..", "cloning", "pdusk.gb"), "genbank")
+        )
+        self.assertTrue(_has_feature(backbone2, "KanR"))
 
 
 def read(filename):

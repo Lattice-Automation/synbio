@@ -89,12 +89,6 @@ class TestContainers(unittest.TestCase):
             [2.0, 2.0, 0.0],
         )
 
-        with self.assertRaises(ValueError):
-            Well(volumes=[40, 80, 90, 130])
-
-        with self.assertRaises(ValueError):  # only one reagent, two volumes
-            Well(volumes=[2.0, 5.0], contents=Reagent("e coli"))
-
     def test_lt(self):
         """Compare two containers to see which should come first."""
 

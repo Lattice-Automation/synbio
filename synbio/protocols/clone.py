@@ -6,7 +6,7 @@ from typing import Dict, List
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.SeqRecord import SeqRecord
 
-from ..assembly import subclone
+from ..assembly import subclone_many
 from ..containers import Container, Well
 from ..instructions import Temperature
 from ..mix import Mix
@@ -17,7 +17,7 @@ from ..steps import Setup, Pipette, Add, ThermoCycle, Incubate, Move
 
 
 class Clone(Protocol):
-    """Clone SeqRecords together using the enzymes provided.
+    """Clone SeqRecords together using BioPython enzymes.
 
     Digest the SeqRecords with all the Enzymes provided, find valid circularized
     assemblies, and create a protocol for preparing and ligating the fragments.
@@ -26,8 +26,8 @@ class Clone(Protocol):
     https://www.neb.com/tools-and-resources/usage-guidelines/cloning-guide
 
     Keyword Arguments:
-        resistance {str} -- resistance to use in backbone selection (default: {""}),
-            remove all circularizable assemblies missing resistance to this backbone
+        include {List[str]} -- include only plasmids with a feature matching something
+            in the include list use in backbone selection (default: {None})
         mix {Mix} -- the assembly mix to use when mixing the assemblies with enzymes
         min_count {int} -- the minimum number of SeqRecords in an assembly for it to
             be considered valid. smaller assemblies are ignored
@@ -42,14 +42,14 @@ class Clone(Protocol):
             fill_with=Reagent("water"),
             fill_to=50.0,
         ),
-        resistance: str = "",
+        include: List[str] = None,
         min_count: int = -1,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
 
         self.enzymes = enzymes or []
-        self.resistance = resistance
+        self.include = include
         self.mix = mix
         self.min_count = min_count
         self.wells_to_construct: Dict[Container, Container] = {}
@@ -83,13 +83,13 @@ class Clone(Protocol):
             Move(name="Move 3 uL from each mixture well to new plate(s)", volume=3.0),
             Add(
                 name="Add 10 uL of competent E. coli to each well",
-                add=Species("competent_e_coli"),
+                add=Species("E coli"),
                 volume=10.0,
             ),
             ThermoCycle(name="Heat shock", temps=[Temperature(temp=42, time=30)]),
             Add(
                 name="Add 150 uL of SOC media to each well",
-                add=Reagent("soc_media"),
+                add=Reagent("SOC"),
                 volume=150.0,
             ),
             Incubate(name="Incubate", temp=Temperature(temp=37, time=3600)),
@@ -106,11 +106,14 @@ class Clone(Protocol):
             List[Container] -- list of wells to mix fragments for Clone
         """
 
+        if not self.enzymes:
+            raise ValueError("Clone protocol lacks list of BioPython Enzymes")
+
         mixed_wells: List[Container] = []
-        for plasmid, fragments in subclone(
+        for plasmids, fragments in subclone_many(
             self.design,
-            enzymes=[],
-            resistance=self.resistance,
+            enzymes=self.enzymes,
+            include=self.include,
             min_count=self.min_count,
         ):
             # add reaction mix and water
@@ -120,7 +123,7 @@ class Clone(Protocol):
             well = Well(contents=well_contents, volumes=well_volumes)
 
             # used in self.mutate
-            self.wells_to_construct[well] = Well(plasmid, [sum(well_volumes)])
+            self.wells_to_construct[well] = Well(plasmids, [sum(well_volumes)])
             mixed_wells.append(well)
 
         if not mixed_wells:

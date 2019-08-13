@@ -93,7 +93,7 @@ def gibson(
             plasmid.id += f"|{f2.id}"
             _mutate_primers(primers[i], primers[j], MIN_HOMOLOGY // 2)
 
-    plasmid.id = "|".join(r.id for r in records if r.id != "<unknown id>")
+    plasmid.id = "+".join(r.id for r in records if r.id != "<unknown id>")
     plasmid.seq = Seq(str(plasmid.seq.upper()), alphabet=IUPACUnambiguousDNA())
 
     _fix_duplicate_junctions(records, primers)

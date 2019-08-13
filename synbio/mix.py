@@ -1,13 +1,12 @@
 """Mixtures of Contents."""
 
+import inspect
 import logging
-from typing import Dict, Iterable, List, Union, Tuple, Set, Any
+from typing import Dict, Iterable, List, Tuple, Set, Any
 
 from .containers import Content
 from .reagents import Reagent
 from .species import Species
-
-MixContent = Union[Reagent, Species, type]
 
 
 class Mix:
@@ -39,7 +38,7 @@ class Mix:
 
     def __init__(
         self,
-        mix: Dict[MixContent, float] = None,
+        mix: Dict[Any, float] = None,
         fill_with: Content = None,
         fill_to: float = 0,
     ):
@@ -84,18 +83,32 @@ class Mix:
             if (
                 isinstance(content, Reagent) or isinstance(content, Species)
             ) and content in self.mix:
+                # reagent was explicitly specified
                 contents_out.append(content)
                 volumes.append(self.mix[content])
                 seen.add(content)
-            elif type(content) in self.mix:  # namely SeqRecord
+            elif type(content) in self.mix:
+                # example is SeqRecord
                 contents_out.append(content)
                 volumes.append(self.mix[type(content)])
                 seen.add(type(content))
+            elif any(
+                isinstance(content, t) for t in self.mix.keys() if inspect.isclass(t)
+            ):
+                # example is RestrictionType class
+                class_type = next(
+                    t
+                    for t in self.mix.keys()
+                    if inspect.isclass(t) and isinstance(content, t)
+                )
+                contents_out.append(content)
+                volumes.append(self.mix[class_type])
+                seen.add(class_type)
             else:
                 logging.warning(f"Content {content} not found in mix")
 
         for content, volume in self.mix.items():
-            if content in seen:
+            if content in seen or inspect.isclass(content):
                 continue
 
             contents_out.append(content)

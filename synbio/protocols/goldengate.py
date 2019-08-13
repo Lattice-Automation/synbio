@@ -35,8 +35,8 @@ class GoldenGate(Clone):
         5. add steps to carry out the rest of the assembly (heat shock, incubate, etc)
 
     Keyword Arguments:
-        resistance {str} -- resistance to use in backbone selection (default: {""}),
-            remove all circularizable assemblies missing resistance to this backbone
+        include {List[str]} -- include only plasmids with a feature matching something
+            in the include list use in backbone selection (default: {None})
         mix {Mix} -- the assembly mix to use when mixing the GoldenGate assemblies
         min_count {int} -- the minimum number of SeqRecords in an assembly for it to
             be considered valid. smaller assemblies are ignored
@@ -74,10 +74,7 @@ class GoldenGate(Clone):
                     "Create 'assembly-mix' from 1:1 T4 Ligase Buffer (10X) and NEB Golden Gate Assembly Mix",
                 ],
             ),
-            Pipette(
-                name="Mix plasmids DNA (2 uL) 'assembly-mix' (4 uL) and 'water' (14 uL)",
-                target=mixed_wells,
-            ),
+            Pipette(name="Mix DNA, assembly-mix and water", target=mixed_wells),
             ThermoCycle(
                 [
                     Temperature(temp=37, time=3600),
@@ -88,13 +85,13 @@ class GoldenGate(Clone):
             Move(name="Move 3 uL from each mixture well to new plate(s)", volume=3.0),
             Add(
                 name="Add 10 uL of competent E. coli to each well",
-                add=Species("competent_e_coli"),
+                add=Species("E coli"),
                 volume=10.0,
             ),
             ThermoCycle(name="Heat shock", temps=[Temperature(temp=42, time=30)]),
             Add(
                 name="Add 150 uL of SOC media to each well",
-                add=Reagent("soc_media"),
+                add=Reagent("SOC"),
                 volume=150.0,
             ),
             Incubate(name="Incubate", temp=Temperature(temp=37, time=3600)),
@@ -112,8 +109,8 @@ class GoldenGate(Clone):
         """
 
         mixed_wells: List[Container] = []
-        for plasmid, fragments in goldengate(
-            self.design, resistance=self.resistance, min_count=self.min_count
+        for plasmids, fragments in goldengate(
+            self.design, include=self.include, min_count=self.min_count
         ):
             # add reaction mix and water
             well_contents, well_volumes = self.mix(fragments)
@@ -122,7 +119,7 @@ class GoldenGate(Clone):
             well = Well(contents=well_contents, volumes=well_volumes)
 
             # used in self.mutate
-            self.wells_to_construct[well] = Well(plasmid, [sum(well_volumes)])
+            self.wells_to_construct[well] = Well(plasmids, [sum(well_volumes)])
             mixed_wells.append(well)
 
         if not mixed_wells:

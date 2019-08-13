@@ -34,7 +34,7 @@ for type in ["promoter", "RBS", "CDS", "terminator"]:
 # create a protocol using GoldenGate as the sole composite step and run
 # filter on plasmids with a KanR feature in the backbone and at least 5 consituent SeqRecords
 protocol = GoldenGate(
-    name="CombinatorialBins Golden Gate", design=design, resistance="KanR", min_count=5
+    name="CombinatorialBins Golden Gate", design=design, include=["KanR"], min_count=5
 )
 
 # export all the output plasmids to a multi-FASTA
