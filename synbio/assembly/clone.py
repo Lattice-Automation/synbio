@@ -1,4 +1,4 @@
-"""clone for digestion and ligation of fragments."""
+"""Cloning for digestion and ligation of fragments."""
 
 from collections import defaultdict
 from typing import Dict, List, Set, Tuple, Iterable, Optional
@@ -176,9 +176,12 @@ def clone(
     plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
     for ids, fragments in ids_to_fragments.items():
         plasmids = ids_to_plasmids[ids]
-        for plasmid in plasmids:
+        for i, plasmid in enumerate(plasmids):
             plasmid.id = "+".join(f.id for f in fragments if f.id != "<unknown id>")
             plasmid.description = f"cloned from {', '.join(str(e) for e in enzymes)}"
+
+            if len(plasmids) > 1:
+                plasmid.id += f"({i + 1})"
         plasmids_and_fragments.append((plasmids, fragments))
     return plasmids_and_fragments
 
