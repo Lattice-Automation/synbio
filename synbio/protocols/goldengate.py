@@ -62,6 +62,8 @@ class GoldenGate(Clone):
 
     def run(self):
         """Filter designs to those that will form valid and new Golden Gate plasmids.
+
+        Run each step and accumulate Golden Gate Assembly steps and layouts.
         """
 
         # get all the unique contents and set them up in their own wells
@@ -69,14 +71,13 @@ class GoldenGate(Clone):
 
         for step in [
             Setup(
-                name="Setup PCR plate with (volumes) shown",
                 target=mixed_wells,
                 instructions=[
                     "Dilute plasmid DNA to 75 ng/µL in 'water'",
                     "Create 'assembly-mix' from 1:1 T4 Ligase Buffer (10X) and NEB Golden Gate Assembly Mix",
                 ],
             ),
-            Pipette(name="Mix DNA, assembly-mix and water", target=mixed_wells),
+            Pipette(name="Mix DNA with assembly-mix and water", target=mixed_wells),
             ThermoCycle(
                 [
                     Temperature(temp=37, time=3600),
@@ -85,7 +86,7 @@ class GoldenGate(Clone):
                 mutate=self.mutate,  # set the SeqRecords
             ),
         ] + HeatShock:
-            step.execute(self)
+            step(self)
 
     def _create_mixed_wells(self) -> List[Container]:
         """Return the valid circularizable assemblies.

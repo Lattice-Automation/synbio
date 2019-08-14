@@ -29,7 +29,7 @@ class TestCloneProtocol(unittest.TestCase):
         expected = next(parse(os.path.join(TEST_DIR, "pdusk-dsred2.gb"), "genbank"))
 
         protocol = Clone(
-            "clone plasmid assembly",
+            "Cloning Protocol",
             enzymes=[BamHI, NotI],
             design=Plasmid([insert, backbone]),
             include=["KanR"],
@@ -37,12 +37,12 @@ class TestCloneProtocol(unittest.TestCase):
         protocol.run()
 
         # test output sequence
-        self.assertEqual(3, len(protocol.outputs))
+        self.assertEqual(3, len(protocol.output))
         self.assertTrue(
             any(
                 a.seq in (expected + expected).seq
                 or a.seq in (expected + expected).seq.reverse_complement()
-                for a in protocol.outputs
+                for a in protocol.output
             )
         )
 

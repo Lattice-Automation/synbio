@@ -25,6 +25,7 @@ PCR_MIX = Mix(
     fill_with=Reagent("water"),
     fill_to=25,
 )
+
 GIBSON_MIX = Mix(
     {Reagent("Gibson master mix 2X"): 10.0, SeqRecord: 1.0},
     fill_with=Reagent("water"),
@@ -38,19 +39,22 @@ class Gibson(Protocol):
     Based on the Gibson Assembly protocol outlined on the NEB site for kit (e5510):
     https://www.neb.com/protocols/2012/12/11/gibson-assembly-protocol-e5510
 
-    Arguments:
-        hifi {bool} -- whether to use NEB's HiFi assembly method
-
     Keyword Arguments:
-        mix {Mix} -- the assembly mix to use when mixing the Gibson wells.
-            Based on NEB's (e5510)
+        hifi {bool} -- whether to use NEB's HiFi assembly method
+        gibson_mix {Mix} -- the assembly mix to use when mixing the Gibson wells. Based on NEB's (e5510)
     """
 
     def __init__(
-        self, *args, pcr_mix: Mix = PCR_MIX, gibson_mix: Mix = GIBSON_MIX, **kwargs
+        self,
+        *args,
+        hifi: bool = False,
+        pcr_mix: Mix = PCR_MIX,
+        gibson_mix: Mix = GIBSON_MIX,
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
 
+        self.hifi = hifi
         self.pcr_mix = pcr_mix
         self.gibson_mix = gibson_mix
 
@@ -62,30 +66,34 @@ class Gibson(Protocol):
 
         pcr_wells, gibson_wells = self._create_mixed_wells()
 
+        # extend for 1 minute per kb: https://www.neb.com/protocols/0001/01/01/taq-dna-polymerase-with-standard-taq-buffer-m0273
+        max_length_dna = 0
+        for gibson_well in gibson_wells:
+            for content in [c for c in gibson_well if isinstance(c, SeqRecord)]:
+                max_length_dna = max(max_length_dna, len(content))
+        extension_time = (float(max_length_dna) / 1000) * 60
+
         for step in [
-            Setup(
-                name="Setup PCR plate with fragments and primers at the (volumes) shown",
-                target=pcr_wells,
-            ),
+            Setup(target=pcr_wells),
             Pipette(name="Mix DNA, assembly-mix and water", target=pcr_wells),
             ThermoCycle(
-                name="PCR fragments with added homology",
+                name="PCR fragments to add junctions between fragments",
                 temps=[
-                    Temperature(temp=95, time=30),  # TODO: calculate these
+                    Temperature(temp=95, time=30),
                     Temperature(temp=60, time=60),
-                    Temperature(temp=68, time=720),  # hold at 4 degrees
+                    Temperature(temp=68, time=extension_time),  # hold at 4 degrees
                 ],
                 cycles=30,
             ),
             Pipette(
-                name="Mix PCR'ed fragments together for Gibson along with Gibson master mix",
+                name="Mix PCR'ed fragments together with Gibson master mix and water",
                 target=gibson_wells,
             ),
             Incubate(
-                Temperature(temp=50, time=900), mutate=self.mutate  # set the SeqRecords
-            ),
+                Temperature(temp=50, time=900), mutate=self.mutate
+            ),  # set the SeqRecords
         ] + HeatShock:
-            step.execute(self)
+            step(self)
 
         return self
 
@@ -102,7 +110,7 @@ class Gibson(Protocol):
         pcr_wells: List[Container] = []
         gibson_wells: List[Container] = []
         for records in self.design:
-            plasmid, primer_pairs = gibson(records)
+            plasmid, primer_pairs = gibson(records, hifi=self.hifi)
 
             for i, primers in enumerate(primer_pairs):
                 # create a well that mixes the primers with the input fragment

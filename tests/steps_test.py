@@ -6,7 +6,8 @@ from Bio.Alphabet.IUPAC import unambiguous_dna
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio import Protocol, Combinatorial
+from synbio import Protocol
+from synbio.designs import Combinatorial
 from synbio.containers import Well, Reagent
 from synbio.designs import Plasmid
 from synbio.steps import Pipette, Setup
@@ -45,7 +46,7 @@ class TestSteps(unittest.TestCase):
 
         protocol = Protocol("", Plasmid())
 
-        Setup(target).execute(protocol)
+        protocol = Setup(target)(protocol)
 
         setup_wells = protocol.containers
 
@@ -74,6 +75,6 @@ class TestSteps(unittest.TestCase):
 
         self.assertNotEqual(contents(self.protocol.containers), contents(target))
 
-        pipette_step.execute(self.protocol)
+        pipette_step(self.protocol)
 
         self.assertEqual(contents(self.protocol.containers), contents(target))

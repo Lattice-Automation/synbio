@@ -25,7 +25,7 @@ class Step:
         self.instructions: List[str] = []
         self.inputs: Dict[str, Tuple[Content, float]]
 
-    def execute(self, protocol: "Protocol"):
+    def __call__(self, protocol: "Protocol"):
         """Execute a step on a protocol, mutating containers and instructions."""
 
         raise NotImplementedError
@@ -49,7 +49,6 @@ class Protocol:
         self.name = name  # name of the protocol
         self.design = design  # the design specification
         self.steps: List[Step] = []  # list of steps for this assembly
-        self.output: List[SeqRecord] = []
 
         # set steps from "how" if they were provided
         if how:
@@ -88,12 +87,12 @@ class Protocol:
         self.containers = [Fridge(r) for r in records]  # first step, all fridge
 
         for step in self.steps:
-            step.execute(self)
+            step(self)
 
         return self
 
     @property
-    def inputs(self) -> Dict[str, float]:
+    def input(self) -> Dict[str, float]:
         """Return a map from protocol 'inputs' to volumes in milliters.
 
         Inputs are SeqRecord (DNA), Primers, Reagents and Species required
@@ -123,7 +122,7 @@ class Protocol:
         return {cid: volume for cid, volume in id_volume_sorted}
 
     @property
-    def outputs(self) -> List[SeqRecord]:
+    def output(self) -> List[SeqRecord]:
         """Gather the output SeqRecords from the final containers after all steps.
 
         Returns:
@@ -153,9 +152,9 @@ class Protocol:
             filename = self._filename() + ".fasta"
 
         self._check_output()
-        return SeqIO.write(self.outputs, filename, "fasta")
+        return SeqIO.write(self.output, filename, "fasta")
 
-    def to_genbank(self, filename: str = "") -> int:
+    def to_genbank(self, filename: str = "", split: bool = False) -> int:
         """Write each output record to a Genbank file.
 
         Uses `SeqIO.write(records, filename, "genbank")`.
@@ -164,6 +163,7 @@ class Protocol:
 
         Arguments:
             filename {str} -- the filename to write the Genbanks to
+            split {bool} -- write a separate Genbank for each SeqRecord
 
         Returns:
             int -- the number of records that were written
@@ -171,13 +171,10 @@ class Protocol:
 
         self._check_output()
 
-        if not filename:
-            filename = self._filename() + ".gb"
-
         # limit for id is 16 characters https://github.com/biopython/biopython/issues/747
         # shorten ids of those that exceed the limit
         output_renamed: List[SeqRecord] = []
-        for i, output in enumerate(self.outputs):
+        for i, output in enumerate(self.output):
             if len(output.id) > 16:
                 output = output.upper()
                 output.description = output.id
@@ -185,6 +182,16 @@ class Protocol:
                 output_renamed.append(output)
             else:
                 output_renamed.append(output)
+
+        if split:
+            write_dir = os.path.dirname(filename)
+            for record, renamed_record in zip(self.output, output_renamed):
+                filename = os.path.join(write_dir, record.id + ".gb")
+                SeqIO.write(renamed_record, filename, "genbank")
+            return len(output_renamed)
+
+        if not filename:
+            filename = self._filename() + ".gb"
 
         return SeqIO.write(output_renamed, filename, "genbank")
 
@@ -333,18 +340,18 @@ class Protocol:
         If there are no steps, or if there is no list of output Records
         in self.containers, there is nothing to write to a FASTA file.
         """
-        if not self.steps and not self.outputs:
+        if not self.steps and not self.output:
             raise RuntimeError(
                 """No steps or containers specified in Protocol. Running `run()`"""
             )
 
-        if self.steps and not self.outputs:
+        if self.steps and not self.output:
             logging.warning(
                 """Steps specified but no output containers created. Running `run()`"""
             )
             self.run()
 
-            if not self.outputs:
+            if not self.output:
                 raise RuntimeError(
                     """Failed to create valid assemblies after executing all steps."""
                 )

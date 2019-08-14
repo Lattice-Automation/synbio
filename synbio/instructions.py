@@ -37,8 +37,6 @@ class Transfer:
         """
 
         transfer_count = math.ceil(self.volume / max_volume)
-        if transfer_count == 0:
-            print(self)
         volume_per_transfer = self.volume / transfer_count
         volume_per_transfer = round(volume_per_transfer / multiple_of) * multiple_of
 
@@ -88,6 +86,9 @@ class Instruction:
 
         if not self.name and not self.instructions:
             return ""
+
+        if not self.name and len(self.instructions) > 1:
+            self.name = self.instructions.pop(0)
 
         txt = ""
         if self.name and self.instructions:
@@ -152,7 +153,10 @@ def _temp_instructions(temps: List[Temperature] = None) -> str:
     """Create an instruction for a thermocycle or incubate step."""
 
     temps = temps or []
-    temps_str = [f"{t.temp} °C {display_time(t.time)}" for t in temps]
+    temps_str = [
+        f"{t.temp} °C {display_time(t.time)}" if t.time > 0 else f"Hold at {t.temp} °C"
+        for t in temps
+    ]
     return "Heat at " + ", ".join(temps_str)
 
 

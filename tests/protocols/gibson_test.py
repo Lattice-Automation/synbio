@@ -29,7 +29,7 @@ class TestGibsonProtocol(unittest.TestCase):
         protocol.to_csv(os.path.join(OUT_DIR, "gibson.csv"))
         protocol.to_txt(os.path.join(OUT_DIR, "gibson_protocol.txt"))
         protocol.to_fasta(os.path.join(OUT_DIR, "gibson.fasta"))
-        protocol.to_genbank(os.path.join(OUT_DIR, "gibson.gb"))
+        protocol.to_genbank(os.path.join(OUT_DIR, "gibson.gb"), split=True)
         protocol.to_picklists(
             os.path.join(OUT_DIR, "gibson.tecan.gwl"), platform="tecan"
         )

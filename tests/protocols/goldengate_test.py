@@ -6,7 +6,7 @@ import unittest
 from Bio import SeqIO
 from Bio.SeqIO import parse
 
-from synbio import Combinatorial
+from synbio.designs import Combinatorial
 from synbio.protocols import GoldenGate
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))

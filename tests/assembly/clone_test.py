@@ -47,7 +47,7 @@ class TestClone(unittest.TestCase):
                 self.assertIn("BpiI", plasmid.description)
 
     def test_clone(self):
-        """Find valid sets of fragments that will circularize"""
+        """Find valid sets of fragments that will circularize."""
 
         results = clone(
             [self.AB, self.BC, self.CD, self.DE, self.AE],

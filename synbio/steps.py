@@ -39,7 +39,7 @@ class Setup(Step):
         self.name = name
         self.instructions = instructions if instructions else []
 
-    def execute(self, protocol: Protocol):
+    def __call__(self, protocol: Protocol):
         """Create setup containers with enough contents to fill the target containers."""
 
         # accumulate the list of transfer volumes necessary
@@ -73,12 +73,19 @@ class Setup(Step):
 
         # make a transfer to fill each setup container
         transfers = [Transfer(src=Fridge(c), dest=c, volume=c.volume()) for c in setup]
+        dest_name = type(setup[0]).__name__
+        instructions = [
+            f"Setup each {dest_name} with volumes (uL) specified"
+        ] + self.instructions
+
         instruction = Instruction(
-            name=self.name, transfers=transfers, instructions=self.instructions
+            name=self.name, transfers=transfers, instructions=instructions
         )
 
         protocol.add_instruction(instruction)
         protocol.containers = setup
+
+        return protocol
 
 
 class Pipette(Step):
@@ -104,7 +111,7 @@ class Pipette(Step):
         self.name = name
         self.instructions = instructions if instructions else []
 
-    def execute(self, protocol: Protocol):
+    def __call__(self, protocol: Protocol):
         """Transfer from protcol's current containers to match the target containers."""
 
         # create a map from current content to its source containers
@@ -142,6 +149,8 @@ class Pipette(Step):
         )
         protocol.containers = list(self.target)
 
+        return protocol
+
 
 class Move(Step):
     """Move a fixed volume from each container to another container of same or new type
@@ -158,7 +167,7 @@ class Move(Step):
         self.volume = volume
         self.dest = dest
 
-    def execute(self, protocol: Protocol):
+    def __call__(self, protocol: Protocol):
         """Create the pipette instructions for the move."""
 
         new_containers: List[Container] = []
@@ -174,12 +183,14 @@ class Move(Step):
         protocol.add_instruction(Instruction(name=self.name, transfers=self.transfers))
         protocol.containers = new_containers
 
+        return protocol
+
 
 class Add(Step):
     """Add contents to the existing containers.
 
     Arguments:
-        add {Union[Container, Content]} -- the src container or content to add
+        add {Content} -- the src container or content to add
         volume {float} -- the volume of the new content to add
 
     Keyword Arguments:
@@ -189,12 +200,14 @@ class Add(Step):
 
     def __init__(
         self,
-        add: Union[Container, Content],
+        add: Content,
         volume: float,
         name: str = "",
         instructions: List[str] = None,
     ):
         super().__init__()
+
+        assert add, "Must select Content to add to each container in Add Step"
 
         if isinstance(add, Container):
             self.add = add
@@ -204,18 +217,24 @@ class Add(Step):
         self.name = name
         self.instructions = instructions if instructions else []
 
-    def execute(self, protocol: Protocol):
+    def __call__(self, protocol: Protocol):
         """Add new content from a src container to each other container."""
 
         for container in protocol.containers:
             transfer = Transfer(src=self.add, dest=container, volume=self.volume)
             self.transfers.append(transfer)
 
-        protocol.add_instruction(
-            Instruction(
-                name=self.name, transfers=self.transfers, instructions=self.instructions
-            )
+        container = protocol.containers[0]
+        instructions = self.instructions or [
+            f"Add {self.volume} uL of {content_id(self.add[0])} to each {type(container).__name__}"
+        ]
+
+        instruction = Instruction(
+            name=self.name, transfers=self.transfers, instructions=instructions
         )
+        protocol.add_instruction(instruction)
+
+        return protocol
 
 
 class ThermoCycle(Step):
@@ -226,7 +245,7 @@ class ThermoCycle(Step):
 
     For example, a ThermoCycle for a typical PCR would be expressed as:
 
-    ```
+    ```python
     ThermoCycle(cycles=30, temps=[
         Temperature(temp=97, time=5 * 60),  # denature
         Temperature(temp=55, time=30),  # annealing
@@ -244,6 +263,8 @@ class ThermoCycle(Step):
             a function to mutate the contents of a container after thermo cycling.
             Used to anneal digested/ligated fragments or amplify DNA with primers
         instructions {List[str]} -- list of additional instructions to add
+        extension {Temperature} -- last extension after other thermocycle steps.
+            Example is a final 5 minute extension at the end of PCR that's common
     """
 
     def __init__(
@@ -252,6 +273,7 @@ class ThermoCycle(Step):
         name: str = "",
         cycles: int = 1,
         mutate: Optional[Callable[[Container], Container]] = None,
+        extension: Temperature = None,
         instructions: List[str] = None,
     ):
         super().__init__()
@@ -260,9 +282,10 @@ class ThermoCycle(Step):
         self.temps = temps
         self.cycles = cycles
         self.mutate = mutate
+        self.extension = extension
         self.instructions = instructions if instructions else []
 
-    def execute(self, protocol: Protocol):
+    def __call__(self, protocol: Protocol):
         """Create an instruction for temps and their durations.
 
         If a mutate function was passed, mutate the contents
@@ -279,17 +302,18 @@ class ThermoCycle(Step):
             protocol.containers = new_containers
 
         if self.cycles > 1:
-            self.instructions += [f"For {self.cycles} cycles"]
+            self.instructions += [f"For {self.cycles} cycles:"]
 
-        protocol.add_instruction(
-            Instruction(
-                name=self.name, temps=self.temps, instructions=self.instructions
-            )
+        instruction = Instruction(
+            name=self.name, temps=self.temps, instructions=self.instructions
         )
+        protocol.add_instruction(instruction)
+
+        return protocol
 
 
 class Incubate(Step):
-    """Incubate contents for some time.
+    """Incubate contents for some time at a set temperature.
 
     Incubate the contents of containers and in a fridge or some other incubator.
 
@@ -304,7 +328,7 @@ class Incubate(Step):
     def __init__(
         self,
         temp: Temperature,
-        name: str = "",
+        name: str = "Incubate",
         mutate: Optional[Callable[[Container], Container]] = None,
     ):
         super().__init__()
@@ -313,7 +337,7 @@ class Incubate(Step):
         self.temps = [temp]
         self.mutate = mutate
 
-    def execute(self, protocol: Protocol):
+    def __call__(self, protocol: Protocol):
         """Create an instruction for temperatures and their durations.
 
         Arguments:
@@ -328,16 +352,14 @@ class Incubate(Step):
 
         protocol.add_instruction(Instruction(name=self.name, temps=self.temps))
 
+        return protocol
+
 
 HeatShock: List[Step] = [
     Move(name="Move 3 uL from each mixture well to new plate(s)", volume=3.0),
-    Add(
-        name="Add 10 uL of competent E. coli to each well",
-        add=Species("E coli"),
-        volume=10.0,
-    ),
+    Add(add=Species("E coli"), volume=10.0),
     ThermoCycle(name="Heat shock", temps=[Temperature(temp=42, time=30)]),
-    Add(name="Add 150 uL of SOC media to each well", add=Reagent("SOC"), volume=150.0),
-    Incubate(name="Incubate", temp=Temperature(temp=37, time=3600)),
+    Add(add=Reagent("SOC"), volume=150.0),
+    Incubate(temp=Temperature(temp=37, time=3600)),
 ]
 """A composite HeatShock step for getting DNA into E coli."""

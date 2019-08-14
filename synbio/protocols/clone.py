@@ -70,7 +70,7 @@ class Clone(Protocol):
         incubate_temp = mean([e.opt_temp for e in self.enzymes])
 
         for step in [
-            Setup(name="Setup PCR plate with (volumes) shown", target=mixed_wells),
+            Setup(target=mixed_wells),
             Pipette(
                 name="Mix DNA with the enzymes, NEBuffer, and water", target=mixed_wells
             ),
@@ -83,7 +83,7 @@ class Clone(Protocol):
                 mutate=self.mutate,  # set the SeqRecords
             ),
         ] + HeatShock:
-            step.execute(self)
+            step(self)
 
     def _create_mixed_wells(self) -> List[Container]:
         """Return the valid circularizable assemblies.

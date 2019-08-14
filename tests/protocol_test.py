@@ -87,6 +87,6 @@ class TestProtocol(unittest.TestCase):
             )
         )
 
-        inputs = protocol.inputs
+        inputs = protocol.input
         self.assertIn("mock_part", inputs.keys())
         self.assertIn("e coli", inputs.keys())

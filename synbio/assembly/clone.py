@@ -55,8 +55,8 @@ def clone_many(
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
     Turn each SeqRecord's post-digest seqs into a graph where the nodes are
-    the overhangs and the edges are the linear fragments
-    post-digest/catalyzing with BsaI/BpiI.
+    the overhangs and the edges are the linear fragments post-digest/catalyzing
+    with BsaI/BpiI.
 
     Arguments:
         record_set {List[SeqRecord]} -- single record set that might circularize
