@@ -34,13 +34,13 @@ def content_id(content: Content) -> str:
         if content.id != "<unknown id>":
             return content.id
         return str(content.seq)
-    elif isinstance(content, RestrictionType):
+    if isinstance(content, RestrictionType):
         return str(content)  # get enzyme cut seq
-    elif isinstance(content, Primers):
+    if isinstance(content, Primers):
         return "primers:" + str(content.fwd) + ";" + str(content.rev)
-    elif isinstance(content, Reagent):
+    if isinstance(content, Reagent):
         return content.name
-    elif isinstance(content, Species):
+    if isinstance(content, Species):
         return content.name
     raise TypeError(content)
 
@@ -55,9 +55,17 @@ class Container:
         volumes {List[float]} -- volumes of each content (default: {None})
     """
 
+    volume_dead = -1
+    """Volume that should be left unused at bottom of container."""
+
     volume_max = -1
+    """Max volume within each container."""
+
     rows = 1
+    """Rows in the container (or its parents, as with Wells and their Plate)"""
+
     cols = 1
+    """Cols in the container (or its parents, as with Wells and their Plate)"""
 
     def __init__(
         self,
@@ -162,6 +170,7 @@ class Well(Container):
     """A single well in a plate."""
 
     volume_max = 200
+    volume_dead = 15
     rows = 8
     cols = 12
 
@@ -174,6 +183,7 @@ class Tube(Container):
     """
 
     volume_max = 2000
+    volume_dead = 30
     rows = 4
     cols = 6
 
@@ -186,6 +196,7 @@ class Reservoir(Container):
     """
 
     volume_max = 290000
+    volume_dead = 1000
     rows = 1
     cols = 1
 

@@ -38,8 +38,8 @@ class TestSteps(unittest.TestCase):
         d1 = SeqRecord(Seq("AGATAGACCAGAAGATAGA", unambiguous_dna), id="r1")
         r1 = Reagent("water")
 
-        w1 = Well([d1, r1], [50.0, 150.0])
-        w2 = Well([d1, r1], [50.0, 150.0])
+        w1 = Well([d1, r1], [50.0, 100.0])
+        w2 = Well([d1, r1], [50.0, 100.0])
 
         target = [w1, w2]
 

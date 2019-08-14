@@ -47,37 +47,38 @@ class Setup(Step):
         id_to_volumes: Dict[str, List[float]] = defaultdict(list)
         for container in self.target:
             for i, content in enumerate(container):
-                id_to_content[content_id(content)] = content
-                id_to_volumes[content_id(content)].append(container.volumes[i])
+                cid = content_id(content)
+                id_to_content[cid] = content
+                id_to_volumes[cid].append(container.volumes[i])
 
         # create the setup containers and transfers based on volume/count
         container = self.dest or self.target[0]
         volume_max = container.volume_max
-        setup_containers: List[Container] = []
+        setup: List[Container] = []
         for cid, content in id_to_content.items():
             volumes = id_to_volumes[cid]
 
-            new_container = container.create(content, volumes=[volumes.pop()])
+            new_container = container.create(
+                content, volumes=[volumes.pop() + container.volume_dead]
+            )
             while volumes:
                 volume = volumes.pop()
 
                 if new_container.volume() + volume > volume_max:
-                    setup_containers.append(new_container)
+                    setup.append(new_container)
                     new_container = container.create(content, volumes=[volume])
 
                 new_container.volumes[0] += volume
-            setup_containers.append(new_container)
+            setup.append(new_container)
 
-        transfers = [
-            Transfer(src=Fridge(c), dest=c, volume=c.volume()) for c in setup_containers
-        ]
-
-        protocol.add_instruction(
-            Instruction(
-                name=self.name, transfers=transfers, instructions=self.instructions
-            )
+        # make a transfer to fill each setup container
+        transfers = [Transfer(src=Fridge(c), dest=c, volume=c.volume()) for c in setup]
+        instruction = Instruction(
+            name=self.name, transfers=transfers, instructions=self.instructions
         )
-        protocol.containers = setup_containers
+
+        protocol.add_instruction(instruction)
+        protocol.containers = setup
 
 
 class Pipette(Step):
