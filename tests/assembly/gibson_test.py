@@ -7,6 +7,7 @@ from Bio.Seq import Seq
 
 from synbio.assembly import gibson
 from synbio.assembly.gibson import _hamming_set
+from synbio.primers import MIN_PRIMER_LEN, MAX_PRIMER_LEN
 
 
 class TestGibson(unittest.TestCase):
@@ -61,23 +62,26 @@ class TestGibson(unittest.TestCase):
     def _run_and_verify(self, records):
         """Verify the primers and plasmid sequence are correct."""
 
-        plasmid, primers = gibson(records)
+        plasmid, primer_pairs = gibson(records)
 
         doubled_seq = "".join(str(r.seq) for r in records + records)
         self.assertIsInstance(plasmid, SeqRecord)
         self.assertIn(str(plasmid.seq), doubled_seq)
 
-        for i, primer in enumerate(primers):
-            fwd = primer.fwd
-            rev = primer.rev
-
-            record = records[i]
+        for i, primers in enumerate(primer_pairs):
+            self.assertGreater(len(primers.fwd), MIN_PRIMER_LEN)
+            self.assertGreater(len(primers.rev), MIN_PRIMER_LEN)
+            self.assertLess(len(primers.fwd), MAX_PRIMER_LEN)
+            self.assertLess(len(primers.rev), MAX_PRIMER_LEN)
 
             # primers' sequences are in the final plasmid
-            self.assertIn(fwd, plasmid.seq)
-            self.assertIn(rev.reverse_complement(), plasmid.seq + plasmid.seq)
+            self.assertIn(primers.fwd, plasmid.seq)
+            self.assertIn(primers.rev.reverse_complement(), plasmid.seq + plasmid.seq)
 
-            self.assertIn(fwd[-10:], record.seq)
-            self.assertIn(rev[-10:].reverse_complement(), record.seq)
+            record = records[i]
+            self.assertIn(primers.fwd[-MIN_PRIMER_LEN:], record.seq)
+            self.assertIn(
+                primers.rev[-MIN_PRIMER_LEN:].reverse_complement(), record.seq
+            )
 
-        return plasmid, primers
+        return plasmid, primer_pairs

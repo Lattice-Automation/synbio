@@ -8,7 +8,10 @@ from Bio.SeqRecord import SeqRecord
 from primer3.bindings import designPrimers
 
 MIN_PRIMER_LEN = 18
-"""The minimum number of bp for a primer."""
+"""The minimum number of bp in a primer."""
+
+MAX_PRIMER_LEN = 50
+"""The maximum number of bp in a primer."""
 
 
 class Primers:

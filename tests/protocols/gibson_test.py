@@ -19,8 +19,8 @@ class TestGibsonProtocol(unittest.TestCase):
     def test_gibson_protocol(self):
         """Run a Gibson Assembly protocol."""
 
-        insert = next(parse(os.path.join(TEST_DIR, "BBa_K1085023.fa"), "fasta"))
-        backbone = next(parse(os.path.join(TEST_DIR, "pSB1C3.fa"), "fasta"))
+        insert = next(parse(os.path.join(TEST_DIR, "pdsred2.fa"), "fasta"))
+        backbone = next(parse(os.path.join(TEST_DIR, "pDusk.fa"), "fasta"))
 
         protocol = Gibson("Gibson plasmid assembly", design=Plasmid([insert, backbone]))
         protocol.run()

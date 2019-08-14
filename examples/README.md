@@ -1,5 +1,11 @@
 # Examples
 
+## Assembly
+
+- Gibson Assembly with primer generation [gibson_assembly.py](gibson_assembly.py)
+
+- Cloning via restriction digest and ligation [clone_assembly.py](clone_assembly.py)
+
 ## Protocols
 
 ### Gibson Assembly

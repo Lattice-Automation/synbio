@@ -12,7 +12,7 @@ from synbio.assembly.clone import (
     goldengate,
     clone,
     _catalyze,
-    _has_feature,
+    _has_features,
     _reorder_fragments,
     _hash_fragments,
 )
@@ -125,19 +125,19 @@ class TestClone(unittest.TestCase):
             self.assertEqual(str(record.seq), expected[i][1])
             self.assertEqual(right, expected[i][2])
 
-    def test_has_feature(self):
+    def test_has_features(self):
         """Find a KanR include feature in a DVK sequence."""
 
         backbone = read("DVK_AE.gb")
-        self.assertTrue(_has_feature(backbone, "KanR"))
-        self.assertTrue(_has_feature(backbone, "kanr"))  # all lower
+        self.assertTrue(_has_features(backbone, ["KanR"]))
+        self.assertTrue(_has_features(backbone, ["kanr"]))  # all lower
 
         backbone2 = next(  # regression test, this had been failing
             SeqIO.parse(os.path.join(TEST_DIR, "..", "cloning", "pdusk.gb"), "genbank")
         )
-        self.assertTrue(_has_feature(backbone2, "KanR"))
-        self.assertTrue(_has_feature(backbone2, None))
-        self.assertTrue(_has_feature(backbone2, []))
+        self.assertTrue(_has_features(backbone2, ["KanR"]))
+        self.assertTrue(_has_features(backbone2, None))
+        self.assertTrue(_has_features(backbone2, []))
 
     def test_reorder_fragments(self):
         """Reorder a list of SeqRecords to match the input order."""

@@ -6,7 +6,7 @@ from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from ..primers import Primers, MIN_PRIMER_LEN
+from ..primers import Primers, MIN_PRIMER_LEN, MAX_PRIMER_LEN
 
 
 MIN_HOMOLOGY = 20
@@ -15,7 +15,7 @@ MIN_HOMOLOGY = 20
 MAX_HOMOLOGY = 100
 """The maximum homology (bp) between two adjacent SeqRecords."""
 
-OFFTARGET_CHECK_LEN = 9
+OFFTARGET_CHECK_LEN = 10
 """The number of bp from the 3' end of a primer to use in an offtarget check.
 
 Any other sequence spans in the template or reverse complement sequence
@@ -63,6 +63,7 @@ def gibson(
 
     assert records
 
+    records = [r.upper() for r in records]
     plasmid = records[0].upper()
     primers: List[Primers] = [Primers.for_record(records[0])]
 
@@ -98,6 +99,10 @@ def gibson(
 
     _fix_duplicate_junctions(records, primers)
     _fix_offtarget_primers(records, primers)
+
+    for primer_pair in primers:
+        assert len(primer_pair.fwd) <= MAX_PRIMER_LEN
+        assert len(primer_pair.rev) <= MAX_PRIMER_LEN
 
     return plasmid, primers
 
@@ -203,7 +208,7 @@ def _mutate_primers(p1: Primers, p2: Primers, homology_to_add: int):
     p2.fwd = new_p2_fwd
 
 
-def _fix_duplicate_junctions(records: List[SeqRecord], primers: List[Primers]) -> None:
+def _fix_duplicate_junctions(records: List[SeqRecord], primers: List[Primers]):
     """Mutates primers to avoid unintentional annealing between records that shouldn't be
 
     Arguments:
@@ -266,22 +271,12 @@ def _mutate_junction(
         n_seq = neighbor.seq
         f_seq = record.seq
         if end_of_record:
-            # add the first i bp from the next neighbor
-            # record to the beginning of the reverse primer
             primers.rev = n_seq[:i].reverse_complement() + primers.rev
-            # add the first i bp from the next neighbor
-            # record to the end of the record pcr sequence
             f_seq += n_seq[:i]
-            # update the record end
             f_end = f_seq[-MAX_HOMOLOGY:]
         else:
-            # add the last i bp from the previous neighbor
-            # record to the beginning of the reverse primer
             primers.fwd = n_seq[-i:] + primers.fwd
-            # add the last i bp from the previous neighbor
-            # record to the beginning of the record pcr sequence
             f_seq = n_seq[-i:] + f_seq
-            # update the record end
             f_end = f_seq[:MAX_HOMOLOGY]
         record.seq = f_seq
         i += 1
@@ -300,17 +295,10 @@ def _has_offtarget_junction(f_end: Seq, ends: List[Seq], end_of_record: bool) ->
         bool -- whether there's an offtarget junction
     """
 
-    # revcomp indicates if we need to use the reverse complement of
-    # an end. Required because _record_homology must take in the end
-    # corresponding to the reverse primer as the first parameter and
-    # the end corresponding to the forward primer as the second parameter.
     revcomp = False
     for end in ends:
         if revcomp:
             end = end.reverse_complement()
-        # end_of_record indicates if the input record end (f_end) corresponds to the
-        # reverse primer or the forward primer. Same reason as above.
-        # True -> rev,  False -> fwd
         if end_of_record:
             if _record_homology(str(f_end), str(end))[0]:
                 return True
@@ -367,7 +355,7 @@ def _fix_offtarget(primers: Primers, seq: Seq, fwd_direction: bool) -> bool:
 
     primer = primers.fwd if fwd_direction else primers.rev
     primer_end = primer[-MIN_PRIMER_LEN:]
-    primer_end_site = str(seq).index(str(primer_end)) + MIN_PRIMER_LEN
+    next_non_primer_bp = str(seq).index(str(primer_end)) + MIN_PRIMER_LEN
 
     off_by_one_set = _hamming_set(str(primer[-OFFTARGET_CHECK_LEN:]))
 
@@ -381,9 +369,9 @@ def _fix_offtarget(primers: Primers, seq: Seq, fwd_direction: bool) -> bool:
             # if an off-target binding site is found, extend the
             # primer in the 3' direction into the sequence
             if fwd_direction:
-                primers.fwd = primers.fwd + seq[primer_end_site]  # add one bp
+                primers.fwd = primers.fwd + seq[next_non_primer_bp]  # add one bp
             else:
-                primers.rev = primers.rev + seq[primer_end_site]  # add one bp
+                primers.rev = primers.rev + seq[next_non_primer_bp]  # add one bp
             return True
     return False
 

@@ -114,8 +114,8 @@ def clone(
 
     seen_seqs: Set[str] = set()  # stored list of input seqs (not new combinations)
     for record in record_set:
-        seen_seqs.add(str(record.seq + record.seq))
-        seen_seqs.add(str((record.seq + record.seq).reverse_complement()))
+        seen_seqs.add(str(record.seq + record.seq).upper())
+        seen_seqs.add(str((record.seq + record.seq).reverse_complement().upper()))
 
         for left, frag, right in _catalyze(record, enzymes):
             # print(left, right, record.id)
@@ -148,22 +148,22 @@ def clone(
             combinations.append(record_bin)
 
         for fragments in combinations:
-            # make sure it's not just a re-ligation of insert + backbone
-            new_plasmid = "".join(str(f.seq) for f in fragments)
-            if any(new_plasmid in seq for seq in seen_seqs):
-                continue
-
-            # filter for plasmids that have an 'include' feature
-            if not any(_has_feature(f, include) for f in fragments):
-                continue
-
-            # re-order the fragments to try and match the input order
-            fragments = _reorder_fragments(record_set, fragments)
-
             # create the composite plasmid
             plasmid = SeqRecord(Seq("", IUPACUnambiguousDNA()))
             for fragment in fragments:
                 plasmid += fragment.upper()
+
+            # make sure it's not just a re-ligation of insert + backbone
+            plasmid_seq = str(plasmid.seq)
+            if any(plasmid_seq in seq for seq in seen_seqs):
+                continue
+
+            # filter for plasmids that have an 'include' feature
+            if not _has_features(plasmid, include):
+                continue
+
+            # re-order the fragments to try and match the input order
+            fragments = _reorder_fragments(record_set, fragments)
 
             seen_seqs.add(str(plasmid.seq + plasmid.seq))
             seen_seqs.add(str((plasmid.seq + plasmid.seq).reverse_complement()))
@@ -331,7 +331,7 @@ def _catalyze(
     return frag_w_overhangs
 
 
-def _has_feature(record: SeqRecord, include: Optional[List[str]]) -> bool:
+def _has_features(record: SeqRecord, include: Optional[List[str]]) -> bool:
     """Return whether any of a record's features/qualifiers match the include specified.
 
     Arguments:
@@ -345,16 +345,16 @@ def _has_feature(record: SeqRecord, include: Optional[List[str]]) -> bool:
     if not include:
         return True
 
+    assert isinstance(include, list)
+
     features: Set[str] = set()
     for feature in record.features:
-        features.add(feature.id.lower())
+        features.update(feature.id.lower().split())
         for _, values in feature.qualifiers.items():
             for value in values:
-                features.add(value.lower())
+                features.update(value.lower().split())
 
-    for feature in features:
-        for keyword in include:
-            if keyword.lower() in feature:
-                return True
+    include_set = {i.lower() for i in include}
+    intersect = features.intersection(include_set)
 
-    return False
+    return len(intersect) == len(include)
