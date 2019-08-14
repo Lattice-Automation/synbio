@@ -1,7 +1,7 @@
 """Steps: lab processes to assemble a design."""
 
 from collections import defaultdict
-from typing import Callable, List, Optional, Dict, Union, Sequence
+from typing import Callable, List, Optional, Dict, Sequence
 
 from .containers import Container, content_id, Content, Fridge
 from .instructions import Temperature, Transfer, Instruction
@@ -83,7 +83,7 @@ class Setup(Step):
         )
 
         protocol.add_instruction(instruction)
-        protocol.containers = setup
+        protocol.containers = sorted(setup)
 
         return protocol
 
@@ -124,6 +124,7 @@ class Pipette(Step):
         # for each target container, make a list of transfers to pipette
         # from the input container to output containers
         # create new containers at will here when others of source contents run out
+        transfers: List[Transfer] = []
         for target_container in self.target:
             for i, content in enumerate(target_container):
                 cid = content_id(content)
@@ -138,16 +139,15 @@ class Pipette(Step):
                 src.withdraw(volume)
 
                 transfer = Transfer(src=src, dest=target_container, volume=volume)
-
-                self.transfers.append(transfer)
+                transfers.append(transfer)
 
         # update the protocol
         protocol.add_instruction(
             Instruction(
-                name=self.name, transfers=self.transfers, instructions=self.instructions
+                name=self.name, transfers=transfers, instructions=self.instructions
             )
         )
-        protocol.containers = list(self.target)
+        protocol.containers = sorted(list(self.target))
 
         return protocol
 
@@ -171,17 +171,29 @@ class Move(Step):
         """Create the pipette instructions for the move."""
 
         new_containers: List[Container] = []
+        transfers: List[Transfer] = []
         for container in protocol.containers:
-            if self.dest:
-                new_container = self.dest.create(container.contents)
-            else:
-                new_container = container.create(container.contents)
+            new_container = (
+                self.dest.create(container.contents)
+                if self.dest
+                else container.create(container.contents)
+            )
             new_containers.append(new_container)
-            transfer = Transfer(src=container, dest=new_container, volume=self.volume)
-            self.transfers.append(transfer)
 
-        protocol.add_instruction(Instruction(name=self.name, transfers=self.transfers))
-        protocol.containers = new_containers
+            transfer = Transfer(src=container, dest=new_container, volume=self.volume)
+            transfers.append(transfer)
+
+        src_name = type(protocol.containers[0]).__name__
+        dest_name = type(new_containers[0]).__name__
+
+        instructions = [
+            f"Move {self.volume} uL from each {src_name} to new {dest_name}s"
+        ]
+
+        protocol.add_instruction(
+            Instruction(name=self.name, transfers=transfers, instructions=instructions)
+        )
+        protocol.containers = sorted(new_containers)
 
         return protocol
 
@@ -220,9 +232,10 @@ class Add(Step):
     def __call__(self, protocol: Protocol):
         """Add new content from a src container to each other container."""
 
+        transfers: List[Transfer] = []
         for container in protocol.containers:
             transfer = Transfer(src=self.add, dest=container, volume=self.volume)
-            self.transfers.append(transfer)
+            transfers.append(transfer)
 
         container = protocol.containers[0]
         instructions = self.instructions or [
@@ -230,7 +243,7 @@ class Add(Step):
         ]
 
         instruction = Instruction(
-            name=self.name, transfers=self.transfers, instructions=instructions
+            name=self.name, transfers=transfers, instructions=instructions
         )
         protocol.add_instruction(instruction)
 
@@ -299,7 +312,7 @@ class ThermoCycle(Step):
             new_containers: List[Container] = []
             for container in protocol.containers:
                 new_containers.append(self.mutate(container))
-            protocol.containers = new_containers
+            protocol.containers = sorted(new_containers)
 
         if self.cycles > 1:
             self.instructions += [f"For {self.cycles} cycles:"]
@@ -348,7 +361,7 @@ class Incubate(Step):
             new_containers: List[Container] = []
             for container in protocol.containers:
                 new_containers.append(self.mutate(container))
-            protocol.containers = new_containers
+            protocol.containers = sorted(new_containers)
 
         protocol.add_instruction(Instruction(name=self.name, temps=self.temps))
 
@@ -356,7 +369,7 @@ class Incubate(Step):
 
 
 HeatShock: List[Step] = [
-    Move(name="Move 3 uL from each mixture well to new plate(s)", volume=3.0),
+    Move(volume=3.0),
     Add(add=Species("E coli"), volume=10.0),
     ThermoCycle(name="Heat shock", temps=[Temperature(temp=42, time=30)]),
     Add(add=Reagent("SOC"), volume=150.0),

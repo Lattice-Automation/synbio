@@ -244,10 +244,6 @@ def _catalyze(
             left overhang, cut fragment, right overhang
     """
 
-    record_id = content_id(record)
-    if record_id in CATALYZE_CACHE:
-        return CATALYZE_CACHE[record_id]
-
     record = record.upper()
     batch = RestrictionBatch(enzymes)
     batch_sites = batch.search(record.seq, linear=False)
@@ -326,7 +322,7 @@ def _catalyze(
         frag_w_overhangs.append((left, frag, right))
         frag_w_overhangs.append((left_rc, frag_rc, right_rc))
 
-    CATALYZE_CACHE[record_id] = frag_w_overhangs  # store for future look-ups
+    # CATALYZE_CACHE[record_id] = frag_w_overhangs  # store for future look-ups
 
     return frag_w_overhangs
 

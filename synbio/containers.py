@@ -128,6 +128,7 @@ class Container:
 
     def __len__(self):
         """Container's length is length of its content."""
+
         return len(self.contents)
 
     def __str__(self):
@@ -151,17 +152,27 @@ class Container:
     def __lt__(self, other: "Container") -> bool:
         """Return whether this container should come before the other."""
 
-        def content_rank(content: Content) -> str:
-            """Unique id based on content type."""
-
-            if isinstance(content, SeqRecord):
-                return "0" + content_id(content)
-            if isinstance(content, Reagent):
-                return "1" + content_id(content)
-            return "2" + content_id(content)
+        def min_rank_content(container: Container) -> int:
+            min_rank = 1000
+            for content in container:
+                if isinstance(content, SeqRecord):
+                    min_rank = min(0, min_rank)
+                elif isinstance(content, Reagent):
+                    min_rank = min(1, min_rank)
+                elif isinstance(content, Species):
+                    min_rank = min(2, min_rank)
+                elif isinstance(content, RestrictionType):
+                    min_rank = min(3, min_rank)
+            return min_rank
 
         def container_id(container: Container) -> str:
-            return "".join(sorted(content_rank(c) for c in container))
+            container_records = [c for c in container if isinstance(c, SeqRecord)]
+            if container_records:
+                return "".join(content_id(c) for c in container_records)
+            return "".join(sorted(content_id(c) for c in container))
+
+        if min_rank_content(self) < min_rank_content(other):
+            return True
 
         return container_id(self) < container_id(other)
 
@@ -202,15 +213,16 @@ class Reservoir(Container):
 
 
 class Fridge(Container):
-    """Ambiguous; something to retrieve from the fridge."""
+    """Ambiguous; a fridge in a lab."""
 
-    default_id = uuid.uuid1()  # default fridge is the same
     volume_max = 1_000_000_000  # like suitcase from harry potter
 
     def __init__(self, contents: Union[Content, List[Content]] = None):
         """Set the contents of the Well."""
 
-        self.id: uuid.UUID = self.default_id
+        super().__init__()
+
+        self.id: uuid.UUID = uuid.uuid1()
 
         if not isinstance(contents, list):
             self.contents = [contents if contents else []]
@@ -249,13 +261,13 @@ class Layout:
         existing_plates: int = 0,
         log_volume: bool = False,
     ):
-        # keep order consistent, see Container.__lt__ for sort method
         self.containers = sorted(containers)
         self.existing_plates = existing_plates
         self.log_volume = log_volume
 
         def get_containers(containers: Optional[Iterable[Container]], ctype: type):
-            return [c for c in (containers or []) if isinstance(c, ctype)]
+            # keep order consistent, see Container.__lt__ for sort method
+            return sorted([c for c in (containers or []) if isinstance(c, ctype)])
 
         # get reservoirs
         src_reservoir = get_containers(src_containers, Reservoir)
@@ -401,6 +413,11 @@ class Layout:
             self.container_to_well_index[container] = well_index
             self.container_to_well_name[container] = well_name
 
+    def __len__(self) -> int:
+        """Return the number of plate spaces this object requires on a robotic deck."""
+
+        return self._plate_count(self.reservoirs, self.tubes, self.wells)
+
     def _plate_count(
         self, reservoirs: List[Reservoir], tubes: List[Tube], wells: List[Well]
     ) -> int:
@@ -431,8 +448,3 @@ class Layout:
             count += math.ceil(float(len(wells)) / wells_per_plate)
 
         return count
-
-    def __len__(self) -> int:
-        """Return the number of plate spaces this object requires on a robotic deck."""
-
-        return self._plate_count(self.reservoirs, self.tubes, self.wells)

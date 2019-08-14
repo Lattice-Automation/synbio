@@ -6,6 +6,7 @@ import unittest
 from Bio import SeqIO
 from Bio.SeqIO import parse
 
+from synbio.containers import content_id
 from synbio.designs import Combinatorial
 from synbio.protocols import GoldenGate
 
@@ -24,9 +25,6 @@ class TestGoldenGate(unittest.TestCase):
         if not os.path.exists(OUT_DIR):
             os.mkdir(OUT_DIR)
 
-        # create a library design with multiple "bins"
-        design = Combinatorial()
-
         # read in all the records
         records = []
         for (_, _, filenames) in os.walk(TEST_DIR):
@@ -35,6 +33,7 @@ class TestGoldenGate(unittest.TestCase):
                 for record in parse(gb_filename, "genbank"):
                     records.append(record)
 
+        record_sets = []
         for f_type in ["promoter", "RBS", "CDS", "terminator"]:
 
             def test(r):
@@ -44,14 +43,18 @@ class TestGoldenGate(unittest.TestCase):
 
             new_bin = [r for r in records if test(r)][:5]
 
-            design.append(new_bin)  # add a new bin
+            record_sets.append(new_bin)  # add a new bin
 
-        # add a backbone
-        design.append(self.read("DVK_AE.gb"))
+        records = [r for record_set in record_sets for r in record_set] + [
+            self.read("DVK_AE.gb")
+        ]
+        record_ids = {content_id(r) for r in records}
 
         # create a protocol, add GoldenGate as the sole protocol step, and run
         protocol = GoldenGate(
-            name="Combinatorial GoldenGate", design=design, include=["KanR"]
+            name="Combinatorial GoldenGate",
+            design=Combinatorial(records),
+            include=["KanR"],
         )
         protocol.run()
 
@@ -64,6 +67,11 @@ class TestGoldenGate(unittest.TestCase):
         protocol.to_picklists(
             os.path.join(OUT_DIR, "gg.labcyte.gwl"), platform="labcyte"
         )
+
+        for record in protocol.output:
+            record_srcs = record.id.split("+")
+            for src in record_srcs:
+                self.assertIn(src, record_ids)
 
     def read(self, filename):
         """Read in a single Genbank file from the test directory."""

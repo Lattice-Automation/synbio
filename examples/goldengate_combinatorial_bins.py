@@ -27,7 +27,7 @@ def read_all_records():
 # create a combinatorial library design from multiple "bins"
 design = CombinatorialBins()
 gg_records = read_all_records()
-for type in ["promoter", "RBS", "CDS", "terminator"]:
+for type in ["promoter", "RBS", "CDS", "terminator", "KanR"]:
     record_bin = [r for r in gg_records if any(f.type == type for f in r.features)]
     design.append(record_bin)  # add a new cominatorial bin
 

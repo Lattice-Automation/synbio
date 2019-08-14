@@ -1,6 +1,7 @@
 .PHONY: test
 
 test:
+	mkdir -p ./tests/output
 	python3 -m unittest discover tests -p '*_test.py'
 
 install:

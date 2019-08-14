@@ -234,6 +234,8 @@ class Protocol:
                 continue
 
             name = instruction.name
+            if not name and instruction.instructions:
+                name = instruction.instructions[0]
             row += 1
             csv += f"{name}:\n" if name else f"Setup step {row}:\n"
             csv += Layout.from_instruction(

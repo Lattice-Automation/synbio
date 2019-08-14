@@ -55,8 +55,8 @@ class TestContainers(unittest.TestCase):
     def test_hash(self):
         """Hash containers."""
 
-        self.assertEqual(hash(Fridge()), hash(Fridge()))
-        self.assertNotEqual(Well(), Well())
+        well_set = {Well(), Well()}
+        self.assertEqual(2, len(well_set))
 
     def test_withdraw(self):
         """Withdraw from a well, know when 'empty'"""

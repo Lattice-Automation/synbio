@@ -33,9 +33,7 @@ design = Plasmid(
 
 # create a protocol using GoldenGate as the sole composite step and run
 # filter on KanR in a backbone
-protocol = GoldenGate(
-    name="Golden Gate Plasmid", design=design, include=["KanR"], min_count=5
-)
+protocol = GoldenGate(name="Golden Gate Plasmid", design=design, min_count=5)
 
 # export the composite plasmid
 protocol.to_fasta("plasmid.fasta")
