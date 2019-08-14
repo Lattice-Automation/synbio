@@ -10,7 +10,7 @@ pip install synbio
 
 ## Models
 
-Designed to have a minimalist API, `synbio` only expects the user to define their `Design` and `Protocol`. Several protocols are pre-defined.
+`synbio` only expects the user to define their `Design` and `Protocol`. Several protocols are pre-defined.
 
 ### Designs
 
@@ -18,7 +18,7 @@ All are in `synbio.designs`:
 
 - `Plasmid` - single list of SeqRecords to combine into a plasmid
 - `Library` - list of list of SeqRecords to combine into plasmids
-- `Combinatorial` - list of SeqRecords to combine into all valid assemblies
+- `Combinatorial` - list of SeqRecords to combinatorially anneal into all valid assemblies
 - `CombinatorialBins` - list of bins of SeqRecords for combinatorial assembly between bins
 
 ### Protocols

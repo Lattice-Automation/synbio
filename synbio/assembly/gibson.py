@@ -6,6 +6,7 @@ from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
+from ..designs import Combinatorial
 from ..primers import Primers, MIN_PRIMER_LEN, MAX_PRIMER_LEN
 
 
@@ -37,6 +38,11 @@ def gibson_many(
     Returns:
         List[Tuple[SeqRecord, List[Primers]]] -- a list of assembled Plasmids and Primers
     """
+
+    if isinstance(design, Combinatorial):
+        raise RuntimeError(
+            f"Cannot create a Gibson library with Combinatorial design. See 'CombinatorialBins'."
+        )
 
     return [gibson(rs, hifi=hifi) for rs in design]
 
