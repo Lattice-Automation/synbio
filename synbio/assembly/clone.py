@@ -1,4 +1,4 @@
-"""Cloning for digestion and ligation of fragments."""
+"""clone for digestion and ligation of fragments."""
 
 from collections import defaultdict
 from typing import Dict, List, Set, Tuple, Iterable, Optional
@@ -43,10 +43,10 @@ def goldengate(
             2. SeqRecords that went into each formed plasmid
     """
 
-    return cloning_many(record_set, [BsaI, BpiI], include, min_count)
+    return clone_many(record_set, [BsaI, BpiI], include, min_count)
 
 
-def cloning_many(
+def clone_many(
     design: Iterable[List[SeqRecord]],
     enzymes: List[RestrictionType],
     include: List[str] = None,
@@ -73,7 +73,7 @@ def cloning_many(
     seen_fragment_ids: Set[str] = set()
     all_plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
     for record_set in design:
-        plasmids_and_fragments = cloning(record_set, enzymes, include, min_count)
+        plasmids_and_fragments = clone(record_set, enzymes, include, min_count)
         for plasmids, fragments in plasmids_and_fragments:
 
             # we don't want to re-use the fragment combination more than once
@@ -86,7 +86,7 @@ def cloning_many(
     return all_plasmids_and_fragments
 
 
-def cloning(
+def clone(
     record_set: List[SeqRecord],
     enzymes: List[RestrictionType],
     include: List[str] = None,
@@ -164,8 +164,6 @@ def cloning(
             plasmid = SeqRecord(Seq("", IUPACUnambiguousDNA()))
             for fragment in fragments:
                 plasmid += fragment.upper()
-            plasmid.id = "+".join(f.id for f in fragments if f.id != "<unknown id>")
-            plasmid.description = f"cloned from {', '.join(str(e) for e in enzymes)}"
 
             seen_seqs.add(str(plasmid.seq + plasmid.seq))
             seen_seqs.add(str((plasmid.seq + plasmid.seq).reverse_complement()))
@@ -178,6 +176,9 @@ def cloning(
     plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
     for ids, fragments in ids_to_fragments.items():
         plasmids = ids_to_plasmids[ids]
+        for plasmid in plasmids:
+            plasmid.id = "+".join(f.id for f in fragments if f.id != "<unknown id>")
+            plasmid.description = f"cloned from {', '.join(str(e) for e in enzymes)}"
         plasmids_and_fragments.append((plasmids, fragments))
     return plasmids_and_fragments
 
@@ -193,7 +194,7 @@ def _reorder_fragments(
     This works because the SeqRecords are going to anneal to one another in a plasmid.
 
     Arguments:
-        input_set {List[SeqRecord]} -- SeqRecords set to cloning
+        input_set {List[SeqRecord]} -- SeqRecords set to clone
         output_set {List[SeqRecord]} -- SeqRecords after circularization
 
     Returns:

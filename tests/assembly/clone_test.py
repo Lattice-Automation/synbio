@@ -8,9 +8,9 @@ from Bio.Restriction import BsaI, BpiI, BamHI, NotI
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.assembly.cloning import (
+from synbio.assembly.clone import (
     goldengate,
-    cloning,
+    clone,
     _catalyze,
     _has_feature,
     _reorder_fragments,
@@ -21,7 +21,7 @@ DIR_NAME = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(DIR_NAME, "..", "..", "data", "goldengate")
 
 
-class TestCloning(unittest.TestCase):
+class TestClone(unittest.TestCase):
     """Test Restriction based assembly."""
 
     def setUp(self):
@@ -46,10 +46,10 @@ class TestCloning(unittest.TestCase):
                 self.assertIn("BsaI", plasmid.description)
                 self.assertIn("BpiI", plasmid.description)
 
-    def test_cloning(self):
+    def test_clone(self):
         """Find valid sets of fragments that will circularize"""
 
-        results = cloning(
+        results = clone(
             [self.AB, self.BC, self.CD, self.DE, self.AE],
             [BsaI, BpiI],
             ["KanR"],

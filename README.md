@@ -128,4 +128,4 @@ This is a non-exhaustive list. Contact me for a comparison of these libraries/pl
 - [BioBricks](https://github.com/liaupm/BioBlocks) is a general focus, web-based editor for describing experiments in Biology.
 - [Biocoder](https://jbioleng.biomedcentral.com/articles/10.1186/1754-1611-4-13) is a C++ library with extensive protocol step definition capabilities.
 - [Plateo](https://github.com/Edinburgh-Genome-Foundry/Plateo) is a python library for planning, running and checking laboratory experiments. Great for parsing and exporting plates and picklists form multiple formats.
-- [pydna](https://github.com/BjornFJohansson/pydna) is a python DNA assembly simulation library with a human-readable description of cloning and assembly strategies.
+- [pydna](https://github.com/BjornFJohansson/pydna) is a python DNA assembly simulation library with a human-readable description of clone and assembly strategies.

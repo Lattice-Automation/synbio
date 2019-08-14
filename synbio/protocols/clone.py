@@ -6,7 +6,7 @@ from typing import Dict, List
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.SeqRecord import SeqRecord
 
-from ..assembly import cloning_many
+from ..assembly import clone_many
 from ..containers import Container, Well
 from ..instructions import Temperature
 from ..mix import Mix
@@ -28,8 +28,8 @@ class Clone(Protocol):
     Digest the SeqRecords with all the Enzymes provided, find valid circularized
     assemblies, and create a protocol for preparing and ligating the fragments.
 
-    This protocol is based on NEB's cloning guide:
-    https://www.neb.com/tools-and-resources/usage-guidelines/cloning-guide
+    This protocol is based on NEB's clone guide:
+    https://www.neb.com/tools-and-resources/usage-guidelines/clone-guide
 
     Keyword Arguments:
         include {List[str]} -- include only plasmids with a feature matching something
@@ -99,7 +99,7 @@ class Clone(Protocol):
             raise ValueError("Clone protocol lacks list of BioPython Enzymes")
 
         mixed_wells: List[Container] = []
-        for plasmids, fragments in cloning_many(
+        for plasmids, fragments in clone_many(
             self.design,
             enzymes=self.enzymes,
             include=self.include,
