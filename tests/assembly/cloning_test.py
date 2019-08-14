@@ -1,4 +1,4 @@
-"""Test Restriction Assembly."""
+"""Test Standard Restriction Digest Cloning."""
 
 import os
 import unittest
@@ -8,13 +8,20 @@ from Bio.Restriction import BsaI, BpiI, BamHI, NotI
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.assembly.subcloning import goldengate, subclone, _catalyze, _has_feature
+from synbio.assembly.cloning import (
+    goldengate,
+    cloning,
+    _catalyze,
+    _has_feature,
+    _reorder_fragments,
+    _hash_fragments,
+)
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(DIR_NAME, "..", "..", "data", "goldengate")
 
 
-class TestRestriction(unittest.TestCase):
+class TestCloning(unittest.TestCase):
     """Test Restriction based assembly."""
 
     def setUp(self):
@@ -27,20 +34,25 @@ class TestRestriction(unittest.TestCase):
         self.AE = read("DVK_AE.gb")
 
     def test_goldengate(self):
-        """Subclone the fragments together."""
+        """Cloning the fragments together."""
 
         fragments = [self.AB, self.BC, self.CD, self.DE, self.AE]
         results = goldengate([fragments], include=["KanR"], min_count=5)
 
         self.assertEqual(1, len(results))
 
-    def test_subclone(self):
+        for plasmids, fragments in results:
+            for plasmid in plasmids:
+                self.assertIn("BsaI", plasmid.description)
+                self.assertIn("BpiI", plasmid.description)
+
+    def test_cloning(self):
         """Find valid sets of fragments that will circularize"""
 
-        results = subclone(
+        results = cloning(
             [self.AB, self.BC, self.CD, self.DE, self.AE],
             [BsaI, BpiI],
-            "KanR",
+            ["KanR"],
             min_count=5,
         )
 
@@ -124,6 +136,32 @@ class TestRestriction(unittest.TestCase):
             SeqIO.parse(os.path.join(TEST_DIR, "..", "cloning", "pdusk.gb"), "genbank")
         )
         self.assertTrue(_has_feature(backbone2, "KanR"))
+        self.assertTrue(_has_feature(backbone2, None))
+        self.assertTrue(_has_feature(backbone2, []))
+
+    def test_reorder_fragments(self):
+        """Reorder a list of SeqRecords to match the input order."""
+
+        r1 = SeqRecord(Seq(""), id="1")
+        r2 = SeqRecord(Seq(""), id="2")
+        r3 = SeqRecord(Seq(""), id="3")
+
+        input_set = [r1, r2, r3]
+        output_set = [r2, r3, r1]  # almost same order but rotated
+
+        reordered = _reorder_fragments(input_set, output_set)
+
+        self.assertNotEqual([r.id for r in input_set], [r.id for r in output_set])
+        self.assertEqual([r.id for r in input_set], [r.id for r in reordered])
+
+    def test_hash_fragments(self):
+        """Create a unique ID from the concatenation of sorted SeqRecord ids."""
+
+        r1 = SeqRecord(Seq(""), id="1")
+        r2 = SeqRecord(Seq(""), id="2")
+        r3 = SeqRecord(Seq(""), id="3")
+
+        self.assertEqual("123", _hash_fragments([r2, r3, r1]))
 
 
 def read(filename):

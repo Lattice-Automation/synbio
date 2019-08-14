@@ -1,8 +1,7 @@
-"""Subcloning for digestion and ligation of SeqRecords together."""
+"""Cloning for digestion and ligation of fragments."""
 
 from collections import defaultdict
-import logging
-from typing import Dict, List, Set, Tuple, Iterable, Union
+from typing import Dict, List, Set, Tuple, Iterable, Optional
 
 from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Restriction import RestrictionBatch, BsaI, BpiI
@@ -14,7 +13,7 @@ from networkx.algorithms.cycles import simple_cycles
 from networkx.exception import NetworkXNoCycle
 
 from ..containers import content_id
-from ..designs import Plasmid, CombinatorialBins
+from ..designs import CombinatorialBins
 
 
 CATALYZE_CACHE: Dict[str, List[Tuple[str, SeqRecord, str]]] = {}
@@ -44,10 +43,10 @@ def goldengate(
             2. SeqRecords that went into each formed plasmid
     """
 
-    return subclone_many(record_set, [BsaI, BpiI], include, min_count)
+    return cloning_many(record_set, [BsaI, BpiI], include, min_count)
 
 
-def subclone_many(
+def cloning_many(
     design: Iterable[List[SeqRecord]],
     enzymes: List[RestrictionType],
     include: List[str] = None,
@@ -74,7 +73,7 @@ def subclone_many(
     seen_fragment_ids: Set[str] = set()
     all_plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
     for record_set in design:
-        plasmids_and_fragments = subclone(record_set, enzymes, include, min_count)
+        plasmids_and_fragments = cloning(record_set, enzymes, include, min_count)
         for plasmids, fragments in plasmids_and_fragments:
 
             # we don't want to re-use the fragment combination more than once
@@ -87,7 +86,7 @@ def subclone_many(
     return all_plasmids_and_fragments
 
 
-def subclone(
+def cloning(
     record_set: List[SeqRecord],
     enzymes: List[RestrictionType],
     include: List[str] = None,
@@ -113,7 +112,6 @@ def subclone(
 
     graph = nx.MultiDiGraph()
 
-    include = include or []
     seen_seqs: Set[str] = set()  # stored list of input seqs (not new combinations)
     for record in record_set:
         seen_seqs.add(str(record.seq + record.seq))
@@ -126,7 +124,6 @@ def subclone(
             graph.add_edge(left, right, frag=frag)
 
     try:  # find all circularizable cycles
-        # print(enzymes, graph.nodes)
         cycles = simple_cycles(graph)
     except NetworkXNoCycle:
         return []
@@ -135,6 +132,7 @@ def subclone(
     ids_to_fragments: Dict[str, List[SeqRecord]] = defaultdict(list)
     ids_to_plasmids: Dict[str, List[SeqRecord]] = defaultdict(list)
     for cycle in cycles:
+        # filter for the minimum number of SeqRecords
         if min_count > 0 and len(cycle) < min_count:
             continue
 
@@ -151,28 +149,24 @@ def subclone(
 
         for fragments in combinations:
             # make sure it's not just a re-ligation of insert + backbone
-            new_plasmid = "".join([str(f.seq) for f in fragments])
+            new_plasmid = "".join(str(f.seq) for f in fragments)
             if any(new_plasmid in seq for seq in seen_seqs):
                 continue
 
-            # filter for plasmids that have the include feature
-            if include:
-                has_include = any(_has_feature(f, include) for f in fragments)
-                if not has_include:
-                    continue
+            # filter for plasmids that have an 'include' feature
+            if not any(_has_feature(f, include) for f in fragments):
+                continue
 
-            # try and re-order the fragments to match the input order
-            fragment_ids = [content_id(r) for r in record_set]
-            fragment_indexes = [fragment_ids.index(f.id) for f in fragments]
-            fragment_min_index = min(fragment_indexes)
-            fragment_first = fragment_indexes.index(fragment_min_index)
-            fragments = fragments[fragment_first:] + fragments[:fragment_first]
+            # re-order the fragments to try and match the input order
+            fragments = _reorder_fragments(record_set, fragments)
 
             # create the composite plasmid
             plasmid = SeqRecord(Seq("", IUPACUnambiguousDNA()))
             for fragment in fragments:
                 plasmid += fragment.upper()
             plasmid.id = "+".join(f.id for f in fragments if f.id != "<unknown id>")
+            plasmid.description = f"cloned from {', '.join(str(e) for e in enzymes)}"
+
             seen_seqs.add(str(plasmid.seq + plasmid.seq))
             seen_seqs.add(str((plasmid.seq + plasmid.seq).reverse_complement()))
 
@@ -188,12 +182,37 @@ def subclone(
     return plasmids_and_fragments
 
 
+def _reorder_fragments(
+    input_set: List[SeqRecord], output_set: List[SeqRecord]
+) -> List[SeqRecord]:
+    """Sort the output set of SeqRecords to try and match input order.
+
+    If the first SeqRecord of the input_set is the third SeqRecord of the
+    output_set, reorder the output_set so its first SeqRecord is the first again.
+
+    This works because the SeqRecords are going to anneal to one another in a plasmid.
+
+    Arguments:
+        input_set {List[SeqRecord]} -- SeqRecords set to cloning
+        output_set {List[SeqRecord]} -- SeqRecords after circularization
+
+    Returns:
+        List[SeqRecord] -- re-ordered SeqRecords
+    """
+
+    fragment_ids = [content_id(r) for r in input_set]
+    fragment_indexes = [fragment_ids.index(f.id) for f in output_set]
+    fragment_min_index = min(fragment_indexes)
+    fragment_first = fragment_indexes.index(fragment_min_index)
+    return output_set[fragment_first:] + output_set[:fragment_first]
+
+
 def _hash_fragments(record_set: List[SeqRecord]) -> str:
     """Create a unique ID for a list of records
-    
+
     Arguments:
         record_set {List[SeqRecord]} -- set of Records to make unique ID for
-    
+
     Returns:
         str -- unique ID concatenating records IDs/Seqs
     """
@@ -221,8 +240,8 @@ def _catalyze(
             left overhang, cut fragment, right overhang
     """
 
-    record_id = _record_id(record)
-    if record_id != "<unknown id>" and record_id in CATALYZE_CACHE:
+    record_id = content_id(record)
+    if record_id in CATALYZE_CACHE:
         return CATALYZE_CACHE[record_id]
 
     record = record.upper()
@@ -308,23 +327,26 @@ def _catalyze(
     return frag_w_overhangs
 
 
-def _has_feature(record: SeqRecord, include: List[str]) -> bool:
+def _has_feature(record: SeqRecord, include: Optional[List[str]]) -> bool:
     """Return whether any of a record's features/qualifiers match the include specified.
 
     Arguments:
         record {SeqRecord} -- the record being checked for include
-        include {List[str]} -- the include to filter for
+        include {Optional[List[str]]} -- the include to filter for
 
     Returns:
         bool -- whether the record has any features or qualifiers with specified include
     """
 
+    if not include:
+        return True
+
     features: Set[str] = set()
     for feature in record.features:
         features.add(feature.id.lower())
-        for _, value in feature.qualifiers.items():
-            for v in value:
-                features.add(v.lower())
+        for _, values in feature.qualifiers.items():
+            for value in values:
+                features.add(value.lower())
 
     for feature in features:
         for keyword in include:
@@ -332,9 +354,3 @@ def _has_feature(record: SeqRecord, include: List[str]) -> bool:
                 return True
 
     return False
-
-
-def _record_id(record: SeqRecord) -> str:
-    """Get the record id, unique, for a seqRecord."""
-
-    return record.id if record.id != "<unknown id>" else str(record.seq)

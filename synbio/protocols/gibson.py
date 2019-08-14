@@ -11,8 +11,25 @@ from ..mix import Mix
 from ..primers import Primers
 from ..protocol import Protocol
 from ..reagents import Reagent
-from ..species import Species
-from ..steps import Setup, Pipette, Add, ThermoCycle, Incubate, Move
+from ..steps import Setup, Pipette, ThermoCycle, Incubate, HeatShock
+
+
+PCR_MIX = Mix(
+    {
+        SeqRecord: 1.0,
+        Primers: 1.0,
+        Reagent("dNTPs"): 0.5,
+        Reagent("10X Standard Taq Buffer"): 2.5,
+        Reagent("Taq Polymerase"): 0.125,
+    },
+    fill_with=Reagent("water"),
+    fill_to=25,
+)
+GIBSON_MIX = Mix(
+    {Reagent("Gibson master mix 2X"): 10.0, SeqRecord: 1.0},
+    fill_with=Reagent("water"),
+    fill_to=20.0,
+)
 
 
 class Gibson(Protocol):
@@ -30,25 +47,7 @@ class Gibson(Protocol):
     """
 
     def __init__(
-        self,
-        *args,
-        pcr_mix: Mix = Mix(
-            {
-                SeqRecord: 1.0,
-                Primers: 1.0,
-                Reagent("dNTPs"): 0.5,
-                Reagent("10X Standard Taq Buffer"): 2.5,
-                Reagent("Taq Polymerase"): 0.125,
-            },
-            fill_with=Reagent("water"),
-            fill_to=25,
-        ),
-        gibson_mix: Mix = Mix(
-            {Reagent("Gibson master mix 2X"): 10.0, SeqRecord: 1.0},
-            fill_with=Reagent("water"),
-            fill_to=20.0,
-        ),
-        **kwargs,
+        self, *args, pcr_mix: Mix = PCR_MIX, gibson_mix: Mix = GIBSON_MIX, **kwargs
     ):
         super().__init__(*args, **kwargs)
 
@@ -85,20 +84,7 @@ class Gibson(Protocol):
             Incubate(
                 Temperature(temp=50, time=900), mutate=self.mutate  # set the SeqRecords
             ),
-            Move(name="Move 3 uL from each mixture well to new plate(s)", volume=3.0),
-            Add(
-                name="Add 10 uL of competent E. coli to each well",
-                add=Species("E coli"),
-                volume=10.0,
-            ),
-            ThermoCycle(name="Heat shock", temps=[Temperature(temp=42, time=30)]),
-            Add(
-                name="Add 150 uL of SOC media to each well",
-                add=Reagent("SOC"),
-                volume=150.0,
-            ),
-            Incubate(name="Incubate", temp=Temperature(temp=37, time=3600)),
-        ]:
+        ] + HeatShock:
             step.execute(self)
 
         return self

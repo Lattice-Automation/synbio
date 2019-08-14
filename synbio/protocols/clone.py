@@ -6,14 +6,20 @@ from typing import Dict, List
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.SeqRecord import SeqRecord
 
-from ..assembly import subclone_many
+from ..assembly import cloning_many
 from ..containers import Container, Well
 from ..instructions import Temperature
 from ..mix import Mix
 from ..protocol import Protocol
 from ..reagents import Reagent
-from ..species import Species
-from ..steps import Setup, Pipette, Add, ThermoCycle, Incubate, Move
+from ..steps import Setup, Pipette, ThermoCycle, HeatShock
+
+
+CLONING_MIX = Mix(
+    {Reagent("10X NEBuffer"): 5.0, SeqRecord: 1.0, RestrictionType: 1.0},
+    fill_with=Reagent("water"),
+    fill_to=50.0,
+)
 
 
 class Clone(Protocol):
@@ -37,11 +43,7 @@ class Clone(Protocol):
         self,
         *args,
         enzymes: List[RestrictionType] = None,
-        mix: Mix = Mix(
-            {Reagent("10X NEBuffer"): 5.0, SeqRecord: 1.0, RestrictionType: 1.0},
-            fill_with=Reagent("water"),
-            fill_to=50.0,
-        ),
+        mix: Mix = CLONING_MIX,
         include: List[str] = None,
         min_count: int = -1,
         **kwargs,
@@ -80,20 +82,7 @@ class Clone(Protocol):
                 ],
                 mutate=self.mutate,  # set the SeqRecords
             ),
-            Move(name="Move 3 uL from each mixture well to new plate(s)", volume=3.0),
-            Add(
-                name="Add 10 uL of competent E. coli to each well",
-                add=Species("E coli"),
-                volume=10.0,
-            ),
-            ThermoCycle(name="Heat shock", temps=[Temperature(temp=42, time=30)]),
-            Add(
-                name="Add 150 uL of SOC media to each well",
-                add=Reagent("SOC"),
-                volume=150.0,
-            ),
-            Incubate(name="Incubate", temp=Temperature(temp=37, time=3600)),
-        ]:
+        ] + HeatShock:
             step.execute(self)
 
     def _create_mixed_wells(self) -> List[Container]:
@@ -110,7 +99,7 @@ class Clone(Protocol):
             raise ValueError("Clone protocol lacks list of BioPython Enzymes")
 
         mixed_wells: List[Container] = []
-        for plasmids, fragments in subclone_many(
+        for plasmids, fragments in cloning_many(
             self.design,
             enzymes=self.enzymes,
             include=self.include,

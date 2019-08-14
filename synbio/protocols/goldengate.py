@@ -12,8 +12,14 @@ from ..containers import Container, Well
 from ..instructions import Temperature
 from ..mix import Mix
 from ..reagents import Reagent
-from ..species import Species
-from ..steps import Setup, Pipette, Add, ThermoCycle, Incubate, Move
+from ..steps import Setup, Pipette, ThermoCycle, HeatShock
+
+
+GOLDEN_GATE_MIX = Mix(
+    {Reagent("master mix"): 4.0, SeqRecord: 2.0},
+    fill_with=Reagent("water"),
+    fill_to=20.0,
+)
 
 
 class GoldenGate(Clone):
@@ -46,11 +52,7 @@ class GoldenGate(Clone):
         self,
         *args,
         enzymes: List[RestrictionType] = [BsaI, BpiI],
-        mix: Mix = Mix(
-            {Reagent("master mix"): 4.0, SeqRecord: 2.0},
-            fill_with=Reagent("water"),
-            fill_to=20.0,
-        ),
+        mix: Mix = GOLDEN_GATE_MIX,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
@@ -82,20 +84,7 @@ class GoldenGate(Clone):
                 ],
                 mutate=self.mutate,  # set the SeqRecords
             ),
-            Move(name="Move 3 uL from each mixture well to new plate(s)", volume=3.0),
-            Add(
-                name="Add 10 uL of competent E. coli to each well",
-                add=Species("E coli"),
-                volume=10.0,
-            ),
-            ThermoCycle(name="Heat shock", temps=[Temperature(temp=42, time=30)]),
-            Add(
-                name="Add 150 uL of SOC media to each well",
-                add=Reagent("SOC"),
-                volume=150.0,
-            ),
-            Incubate(name="Incubate", temp=Temperature(temp=37, time=3600)),
-        ]:
+        ] + HeatShock:
             step.execute(self)
 
     def _create_mixed_wells(self) -> List[Container]:

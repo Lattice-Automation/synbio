@@ -6,6 +6,8 @@ from typing import Callable, List, Optional, Dict, Union, Sequence
 from .containers import Container, content_id, Content, Fridge
 from .instructions import Temperature, Transfer, Instruction
 from .protocol import Protocol, Step
+from .reagents import Reagent
+from .species import Species
 
 
 class Setup(Step):
@@ -325,3 +327,16 @@ class Incubate(Step):
 
         protocol.add_instruction(Instruction(name=self.name, temps=self.temps))
 
+
+HeatShock: List[Step] = [
+    Move(name="Move 3 uL from each mixture well to new plate(s)", volume=3.0),
+    Add(
+        name="Add 10 uL of competent E. coli to each well",
+        add=Species("E coli"),
+        volume=10.0,
+    ),
+    ThermoCycle(name="Heat shock", temps=[Temperature(temp=42, time=30)]),
+    Add(name="Add 150 uL of SOC media to each well", add=Reagent("SOC"), volume=150.0),
+    Incubate(name="Incubate", temp=Temperature(temp=37, time=3600)),
+]
+"""A composite HeatShock step for getting DNA into E coli."""
