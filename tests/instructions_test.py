@@ -3,7 +3,7 @@
 import unittest
 
 from synbio.containers import Well
-from synbio.instructions import display_time, Transfer
+from synbio.instructions import _display_time, Transfer
 
 
 class InstructionsTest(unittest.TestCase):
@@ -12,9 +12,9 @@ class InstructionsTest(unittest.TestCase):
     def test_display_time(self):
         """Create time messages from step durations in seconds."""
 
-        self.assertEqual("for 1 hour, 1 second", display_time(3601))
-        self.assertEqual("hold", display_time(0))
-        self.assertEqual("hold", display_time(-1))
+        self.assertEqual("for 1 hour, 1 second", _display_time(3601))
+        self.assertEqual("hold", _display_time(0))
+        self.assertEqual("hold", _display_time(-1))
 
     def test_transfer_split(self):
         """Splitup a transfer based on max-volume."""

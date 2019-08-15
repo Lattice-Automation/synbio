@@ -154,13 +154,13 @@ def _temp_instructions(temps: List[Temperature] = None) -> str:
 
     temps = temps or []
     temps_str = [
-        f"{t.temp} °C {display_time(t.time)}" if t.time > 0 else f"Hold at {t.temp} °C"
+        f"{t.temp} °C {_display_time(t.time)}" if t.time > 0 else f"Hold at {t.temp} °C"
         for t in temps
     ]
     return "Heat at " + ", ".join(temps_str)
 
 
-def display_time(seconds: float, granularity=2) -> str:
+def _display_time(seconds: float, granularity=2) -> str:
     """Return a human readable instruction for some time duration.
 
     Copy and pasted from:

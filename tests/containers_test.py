@@ -8,7 +8,7 @@ from Bio.Restriction import EcoRI
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.containers import content_id, Layout, Well, Species, Reagent, Fridge
+from synbio.containers import content_id, Layout, Well, Species, Reagent
 
 
 class TestContainers(unittest.TestCase):

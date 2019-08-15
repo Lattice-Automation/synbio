@@ -16,17 +16,17 @@ pip install synbio
 
 All are in `synbio.designs`:
 
-- `Plasmid` - single list of SeqRecords to combine into a plasmid
-- `Library` - list of list of SeqRecords to combine into plasmids
 - `Combinatorial` - list of SeqRecords to combinatorially anneal into all valid assemblies
 - `CombinatorialBins` - list of bins of SeqRecords for combinatorial assembly between bins
+- `Library` - list of list of SeqRecords to combine into plasmids
+- `Plasmid` - single list of SeqRecords to combine into a plasmid
 
 ### Protocols
 
 All are in `synbio.protocols`:
 
-- `GoldenGate` - Golden Gate assembly based on [NEB's E1601](https://www.neb.com/products/e1601-neb-golden-gate-assembly-mix#Product%20Information)
 - `Gibson` - Gibson assembly based on [NEB's E5510](https://www.neb.com/protocols/2012/12/11/gibson-assembly-protocol-e5510)
+- `GoldenGate` - Golden Gate assembly based on [NEB's E1601](https://www.neb.com/products/e1601-neb-golden-gate-assembly-mix#Product%20Information)
 
 ## Example
 
@@ -78,13 +78,13 @@ protocol.to_csv("plate_layouts.csv")
 protocol.to_txt("protocol.txt")
 
 # export a hamilton picklist
-protocol.to_picklists("robotic_picklist.gwl", platform="tecan")
+protocol.to_picklists("robotic_picklist.gwl", platform="hamilton")
 ```
 
 _composite_parts.fasta_
 
 ```txt
->J23100_AB|B0032m_BC|C0012m_CD|B0015_DE|DVK_AE
+>J23100_AB+B0032m_BC+C0012m_CD+B0015_DE+DVK_AE
 GGAGTTGACGGCTAGCTCAGTCCTAGGTACAGTGCTAGCTACTAGAGTCACACAGGAAAG
 TACTAAATGATGGTGAATGTGAAACCAGTAACGTTATACGATGTCGCAGAGTATGCCGGT
 ...
@@ -93,17 +93,17 @@ TACTAAATGATGGTGAATGTGAAACCAGTAACGTTATACGATGTCGCAGAGTATGCCGGT
 _plate_layouts.csv_
 
 ```csv
-Setup PCR plate with (volumes) shown:
-Plate 1,1,2,3,4,5,6,7,8,9,10,11,12
-A,B0015_DE (4),C0080_CD (18),R0010_AB (54),water (36)
-B,B0015_DE (160),DVK_AE (160),cre_CD (18),water (156)
+Setup Wells with volumes (uL) shown:
+Plate:1,1,2,3,4,5,6,7,8,9,10,11,12
+A,B0015_DE(4),C0080_CD(18),R0010_AB(54),water(36)
+B,B0015_DE(160),DVK_AE(160),cre_CD(18),water(156)
 ...
 ```
 
 _protocol.txt_
 
 ```txt
-Combinatorial GoldenGate
+Combinatorial GoldenGate:
 1. Setup PCR plate with (volumes) shown:
 	1.1. Dilute plasmid DNA to 75 ng/µL in 'water'
 	1.2. Create 'assembly-mix' from 1:1 T4 Ligase Buffer (10X) and NEB Golden Gate Assembly Mix
