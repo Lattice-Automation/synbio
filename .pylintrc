@@ -1,2 +1,2 @@
 [MESSAGES CONTROL]
-disable=bad-continuation
+disable=bad-continuation,logging-fstring-interpolation

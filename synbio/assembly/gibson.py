@@ -1,5 +1,6 @@
 """Create primers to assembly SeqRecords via Gibson Assembly."""
 
+import logging
 from typing import Tuple, List, Set, Optional, Iterable
 
 from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
@@ -103,9 +104,14 @@ def gibson(
     plasmid.id = "+".join(r.id for r in records if r.id != "<unknown id>")
     plasmid.seq = Seq(str(plasmid.seq.upper()), alphabet=IUPACUnambiguousDNA())
 
+    # extend primers in 5' direction to avoid duplicate junctions
     _fix_duplicate_junctions(records, primers)
-    _fix_offtarget_primers(records, primers)
 
+    # extend primers in 3' direction to avoid ectopic binding sites
+    _bp_to_add_index_primers(records, primers)
+
+    # sanity check
+    # TODO: add many more tests so this is unnecessary
     for primer_pair in primers:
         assert len(primer_pair.fwd) <= MAX_PRIMER_LEN
         assert len(primer_pair.rev) <= MAX_PRIMER_LEN
@@ -315,7 +321,7 @@ def _has_offtarget_junction(f_end: Seq, ends: List[Seq], end_of_record: bool) ->
     return False
 
 
-def _fix_offtarget_primers(records: List[SeqRecord], primers: List[Primers]):
+def _bp_to_add_index_primers(records: List[SeqRecord], primers: List[Primers]):
     """Checks if primers can bind to multiple regions in record's sequence.
     If they do, mutate primers until they do not. Primers should only anneal
     to start and end of record.
@@ -325,43 +331,56 @@ def _fix_offtarget_primers(records: List[SeqRecord], primers: List[Primers]):
         primers {List[Primers]} -- all the primers to amplify the SeqRecords
     """
 
-    for j, record in enumerate(records):
-        primer = primers[j]
-
-        # forward primer check
+    for record, primer_pair in zip(records, primers):
+        # forward primer check and fix
         seq = record.seq
-        i = 1
-        while _fix_offtarget(primer, seq, True):
-            if i > len(primer.fwd):
-                raise RuntimeError(f"Failed to avoid an offtarget primer")
-            i += 1
+        new_primer = primer_pair.fwd.upper()
+        bp_index = _bp_to_add_index(new_primer, seq)
+        while bp_index > 0:
+            new_primer += seq[bp_index]
+            bp_index = _bp_to_add_index(new_primer, seq)
 
-        # reverse primer check
+            # we've fixed too many sites, give up and log
+            if len(new_primer) >= MAX_PRIMER_LEN:
+                logging.warning("Failed to fix off-target in FWD primer")
+                new_primer = primer_pair.fwd.upper()
+                break
+        primer_pair.fwd = new_primer
+
+        # reverse primer check and fix
         seq = seq.reverse_complement()
-        i = 1
-        while _fix_offtarget(primer, seq, False):
-            if i > len(primer.rev):
-                raise RuntimeError(f"Failed to avoid an offtarget primer")
-            i += 1
+        new_primer = primer_pair.rev.upper()
+        bp_index = _bp_to_add_index(new_primer, seq)
+        while bp_index > 0:
+            new_primer += seq[bp_index]
+            bp_index = _bp_to_add_index(new_primer, seq)
+
+            # we've fixed too many sites, give up and log
+            if len(new_primer) >= MAX_PRIMER_LEN:
+                logging.warning("Failed to fix off-target in REV primer")
+                new_primer = primer_pair.rev.upper()
+                break
+        primer_pair.rev = new_primer
 
 
-def _fix_offtarget(primers: Primers, seq: Seq, fwd_direction: bool) -> bool:
+def _bp_to_add_index(primer: Seq, seq: Seq) -> int:
     """Check for an offtarget. If there is one, expand primer in 3' dir and return True
 
     Arguments:
-        primers {Primers} -- the primers to mutate if off-target binding
-            sites are found
+        primer {Seq} -- the primer to mutate if it has ectopic binding
         seq {Seq} -- the sequence of the SeqRecord being checked for
             off-target binding sites
-        fwd_direction {bool} -- whether we're checking the FWD primer
 
     Returns:
-        bool -- whether an off-target binding site was found+fixed
+        int -- index of next bp in seq to add to primer if needed, -1
+            if no fix for an off-target primer is needed
     """
 
-    primer = primers.fwd if fwd_direction else primers.rev
     primer_end = primer[-MIN_PRIMER_LEN:]
+
     next_non_primer_bp = str(seq).index(str(primer_end)) + MIN_PRIMER_LEN
+
+    assert next_non_primer_bp > 0
 
     off_by_one_set = _hamming_set(str(primer[-OFFTARGET_CHECK_LEN:]))
 
@@ -372,14 +391,8 @@ def _fix_offtarget(primers: Primers, seq: Seq, fwd_direction: bool) -> bool:
             str(stretch) in off_by_one_set
             or str(stretch.reverse_complement()) in off_by_one_set
         ):
-            # if an off-target binding site is found, extend the
-            # primer in the 3' direction into the sequence
-            if fwd_direction:
-                primers.fwd = primers.fwd + seq[next_non_primer_bp]  # add one bp
-            else:
-                primers.rev = primers.rev + seq[next_non_primer_bp]  # add one bp
-            return True
-    return False
+            return next_non_primer_bp
+    return -1
 
 
 def _hamming_set(seq: str) -> Set[str]:

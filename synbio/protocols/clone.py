@@ -6,7 +6,7 @@ from typing import Dict, List
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.SeqRecord import SeqRecord
 
-from ..assembly import clone_many
+from ..assembly import clone_many_combinatorial
 from ..containers import Container, Well
 from ..instructions import Temperature
 from ..mix import Mix
@@ -99,7 +99,7 @@ class Clone(Protocol):
             raise ValueError("Clone protocol lacks list of BioPython Enzymes")
 
         mixed_wells: List[Container] = []
-        for plasmids, fragments in clone_many(
+        for plasmids, fragments in clone_many_combinatorial(
             self.design,
             enzymes=self.enzymes,
             include=self.include,

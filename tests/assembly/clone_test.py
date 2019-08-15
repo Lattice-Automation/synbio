@@ -10,7 +10,7 @@ from Bio.SeqRecord import SeqRecord
 
 from synbio.assembly.clone import (
     goldengate,
-    clone,
+    clone_combinatorial,
     _catalyze,
     _has_features,
     _reorder_fragments,
@@ -49,7 +49,7 @@ class TestClone(unittest.TestCase):
     def test_clone(self):
         """Find valid sets of fragments that will circularize."""
 
-        results = clone(
+        results = clone_combinatorial(
             [self.AB, self.BC, self.CD, self.DE, self.AE],
             [BsaI, BpiI],
             ["KanR"],

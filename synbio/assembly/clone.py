@@ -20,6 +20,39 @@ CATALYZE_CACHE: Dict[str, List[Tuple[str, SeqRecord, str]]] = {}
 """Store the catalyze results of each SeqRecord. Avoid lots of string searches."""
 
 
+def clone(
+    record_set: Iterable[SeqRecord],
+    enzymes: List[RestrictionType],
+    include: List[str] = None,
+    min_count: int = -1,
+):
+    """Simulate a digestion/ligation with a list of enzymes to get expected plasmids.
+
+    Each SeqRecord is digested with all enzymes and a graph is created with
+    nodes from each digested records overhangs. Circularizable assemblies/plasmids
+    are returned as a list of ligated plasmids.
+
+    Note: this does not return, explicitly, which enzymes and SeqRecords were
+    used to create each plasmid. But that information is implicitly available
+    in each SeqRecord's id.
+
+    Arguments:
+        record_set {Iterable[SeqRecord]} -- SeqRecords to combine into a plasmid
+        enzymes {List[RestrictionType]} -- Enzymes to digest each SeqRecord with
+    
+    Keyword Arguments:
+        include {List[str]} -- feature names to filter plasmids against (default: {None})
+        min_count {int} -- mininum # of SeqRecords in each output plasmid (default: {-1})
+    """
+
+    cloned_plasmids: List[SeqRecord] = []
+    for plasmids, _ in clone_combinatorial(
+        list(record_set), enzymes, include=include, min_count=min_count
+    ):
+        cloned_plasmids.extend(plasmids)
+    return cloned_plasmids
+
+
 def goldengate(
     record_set: Iterable[List[SeqRecord]],
     include: List[str] = None,
@@ -43,10 +76,10 @@ def goldengate(
             2. SeqRecords that went into each formed plasmid
     """
 
-    return clone_many(record_set, [BsaI, BpiI], include, min_count)
+    return clone_many_combinatorial(record_set, [BsaI, BpiI], include, min_count)
 
 
-def clone_many(
+def clone_many_combinatorial(
     design: Iterable[List[SeqRecord]],
     enzymes: List[RestrictionType],
     include: List[str] = None,
@@ -73,7 +106,9 @@ def clone_many(
     seen_fragment_ids: Set[str] = set()
     all_plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
     for record_set in design:
-        plasmids_and_fragments = clone(record_set, enzymes, include, min_count)
+        plasmids_and_fragments = clone_combinatorial(
+            record_set, enzymes, include, min_count
+        )
         for plasmids, fragments in plasmids_and_fragments:
 
             # we don't want to re-use the fragment combination more than once
@@ -86,7 +121,7 @@ def clone_many(
     return all_plasmids_and_fragments
 
 
-def clone(
+def clone_combinatorial(
     record_set: List[SeqRecord],
     enzymes: List[RestrictionType],
     include: List[str] = None,
@@ -197,7 +232,7 @@ def _reorder_fragments(
     This works because the SeqRecords are going to anneal to one another in a plasmid.
 
     Arguments:
-        input_set {List[SeqRecord]} -- SeqRecords set to clone
+        input_set {List[SeqRecord]} -- SeqRecords set to clone_combinatorial
         output_set {List[SeqRecord]} -- SeqRecords after circularization
 
     Returns:

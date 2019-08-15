@@ -1,13 +1,19 @@
 """Gibson testing."""
 
+import logging
+import os
 import unittest
 
+from Bio.SeqIO import parse
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 
 from synbio.assembly import gibson
 from synbio.assembly.gibson import _hamming_set
 from synbio.primers import MIN_PRIMER_LEN, MAX_PRIMER_LEN
+
+DIR_NAME = os.path.abspath(os.path.dirname(__file__))
+TEST_DIR = os.path.join(DIR_NAME, "..", "..", "data", "gibson")
 
 
 class TestGibson(unittest.TestCase):
@@ -32,7 +38,7 @@ class TestGibson(unittest.TestCase):
         self._run_and_verify([r1, r2, r3])
 
     def test_gibson_offtarget_primer(self):
-        """Create primers extending in 3' direction when there's an offtarget."""
+        """Create Gibson primers when there's offtarget in one's end (1)."""
 
         s1 = Seq(  # GCGTTTTATAGAAGCCTAGGGGAAC shows up twice
             "GCGTTTTATAGAAGCCTAGGGGAACAGATTGGTCTAATTAGCTTAAGAGAGTAAATGGCGTTTTATAGAAGCCTAGGGGAACCTGGGATCATTCAGTAGTAATCACAAATTTACGGTGGGGCTTTTTTGGCGGATCTTTACAGATACTAACCAGGTGATTTCAACTAATTTAGTTGACGATTTAGGCGCGCTATCCCGTAATCTTCAAATTAAAACATAGCGTTCCATGAGGGCTAGAATTACTTACCGGCCTTCACCATGCCTGCGTTATTCGCGCCCACTCTCCCATTTATCCGCGCAAGCGGATGCGATGCGATTGCCCGCT"
@@ -48,6 +54,16 @@ class TestGibson(unittest.TestCase):
         r3 = SeqRecord(s3)
 
         self._run_and_verify([r1, r2, r3])
+
+    def test_gibson_offtarget_primer2(self):
+        """Create Gibson primers when there's offtarget in one's end (2)."""
+
+        insert = next(parse(os.path.join(TEST_DIR, "BBa_K1649003.fa"), "fasta"))
+        backbone = next(parse(os.path.join(TEST_DIR, "pDusk.fa"), "fasta"))
+
+        plasmid, primer_pairs = gibson([insert, backbone])
+
+        self.assertTrue(plasmid and primer_pairs)
 
     def test_hamming_set(self):
         """Create a set of off-by-one DNA sequences."""
