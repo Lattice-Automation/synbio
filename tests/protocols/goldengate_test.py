@@ -21,10 +21,6 @@ class TestGoldenGate(unittest.TestCase):
     def test_goldengate(self):
         """End to end GoldenGate test."""
 
-        # create the test directory for file output
-        if not os.path.exists(OUT_DIR):
-            os.mkdir(OUT_DIR)
-
         # read in all the records
         records = []
         for (_, _, filenames) in os.walk(TEST_DIR):

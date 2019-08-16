@@ -3,6 +3,7 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+
 setuptools.setup(
     name="synbio",
     version="0.4.3",
@@ -18,4 +19,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     url="https://latticeautomation.com/",
+    test_suite="tests.suite",
 )
