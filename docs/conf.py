@@ -15,6 +15,10 @@ import os
 import shutil
 import sys
 
+for filename in glob.glob(os.path.join(".", "*.py")):
+    if "conf" not in filename:
+        os.remove(filename)
+
 for filename in glob.glob(os.path.join("..", "examples", "*.py")):
     shutil.copy(filename, ".")
 
@@ -60,7 +64,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_theme = "sphinx_rtd_theme"
 
 # see: https://sphinx-rtd-theme.readthedocs.io/en/stable/configuring.html
-html_theme_options = {"display_version": True, "collapse_navigation": False}
+html_theme_options = {"display_version": True, "collapse_navigation": True}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
