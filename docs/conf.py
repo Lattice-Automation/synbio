@@ -23,7 +23,7 @@ copyright = "2019, jjtimmons"
 author = "jjtimmons"
 
 # The full version, including alpha/beta/rc tags
-release = "0.4.3"
+release = "0.4.4"
 
 
 # -- General configuration ---------------------------------------------------
