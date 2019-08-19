@@ -7,10 +7,6 @@ Contents
    :maxdepth: 3
 
    ref/ref
-
-.. toctree::
-   :maxdepth: 3
-
    examples
 
 

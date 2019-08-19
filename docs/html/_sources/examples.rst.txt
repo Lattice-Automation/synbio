@@ -1,3 +1,1 @@
-.. _examples:
-
-.. mdinclude:: ../examples/README.md
+.. include:: ../examples/README.rst

@@ -1,12 +1,17 @@
-# Examples
+Examples
+========
 
-## Assembly
+Assembly
+========
 
-- Gibson Assembly with primer generation [gibson_assembly.py](./gibson_assembly.py)
+Gibson Assembly with primer generation
+
+.. include:: gibson_assembly.py
 
 - Cloning via restriction digest and ligation [clone_assembly.py](./clone_assembly.py)
 
-## Protocols
+Protocols
+=========
 
 - Gibson Assembly of a plasmid library
   [gibson_library.py](./gibson_library.py)
