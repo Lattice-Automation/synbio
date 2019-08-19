@@ -158,8 +158,113 @@
   <div class="section" id="module-synbio.protocols.clone">
 <span id="protocols"></span><h1>Protocols<a class="headerlink" href="#module-synbio.protocols.clone" title="Permalink to this headline">¶</a></h1>
 <p>Clone fragments together with digestion and ligation.</p>
+<dl class="class">
+<dt id="synbio.protocols.clone.Clone">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.protocols.clone.</code><code class="sig-name descname">Clone</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">enzymes: List[Bio.Restriction.Restriction.RestrictionType] = None</em>, <em class="sig-param">mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;</em>, <em class="sig-param">include: List[str] = None</em>, <em class="sig-param">min_count: int = -1</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.clone.Clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone SeqRecords together using BioPython enzymes.</p>
+<p>Digest the SeqRecords with all the Enzymes provided, find valid circularized
+assemblies, and create a protocol for preparing and ligating the fragments.</p>
+<p>This protocol is based on NEB’s clone guide:
+<a class="reference external" href="https://www.neb.com/tools-and-resources/usage-guidelines/clone-guide">https://www.neb.com/tools-and-resources/usage-guidelines/clone-guide</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>{List</strong><strong>[</strong><strong>str</strong><strong>]</strong><strong>} -- include only plasmids with a feature matching something</strong> (<em>include</em>) – in the include list use in backbone selection (default: {None})</p></li>
+<li><p><strong>{Mix} -- the assembly mix to use when mixing the assemblies with enzymes</strong> (<em>mix</em>) – </p></li>
+<li><p><strong>{int} -- the minimum number of SeqRecords in an assembly for it to</strong> (<em>min_count</em>) – be considered valid. smaller assemblies are ignored</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="synbio.protocols.clone.Clone.mutate">
+<code class="sig-name descname">mutate</code><span class="sig-paren">(</span><em class="sig-param">well: synbio.containers.Container</em><span class="sig-paren">)</span> &#x2192; synbio.containers.Container<a class="headerlink" href="#synbio.protocols.clone.Clone.mutate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the contents of a well, return single SeqRecord after digest/ligation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="synbio.protocols.clone.Clone.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.clone.Clone.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter designs to those that will form valid and new plasmids.</p>
+<p>Run each Clone step on the protocol. See:
+<a class="reference external" href="https://www.neb.com/protocols/2018/10/02/golden-gate-assembly-protocol-for-using-neb-golden-gate-assembly-mix-e1601">https://www.neb.com/protocols/2018/10/02/golden-gate-assembly-protocol-for-using-neb-golden-gate-assembly-mix-e1601</a></p>
+</dd></dl>
+
+</dd></dl>
+
 <span class="target" id="module-synbio.protocols.gibson"></span><p>Gibson Assembly Composite Step.</p>
+<dl class="class">
+<dt id="synbio.protocols.gibson.Gibson">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.protocols.gibson.</code><code class="sig-name descname">Gibson</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">hifi: bool = False</em>, <em class="sig-param">pcr_mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;</em>, <em class="sig-param">gibson_mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.gibson.Gibson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gibson Assembly.</p>
+<p>Based on the Gibson Assembly protocol outlined on the NEB site for kit (e5510):
+<a class="reference external" href="https://www.neb.com/protocols/2012/12/11/gibson-assembly-protocol-e5510">https://www.neb.com/protocols/2012/12/11/gibson-assembly-protocol-e5510</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>{bool} -- whether to use NEB's HiFi assembly method</strong> (<em>hifi</em>) – </p></li>
+<li><p><strong>{Mix} -- the assembly mix to use when mixing the Gibson wells. Based on NEB's</strong> (<em>gibson_mix</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="synbio.protocols.gibson.Gibson.mutate">
+<code class="sig-name descname">mutate</code><span class="sig-paren">(</span><em class="sig-param">well: synbio.containers.Container</em><span class="sig-paren">)</span> &#x2192; synbio.containers.Container<a class="headerlink" href="#synbio.protocols.gibson.Gibson.mutate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the contents of a well, return single SeqRecord after Gibson Assembly.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="synbio.protocols.gibson.Gibson.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; synbio.protocol.Protocol<a class="headerlink" href="#synbio.protocols.gibson.Gibson.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run each step of the protcol. Build up the output records and instructions.</p>
+</dd></dl>
+
+</dd></dl>
+
 <span class="target" id="module-synbio.protocols.goldengate"></span><p>GoldenGate assembly design process and steps.</p>
+<dl class="class">
+<dt id="synbio.protocols.goldengate.GoldenGate">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.protocols.goldengate.</code><code class="sig-name descname">GoldenGate</code><span class="sig-paren">(</span><em class="sig-param">*args, enzymes: List[Bio.Restriction.Restriction.RestrictionType] = [BsaI, BpiI], mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;, **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.goldengate.GoldenGate" title="Permalink to this definition">¶</a></dt>
+<dd><p>GoldenGate assembly.</p>
+<p>Takes the design of a protocol and finds combinations of
+SeqRecords that will circularize into valid new plasmids.</p>
+<p>This Protocol is derived from NEB’s guide:
+<a class="reference external" href="https://www.neb.com/protocols/2018/10/02/golden-gate-assembly-protocol-for-using-neb-golden-gate-assembly-mix-e1601">https://www.neb.com/protocols/2018/10/02/golden-gate-assembly-protocol-for-using-neb-golden-gate-assembly-mix-e1601</a></p>
+<dl class="simple">
+<dt>Full responsibilities include:</dt><dd><ol class="arabic simple">
+<li><dl class="simple">
+<dt>subselecting the input designs that will form valid plasmids</dt><dd><p>after digestion with BsaI and BpiI</p>
+</dd>
+</dl>
+</li>
+<li><p>adding NEB Golden Gate Assembly Mix to the valid designs as Contents for a Container</p></li>
+<li><p>computing the final plasmid (SeqRecord) after ligation of digested fragments</p></li>
+<li><dl class="simple">
+<dt>memoize the sorted enzyme + ids -&gt; SeqRecord from step #3, pass as a</dt><dd><p>“mutate” method for the step after ThermoCycle()</p>
+</dd>
+</dl>
+</li>
+<li><p>add steps to carry out the rest of the assembly (heat shock, incubate, etc)</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>{List</strong><strong>[</strong><strong>str</strong><strong>]</strong><strong>} -- include only plasmids with a feature matching something</strong> (<em>include</em>) – in the include list use in backbone selection (default: {None})</p></li>
+<li><p><strong>{Mix} -- the assembly mix to use when mixing the GoldenGate assemblies</strong> (<em>mix</em>) – </p></li>
+<li><p><strong>{int} -- the minimum number of SeqRecords in an assembly for it to</strong> (<em>min_count</em>) – be considered valid. smaller assemblies are ignored</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="synbio.protocols.goldengate.GoldenGate.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.goldengate.GoldenGate.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter designs to those that will form valid and new Golden Gate plasmids.</p>
+<p>Run each step and accumulate Golden Gate Assembly steps and layouts.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
