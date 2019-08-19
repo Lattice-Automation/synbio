@@ -1,5 +1,8 @@
 .. mdinclude:: ../README.md
 
+Contents
+========
+
 .. toctree::
    :maxdepth: 3
 
@@ -11,7 +14,7 @@
    examples
 
 
-Indices
-=======
+Index
+=====
 
-* :ref:`genindex`
+:ref:`genindex`
