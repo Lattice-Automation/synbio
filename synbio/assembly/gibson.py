@@ -37,7 +37,7 @@ def gibson_many(
         hifi: whether to use NEB's HiFi DNA ssembly (default: {False})
 
     Returns:
-        List[Tuple[SeqRecord, List[Primers]]] -- a list of assembled Plasmids and Primers
+        A list of assembled Plasmids and Primers
     """
 
     if isinstance(design, Combinatorial):
@@ -63,9 +63,8 @@ def gibson(
         hifi: whether to use HiFi DNA assembly
 
     Returns:
-        Tuple[SeqRecord, List[Primers]] --
-            1. assembled plasmid (SeqRecord)
-            2. list of primer pairs (same length as records)
+        1. assembled plasmid (SeqRecord)
+        2. list of primer pairs (same length as records)
     """
 
     assert records
@@ -129,10 +128,9 @@ def _record_homology(
         f2: second sequence
 
     Returns:
-        Tuple[bool, int, int] --
-            true if homologous, false if not
-            length of homologous sequence
-            number of mismatches on either side
+        1. true if homologous, false if not
+        2. length of homologous sequence
+        3. number of mismatches on either side
     """
 
     f1 = f1[-MAX_HOMOLOGY:]
@@ -182,7 +180,7 @@ def _record_homology(
 
 
 def _common_substring_table(f1: str, f2: str, hifi: bool = False) -> List[List[int]]:
-    """ Builds matrix of common substring lengths. """
+    """Builds matrix of common substring lengths."""
 
     matrix = [[0] * (1 + len(f2)) for i in range(1 + len(f1))]
     for x in range(1, 1 + len(f1)):
@@ -199,13 +197,12 @@ def _common_substring_table(f1: str, f2: str, hifi: bool = False) -> List[List[i
 
 
 def _mutate_primers(p1: Primers, p2: Primers, homology_to_add: int):
-    """ Mutates primers of records if they're not homologous.
+    """Mutates primers of records if they're not homologous.
 
     Args:
         p1: primers of the left-most SeqRecord
         p2: primers of the right-most SeqRecord
-        homology_to_add: the number of bp to add to both sides'
-            primers from the other
+        homology_to_add: the number of bp to add to both sides' primers from the other
     """
 
     # add the first homology_to_add bp of the next record (p2)
@@ -402,7 +399,7 @@ def _hamming_set(seq: str) -> Set[str]:
         seq: the end of a primer sequence
 
     Returns:
-        Set[str] -- a set of possible offtarget binding sites
+        A set of possible offtarget binding sites
     """
 
     hamming_set: Set[str] = set()

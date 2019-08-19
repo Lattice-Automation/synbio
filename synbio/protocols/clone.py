@@ -32,6 +32,7 @@ class Clone(Protocol):
     https://www.neb.com/tools-and-resources/usage-guidelines/clone-guide
 
     Keyword Args:
+        enzymes: the list of enzymes to digest the SeqRecords with
         include: include only plasmids with a feature matching something
             in the include list use in backbone selection (default: {None})
         mix: the assembly mix to use when mixing the assemblies with enzymes
@@ -92,7 +93,7 @@ class Clone(Protocol):
         Fragment IDs to the SeqRecord that they will form after digestion and ligation.
 
         Returns:
-            List[Container] -- list of wells to mix fragments for Clone
+            a list of wells to mix fragments for Clone
         """
 
         if not self.enzymes:

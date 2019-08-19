@@ -4,4 +4,4 @@ Designs
 =======
 
 .. automodule:: synbio.designs 
-   :members:
+   :members: Combinatorial, CombinatorialBins, Plasmid, PlasmidLibrary

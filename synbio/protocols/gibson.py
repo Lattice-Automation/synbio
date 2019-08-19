@@ -36,6 +36,9 @@ GIBSON_MIX = Mix(
 class Gibson(Protocol):
     """Gibson Assembly.
 
+    Create primer pairs that will anneal each SeqRecord to its two neighbors
+    so that, after PCR, the fragments will circularize via a Gibson Assembly.
+
     Based on the Gibson Assembly protocol outlined on the NEB site for kit (e5510):
     https://www.neb.com/protocols/2012/12/11/gibson-assembly-protocol-e5510
 

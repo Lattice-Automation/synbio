@@ -71,7 +71,7 @@ def goldengate(
         min_count: minimum number of SeqRecords for an assembly to be considered
 
     Returns:
-        List[Tuple[List[SeqRecord], List[SeqRecord]]] -- list of tuples with:
+        A list of tuples with:
             1. plasmids that will form
             2. SeqRecords that went into each formed plasmid
     """
@@ -140,7 +140,7 @@ def clone_combinatorial(
         min_count: mininum number of SeqRecords for an assembly to be considered
 
     Returns:
-        List[Tuple[List[SeqRecord], List[SeqRecord]]] -- list of tuples with:
+        A list of tuples with:
             1. plasmids that will form
             2. SeqRecords that went into each formed plasmid
     """
@@ -253,7 +253,7 @@ def _hash_fragments(record_set: List[SeqRecord]) -> str:
         record_set: set of Records to make unique ID for
 
     Returns:
-        unique ID concatenating records IDs/Seqs
+        A unique ID concatenating records IDs/Seqs
     """
 
     fragment_ids = [content_id(f) for f in record_set]
@@ -275,8 +275,7 @@ def _catalyze(
         enzymes: list of enzymes to digest the input records with
 
     Returns:
-        List[Tuple[str, SeqRecord, str]] --
-            left overhang, cut fragment, right overhang
+        Tuple with: (left overhang, cut fragment, right overhang)
     """
 
     record = record.upper()
@@ -370,7 +369,7 @@ def _has_features(record: SeqRecord, include: Optional[List[str]]) -> bool:
         include: the include to filter for
 
     Returns:
-        whether the record has any features or qualifiers with specified include
+        Whether the record has any features or qualifiers with specified include
     """
 
     if not include:
