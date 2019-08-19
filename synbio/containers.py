@@ -20,11 +20,11 @@ Content = Union[SeqRecord, RestrictionType, Primers, Reagent, Species]
 def content_id(content: Content) -> str:
     """Return a "unique" ID for each set of content.
 
-    Arguments:
-        content {Content} -- contents of some container
+    Args:
+        content: contents of some container
 
     Returns:
-        str -- the unique ID associated with the content
+        the unique ID associated with the content
 
     Raises:
         TypeError: if unrecognized content type
@@ -50,9 +50,9 @@ class Container:
 
     TODO: make contents a set for uniqueness
 
-    Keyword Arguments:
-        contents {List[Content]} -- the contents of the container (default: {None})
-        volumes {List[float]} -- volumes of each content (default: {None})
+    Keyword Args:
+        contents: the contents of the container (default: {None})
+        volumes: volumes of each content (default: {None})
     """
 
     volume_dead = -1
@@ -87,8 +87,8 @@ class Container:
     def add(self, contents: Union[Content, List[Content]]):
         """Add more content to this container
 
-        Arguments:
-            contents {Union[Content, List[Content]]} -- single content or list
+        Args:
+            contents: single content or list
         """
 
         if isinstance(contents, list):
@@ -245,13 +245,13 @@ class Layout:
 
     Allocates positions to each grouped container (plate/reservoir, etc)
 
-    Arguments:
-        containers {Iterable[Container]} -- the list of containers to put in the plates
+    Args:
+        containers: the list of containers to put in the plates
 
-    Keyword Arguments:
-        src_containers {Iterable[Container]} -- list of source containers (default: {None})
-        existing_plates {int} -- the number of already existing plates
-        log_volume {bool} -- whether to log volume to csv output (ex water(20)) (default: {False})
+    Keyword Args:
+        src_containers: list of source containers (default: {None})
+        existing_plates: the number of already existing plates
+        log_volume: whether to log volume to csv output (ex water(20)) (default: {False})
     """
 
     def __init__(
@@ -310,14 +310,14 @@ class Layout:
     ) -> "Layout":
         """Create a Layout from an instruction with transfers.
 
-        Arguments:
-            instruction {Instruction} -- the instruction with transfers
-            src_containers {bool} -- whether to also map out source containers
-            existing_plates {int} -- the number of already existing plates
-            log_volume {bool} -- whether to log each wells volume during to_csv
+        Args:
+            instruction: the instruction with transfers
+            src_containers: whether to also map out source containers
+            existing_plates: the number of already existing plates
+            log_volume: whether to log each wells volume during to_csv
 
         Returns:
-            Layout -- new Layout for plates, reservoirs, etc
+            new Layout for plates, reservoirs, etc
         """
 
         if not instruction.transfers:
@@ -342,7 +342,7 @@ class Layout:
         Each cells holds the ids of all well containers.
 
         Returns:
-            str -- CSV representation of plate row
+            CSV representation of plate row
         """
 
         if not self.wells:
@@ -427,13 +427,13 @@ class Layout:
         Tubes and wells take up a variable number of space, depending on
         the number or rows/columns of their respective rack/plate
 
-        Arguments:
-            reservoirs {List[Reservoir]} -- large liquid reservoirs
-            tubes {List[Tube]} -- list of tubes for a rack
-            wells {List[Well]} -- list of wells for a plate
+        Args:
+            reservoirs: large liquid reservoirs
+            tubes: list of tubes for a rack
+            wells: list of wells for a plate
 
         Returns:
-            int -- the number of "plate" spaces this layout requires
+            the number of "plate" spaces this layout requires
         """
 
         count = 0

@@ -26,15 +26,15 @@ def to_opentrons(
 
     Example protocols: https://protocols.opentrons.com/protocol/dinosaur
 
-    Arguments:
-        instruction {Instruction} -- a single step's instruction
-        existing_plates {int} -- number of plates before these in protocol
+    Args:
+        instruction: a single step's instruction
+        existing_plates: number of plates before these in protocol
 
-    Keyword Arguments:
-        robot {Robot} -- which of the Opentrons robots to make the script for
+    Keyword Args:
+        robot: which of the Opentrons robots to make the script for
 
     Returns:
-        str -- the python script
+        the python script
     """
 
     pass

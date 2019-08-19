@@ -39,9 +39,9 @@ class Gibson(Protocol):
     Based on the Gibson Assembly protocol outlined on the NEB site for kit (e5510):
     https://www.neb.com/protocols/2012/12/11/gibson-assembly-protocol-e5510
 
-    Keyword Arguments:
-        hifi {bool} -- whether to use NEB's HiFi assembly method
-        gibson_mix {Mix} -- the assembly mix to use when mixing the Gibson wells. Based on NEB's (e5510)
+    Keyword Args:
+        hifi: whether to use NEB's HiFi assembly method
+        gibson_mix: the assembly mix to use when mixing the Gibson wells. Based on NEB's (e5510)
     """
 
     def __init__(

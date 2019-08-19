@@ -1,5 +1,3 @@
-"""Designs are build specifications that return lists of SeqRecord lists."""
-
 from typing import Dict, Iterable, List, Union
 
 from Bio.SeqRecord import SeqRecord
@@ -24,7 +22,7 @@ class Design:
         """Return all unique SeqRecords across all designs.
 
         Returns:
-            List[SeqRecord] -- a unique list of SeqRecords used across designs
+            The unique set of SeqRecord in this Design.
         """
 
         id_to_record: Dict[str, SeqRecord] = {}
@@ -43,8 +41,8 @@ class Design:
 class Plasmid(Design):
     """Create a plasmid from a list of SeqRecords
 
-    Arguments:
-        records {List[SeqRecord]} -- SeqRecords to concatenate into a plasmid
+    Attributes:
+        records: SeqRecords to concatenate into a plasmid
     """
 
     __name__ = "plasmid"
@@ -59,7 +57,7 @@ class Plasmid(Design):
         """Return the ids of each piece of DNA in this plasmid
 
         Returns:
-            str -- high level description of this plasmid's design
+            high level description of this plasmid's design
         """
 
         if not self.records:
@@ -82,8 +80,8 @@ class Plasmid(Design):
     def append(self, records: Union[SeqRecord, List[SeqRecord]]):
         """Add the SeqRecord to this plasmid's list of SeqRecords/fragments
 
-        Arguments:
-            record {SeqRecord} -- the SeqRecord to add to the plasmid specification
+        Args:
+            record: the SeqRecord to add to the plasmid specification
         """
 
         if not records:
@@ -105,8 +103,8 @@ class Combinatorial(Plasmid):
     list of SeqRecords out. Versus List of SeqRecords in one SeqRecord
     out for a Plasmid design
 
-    Arguments:
-        records {Iterable[SeqRecord]} -- list of SeqRecord
+    Attributes:
+        records: list of SeqRecord
     """
 
     __name__ = "combinatorial"
@@ -115,8 +113,8 @@ class Combinatorial(Plasmid):
 class CombinatorialBins(Design):
     """A list of bins of SeqRecords. All combinations between bins are attempted.
 
-    Arguments:
-        bins {Iterable[List[SeqRecord]]} -- list of SeqRecord bins
+    Attributes:
+        bins: list of SeqRecord bins
     """
 
     __name__ = "combinatorial_bins"
@@ -158,7 +156,7 @@ class CombinatorialBins(Design):
         ```[[4 x SeqRecord], [500 x SeqRecord], [3 x SeqRecord]]```
 
         Returns:
-            str -- high level overview of the number of SeqRecords in each bin
+            high level overview of the number of SeqRecords in each bin
         """
 
         return (
@@ -173,8 +171,8 @@ class CombinatorialBins(Design):
     def append(self, records: Union[SeqRecord, List[SeqRecord]]):
         """Add the SeqRecords as a bin for combinatorial design
 
-        Arguments:
-            record {Union[SeqRecord, List[SeqRecord]]} -- the records to add as a bin
+        Args:
+            record: the records to add as a bin
         """
 
         if not records:
@@ -191,8 +189,8 @@ class CombinatorialBins(Design):
 class PlasmidLibrary(Design):
     """A list of SeqRecord lists. Each nested list is combined into a Plasmid.
 
-    Arguments:
-        sets {Iterable[List[SeqRecord]]} -- Iterable of SeqRecord sets
+    Attributes:
+        sets: Iterable of SeqRecord sets
     """
 
     __name__ = "library"
@@ -223,7 +221,7 @@ class PlasmidLibrary(Design):
         ```[[4 x SeqRecord], [500 x SeqRecord], [3 x SeqRecord]]```
 
         Returns:
-            str -- high level overview of the number of SeqRecords in each bin
+            high level overview of the number of SeqRecords in each bin
         """
 
         return f"[{len(self.sets)} x [SeqRecord]]"
@@ -236,8 +234,8 @@ class PlasmidLibrary(Design):
     def append(self, records: Union[SeqRecord, List[SeqRecord]]):
         """Add a new set or SeqRecord to the library
 
-        Arguments:
-            records {Union[SeqRecord, List[SeqRecord]]} -- the records to add as a set
+        Args:
+            records: the records to add as a set
         """
 
         if not records:

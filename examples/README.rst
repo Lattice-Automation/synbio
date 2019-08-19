@@ -1,8 +1,5 @@
-Examples
-========
-
 Assembly
-========
+--------
 
 Gibson Assembly with primer generation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -15,7 +12,7 @@ Cloning via restriction digest and ligation
 .. literalinclude:: clone_assembly.py
 
 Protocols
-=========
+---------
 
 Gibson Assembly of a plasmid library
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

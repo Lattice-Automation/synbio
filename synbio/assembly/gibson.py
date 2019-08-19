@@ -30,11 +30,11 @@ def gibson_many(
 ) -> List[Tuple[SeqRecord, List[Primers]]]:
     """Create many Gibson assemblies for each combination of SeqRecords
 
-    Arguments:
-        design {Iterable[List[SeqRecord]]} -- the list of seqrecord combinations to circularize
+    Args:
+        design: the list of seqrecord combinations to circularize
 
-    Keyword Arguments:
-        hifi {bool} -- whether to use NEB's HiFi DNA ssembly (default: {False})
+    Keyword Args:
+        hifi: whether to use NEB's HiFi DNA ssembly (default: {False})
 
     Returns:
         List[Tuple[SeqRecord, List[Primers]]] -- a list of assembled Plasmids and Primers
@@ -56,11 +56,11 @@ def gibson(
     Create primers to mutate the records' sequences (after PCR) so they
     anneal to their neighboring records
 
-    Arguments:
-        records {List[SeqRecord]} -- list of records to assemble
+    Args:
+        records: list of records to assemble
 
-    Keyword Arguments:
-        hifi {bool} -- whether to use HiFi DNA assembly
+    Keyword Args:
+        hifi: whether to use HiFi DNA assembly
 
     Returns:
         Tuple[SeqRecord, List[Primers]] --
@@ -124,9 +124,9 @@ def _record_homology(
 ) -> Tuple[bool, int, Tuple[int, int]]:
     """Checks homology between two sequences.
 
-    Arguments:
-        f1 {str} -- first sequence
-        f2 {str} -- second sequence
+    Args:
+        f1: first sequence
+        f2: second sequence
 
     Returns:
         Tuple[bool, int, int] --
@@ -201,10 +201,10 @@ def _common_substring_table(f1: str, f2: str, hifi: bool = False) -> List[List[i
 def _mutate_primers(p1: Primers, p2: Primers, homology_to_add: int):
     """ Mutates primers of records if they're not homologous.
 
-    Arguments:
-        p1 {Primers} -- primers of the left-most SeqRecord
-        p2 {Primers} -- primers of the right-most SeqRecord
-        homology_to_add {int} -- the number of bp to add to both sides'
+    Args:
+        p1: primers of the left-most SeqRecord
+        p2: primers of the right-most SeqRecord
+        homology_to_add: the number of bp to add to both sides'
             primers from the other
     """
 
@@ -223,9 +223,9 @@ def _mutate_primers(p1: Primers, p2: Primers, homology_to_add: int):
 def _fix_duplicate_junctions(records: List[SeqRecord], primers: List[Primers]):
     """Mutates primers to avoid unintentional annealing between records that shouldn't be
 
-    Arguments:
-        records {List[SeqRecord]} -- list of records in this assembly
-        primers {List[Primers]} -- list of primers to PCR each records
+    Args:
+        records: list of records in this assembly
+        primers: list of primers to PCR each records
     """
 
     for i, record in enumerate(records):
@@ -298,13 +298,13 @@ def _mutate_junction(
 def _has_offtarget_junction(f_end: Seq, ends: List[Seq], end_of_record: bool) -> bool:
     """Check whether f_end has offtarget junction with any other end.
 
-    Arguments:
-        f_end {str} -- the end of the SeqRecord we're checking
-        ends {List[Seq]} -- the ends of the other SeqRecords
-        end_of_record {bool} -- whether we're checking the 5' or 3'. 3' if end
+    Args:
+        f_end: the end of the SeqRecord we're checking
+        ends: the ends of the other SeqRecords
+        end_of_record: whether we're checking the 5' or 3'. 3' if end
 
     Returns:
-        bool -- whether there's an offtarget junction
+        whether there's an offtarget junction
     """
 
     revcomp = False
@@ -326,9 +326,9 @@ def _bp_to_add_index_primers(records: List[SeqRecord], primers: List[Primers]):
     If they do, mutate primers until they do not. Primers should only anneal
     to start and end of record.
 
-    Arguments:
-        records {List[SeqRecord]} -- all the SeqRecords to account for
-        primers {List[Primers]} -- all the primers to amplify the SeqRecords
+    Args:
+        records: all the SeqRecords to account for
+        primers: all the primers to amplify the SeqRecords
     """
 
     for record, primer_pair in zip(records, primers):
@@ -366,13 +366,13 @@ def _bp_to_add_index_primers(records: List[SeqRecord], primers: List[Primers]):
 def _bp_to_add_index(primer: Seq, seq: Seq) -> int:
     """Check for an offtarget. If there is one, expand primer in 3' dir and return True
 
-    Arguments:
-        primer {Seq} -- the primer to mutate if it has ectopic binding
-        seq {Seq} -- the sequence of the SeqRecord being checked for
+    Args:
+        primer: the primer to mutate if it has ectopic binding
+        seq: the sequence of the SeqRecord being checked for
             off-target binding sites
 
     Returns:
-        int -- index of next bp in seq to add to primer if needed, -1
+        index of next bp in seq to add to primer if needed, -1
             if no fix for an off-target primer is needed
     """
 
@@ -398,8 +398,8 @@ def _bp_to_add_index(primer: Seq, seq: Seq) -> int:
 def _hamming_set(seq: str) -> Set[str]:
     """Constructs all possible 1-off variations of given sequence.
 
-    Arguments:
-        seq {str} -- the end of a primer sequence
+    Args:
+        seq: the end of a primer sequence
 
     Returns:
         Set[str] -- a set of possible offtarget binding sites

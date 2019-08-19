@@ -31,11 +31,11 @@ class Clone(Protocol):
     This protocol is based on NEB's clone guide:
     https://www.neb.com/tools-and-resources/usage-guidelines/clone-guide
 
-    Keyword Arguments:
-        include {List[str]} -- include only plasmids with a feature matching something
+    Keyword Args:
+        include: include only plasmids with a feature matching something
             in the include list use in backbone selection (default: {None})
-        mix {Mix} -- the assembly mix to use when mixing the assemblies with enzymes
-        min_count {int} -- the minimum number of SeqRecords in an assembly for it to
+        mix: the assembly mix to use when mixing the assemblies with enzymes
+        min_count: the minimum number of SeqRecords in an assembly for it to
             be considered valid. smaller assemblies are ignored
     """
 

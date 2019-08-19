@@ -11,10 +11,10 @@ from uuid import uuid1
 class Transfer:
     """Transfer contents from one container to another.
 
-    Arguments:
-        src {Container} -- the source Container
-        dest {Container} -- the destination Container
-        volume {float} -- the volume to transfer in microliters
+    Args:
+        src: the source Container
+        dest: the destination Container
+        volume: the volume to transfer in microliters
     """
 
     def __init__(self, src, dest, volume: float = 10.0):
@@ -28,9 +28,9 @@ class Transfer:
         This was necessitated by the Labcyte Echo that only transfers up to 10 uL
         and with transfers that are a multiple of 2.5 nL.
 
-        Arguments;
-            max_volume {float} -- the max volume of a single transfer in uL
-            multiple_of {float} -- each transfer has to be a multiple of this (in uL)
+        Args;
+            max_volume: the max volume of a single transfer in uL
+            multiple_of: each transfer has to be a multiple of this (in uL)
 
         Returns:
             List[Transfer] -- list of transfers meeting restraints
@@ -52,9 +52,9 @@ class Transfer:
 class Temperature:
     """A temperature instruction, has a temperature and time component.
 
-    Arguments:
-        temp {float} -- temperature in degrees Celcius
-        time {float} -- length of time in seconds
+    Args:
+        temp: temperature in degrees Celcius
+        time: length of time in seconds
     """
 
     def __init__(self, temp: float = 27.0, time: float = 10.0):
@@ -130,12 +130,12 @@ def to_txt(name: str, instructions: List[Instruction]) -> str:
     2. Setup the Setup Plate as specified
     ```
 
-    Arguments:
-        name {str} -- the protocol's name
-        instructions {str} -- the list of protocol instructions
+    Args:
+        name: the protocol's name
+        instructions: the list of protocol instructions
 
     Returns:
-        str -- a string representation of the protocol
+        a string representation of the protocol
     """
 
     txt = name + ":\n" if name else ""
@@ -182,14 +182,14 @@ def _display_time(seconds: float, granularity=2) -> str:
     ..."hold"
     ```
 
-    Arguments:
-        seconds {int} -- the number of seconds of a step
+    Args:
+        seconds: the number of seconds of a step
 
-    Keyword Arguments:
-        granularity {int} -- the granularity of the displayed time
+    Keyword Args:
+        granularity: the granularity of the displayed time
 
     Returns:
-        str -- the steps total time in human readable string format
+        the steps total time in human readable string format
     """
 
     if seconds < 1:

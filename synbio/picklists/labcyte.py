@@ -25,12 +25,12 @@ def to_labcyte(instruction: Instruction, existing_plates: int) -> str:
     There is really great documentation for this (in a relative sense) at:
     https://www.labcyte.com/documentation/ECP_HTML5/Content/PROJECTS/ECP_UG/CONTENT/c_CreatingPickLists.htm
 
-    Arguments:
-        instruction {Instruction} -- a single step's instruction
-        existing_plates {int} -- number of plates before these in protocol
+    Args:
+        instruction: a single step's instruction
+        existing_plates: number of plates before these in protocol
 
     Returns:
-        str -- the picklist in CSV string format
+        the picklist in CSV string format
     """
 
     if not instruction.transfers:

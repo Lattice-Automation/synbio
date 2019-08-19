@@ -22,12 +22,12 @@ def to_tecan(instruction: Instruction, existing_plates: int) -> str:
         TODO: reagents like water can be done with one larger aspirate step
         TODO: reagents that ALWAYS mix don't need "wash" steps between dispenses
 
-    Arguments:
-        instruction {Instruction} -- a single step's instruction
-        existing_plates {int} -- number of plates before these in protocol
+    Args:
+        instruction: a single step's instruction
+        existing_plates: number of plates before these in protocol
 
     Returns:
-        str -- the picklist in CSV string format
+        the picklist in CSV string format
     """
 
     if not instruction.transfers:

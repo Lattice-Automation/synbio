@@ -15,11 +15,11 @@ class Setup(Step):
 
     All transfers for a Setup step come from the magical and bottomless 'Fridge'
 
-    Keyword Arguments:
-        target {List[Container]} -- target container list/ordering (default: {None})
-        dest {Container} -- the type of target container (default: {first target container})
-        name {str} -- the name of this step in the protocol
-        instructions {List[str]} -- extra instructions to add to this step
+    Keyword Args:
+        target: target container list/ordering (default: {None})
+        dest: the type of target container (default: {first target container})
+        name: the name of this step in the protocol
+        instructions: extra instructions to add to this step
     """
 
     def __init__(
@@ -93,10 +93,10 @@ class Pipette(Step):
 
     Create transfers to map the input containers to a new list of output containers (target)
 
-    Keyword Arguments:
-        target {List[Container]} -- target container list/ordering (default: {None})
-        name {str} -- the name of this step in the protocol
-        instructions {List[str]} -- extra instructions to add to this step
+    Keyword Args:
+        target: target container list/ordering (default: {None})
+        name: the name of this step in the protocol
+        instructions: extra instructions to add to this step
     """
 
     def __init__(
@@ -155,9 +155,9 @@ class Pipette(Step):
 class Move(Step):
     """Move a fixed volume from each container to another container of same or new type
 
-    Arguments:
-        volume {float} -- the amount in millileters to move to the new container
-        type {type} -- the type of new container to move the contents to
+    Args:
+        volume: the amount in millileters to move to the new container
+        type: the type of new container to move the contents to
     """
 
     def __init__(self, volume: float, dest: Container = None, name: str = ""):
@@ -201,13 +201,13 @@ class Move(Step):
 class Add(Step):
     """Add contents to the existing containers.
 
-    Arguments:
-        add {Content} -- the src container or content to add
-        volume {float} -- the volume of the new content to add
+    Args:
+        add: the src container or content to add
+        volume: the volume of the new content to add
 
-    Keyword Arguments:
-        name {str} -- the name of this step in the protocol
-        instructions {List[str]} -- extra instructions to add to this step
+    Keyword Args:
+        name: the name of this step in the protocol
+        instructions: extra instructions to add to this step
     """
 
     def __init__(
@@ -266,17 +266,17 @@ class ThermoCycle(Step):
     ])
     ```
 
-    Arguments:
-        temps {List[Temperature]} -- list of temperatures in a gradient
+    Args:
+        temps: list of temperatures in a gradient
 
-    Keyword Arguments:
-        name {str} -- the name of this step in the protocol
-        cycles {int} -- the number of thermo cycles (default: {1})
-        mutate {Optional[Callable[Container], List[Content]]]} --
+    Keyword Args:
+        name: the name of this step in the protocol
+        cycles: the number of thermo cycles (default: {1})
+        mutate:
             a function to mutate the contents of a container after thermo cycling.
             Used to anneal digested/ligated fragments or amplify DNA with primers
-        instructions {List[str]} -- list of additional instructions to add
-        extension {Temperature} -- last extension after other thermocycle steps.
+        instructions: list of additional instructions to add
+        extension: last extension after other thermocycle steps.
             Example is a final 5 minute extension at the end of PCR that's common
     """
 
@@ -304,8 +304,8 @@ class ThermoCycle(Step):
         If a mutate function was passed, mutate the contents
         of the containers appropriately.
 
-        Arguments:
-            protocol {Protocol} -- the protocol to add a thermoCycle step to
+        Args:
+            protocol: the protocol to add a thermoCycle step to
         """
 
         if self.mutate:
@@ -330,10 +330,10 @@ class Incubate(Step):
 
     Incubate the contents of containers and in a fridge or some other incubator.
 
-    Keyword Arguments:
-        name {str} -- the name of this step in the protocol
-        temp {Temperature} -- the target the container should be in (default: {None})
-        mutate {Optional[Callable[Container], List[Content]]]} --
+    Keyword Args:
+        name: the name of this step in the protocol
+        temp: the target the container should be in (default: {None})
+        mutate:
             a function to mutate the contents of a container after thermo cycling.
             Used to anneal digested/ligated fragments or amplify DNA with primers
     """
@@ -353,8 +353,8 @@ class Incubate(Step):
     def __call__(self, protocol: Protocol):
         """Create an instruction for temperatures and their durations.
 
-        Arguments:
-            protocol {Protocol} -- the protocol to add an incubtion step to
+        Args:
+            protocol: the protocol to add an incubtion step to
         """
 
         if self.mutate:

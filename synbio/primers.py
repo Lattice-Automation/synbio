@@ -17,11 +17,11 @@ MAX_PRIMER_LEN = 50
 class Primers:
     """Primers created by Primer3 for a SeqRecord.
 
-    Arguments:
-        fwd {Seq} -- the FWD primer
-        fwd_tm {float} -- the tm of the FWD primer
-        rev {Seq} -- the REV primer
-        rev_tm {float} -- the tm of the REV primer
+    Args:
+        fwd: the FWD primer
+        fwd_tm: the tm of the FWD primer
+        rev: the REV primer
+        rev_tm: the tm of the REV primer
     """
 
     def __init__(self, fwd: Seq, fwd_tm: float, rev: Seq, rev_tm: float):
@@ -34,11 +34,11 @@ class Primers:
     def for_record(cls, record: SeqRecord) -> "Primers":
         """Create Primers to amplify a SeqRecord.
 
-        Arguments:
-            record {SeqRecord} -- the sequence to amplify via primers
+        Args:
+            record: the sequence to amplify via primers
 
         Returns:
-            Primers -- to PCR the record
+            to PCR the record
         """
 
         p3_output = designPrimers(
@@ -65,7 +65,7 @@ class Primers:
         http://primer3.ut.ee/primer3web_help.htm
 
         Returns:
-            Primers -- a primer pair from Primer3 output
+            a primer pair from Primer3 output
         """
 
         assert p3_output

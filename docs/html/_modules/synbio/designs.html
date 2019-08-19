@@ -76,8 +76,8 @@
 <div class="viewcode-block" id="Plasmid"><a class="viewcode-back" href="../../index.html#synbio.designs.Plasmid">[docs]</a><span class="k">class</span> <span class="nc">Plasmid</span><span class="p">(</span><span class="n">Design</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Create a plasmid from a list of SeqRecords</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">        records {List[SeqRecord]} -- SeqRecords to concatenate into a plasmid</span>
+<span class="sd">    Args:</span>
+<span class="sd">        records: SeqRecords to concatenate into a plasmid</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;plasmid&quot;</span>
@@ -115,8 +115,8 @@
 <div class="viewcode-block" id="Plasmid.append"><a class="viewcode-back" href="../../index.html#synbio.designs.Plasmid.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">records</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">]]):</span>
         <span class="sd">&quot;&quot;&quot;Add the SeqRecord to this plasmid&#39;s list of SeqRecords/fragments</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">            record {SeqRecord} -- the SeqRecord to add to the plasmid specification</span>
+<span class="sd">        Args:</span>
+<span class="sd">            record: the SeqRecord to add to the plasmid specification</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
@@ -138,8 +138,8 @@
 <span class="sd">    list of SeqRecords out. Versus List of SeqRecords in one SeqRecord</span>
 <span class="sd">    out for a Plasmid design</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">        records {Iterable[SeqRecord]} -- list of SeqRecord</span>
+<span class="sd">    Args:</span>
+<span class="sd">        records: list of SeqRecord</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;combinatorial&quot;</span></div>
@@ -148,8 +148,8 @@
 <div class="viewcode-block" id="CombinatorialBins"><a class="viewcode-back" href="../../index.html#synbio.designs.CombinatorialBins">[docs]</a><span class="k">class</span> <span class="nc">CombinatorialBins</span><span class="p">(</span><span class="n">Design</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A list of bins of SeqRecords. All combinations between bins are attempted.</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">        bins {Iterable[List[SeqRecord]]} -- list of SeqRecord bins</span>
+<span class="sd">    Args:</span>
+<span class="sd">        bins: list of SeqRecord bins</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;combinatorial_bins&quot;</span>
@@ -206,8 +206,8 @@
 <div class="viewcode-block" id="CombinatorialBins.append"><a class="viewcode-back" href="../../index.html#synbio.designs.CombinatorialBins.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">records</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">]]):</span>
         <span class="sd">&quot;&quot;&quot;Add the SeqRecords as a bin for combinatorial design</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">            record {Union[SeqRecord, List[SeqRecord]]} -- the records to add as a bin</span>
+<span class="sd">        Args:</span>
+<span class="sd">            record: the records to add as a bin</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
@@ -224,8 +224,8 @@
 <div class="viewcode-block" id="PlasmidLibrary"><a class="viewcode-back" href="../../index.html#synbio.designs.PlasmidLibrary">[docs]</a><span class="k">class</span> <span class="nc">PlasmidLibrary</span><span class="p">(</span><span class="n">Design</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;An Iterable of SeqRecord lists. Each list of combined via the assembly method.</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">        sets {Iterable[List[SeqRecord]]} -- Iterable of SeqRecord sets</span>
+<span class="sd">    Args:</span>
+<span class="sd">        sets: Iterable of SeqRecord sets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;library&quot;</span>
@@ -269,8 +269,8 @@
 <div class="viewcode-block" id="PlasmidLibrary.append"><a class="viewcode-back" href="../../index.html#synbio.designs.PlasmidLibrary.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">records</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">]]):</span>
         <span class="sd">&quot;&quot;&quot;Add a new set or SeqRecord to the library</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">            records {Union[SeqRecord, List[SeqRecord]]} -- the records to add as a set</span>
+<span class="sd">        Args:</span>
+<span class="sd">            records: the records to add as a set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>

@@ -27,13 +27,13 @@ class Mix:
     )
     ```
 
-    Keyword Arguments:
-        mix {Dict[Union[Reagent, Species, type], float]} -- map from mix content to the
+    Keyword Args:
+        mix: map from mix content to the
             volume required per well. Mix content can be a type (like SeqRecord)
             or an actual reagent (like Reagent("water")) (default: {None})
-        fill_with {Content} -- Content to fill rest of container to
+        fill_with: Content to fill rest of container to
             fill_to with (default: {None})
-        fill_to {float} -- the volume to fill the container to (default: {0})
+        fill_to: the volume to fill the container to (default: {0})
     """
 
     def __init__(
@@ -66,8 +66,8 @@ class Mix:
         Also return a second list with the volumes needed for each content in the
         first returned list
 
-        Arguments:
-            contents {Iterable[Content]} -- the contents of a well to add to a mix
+        Args:
+            contents: the contents of a well to add to a mix
 
         Returns:
             Tuple[List[Content], List[float]] -- list of container contents and

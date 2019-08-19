@@ -36,13 +36,13 @@ def clone(
     used to create each plasmid. But that information is implicitly available
     in each SeqRecord's id.
 
-    Arguments:
-        record_set {Iterable[SeqRecord]} -- SeqRecords to combine into a plasmid
-        enzymes {List[RestrictionType]} -- Enzymes to digest each SeqRecord with
+    Args:
+        record_set: SeqRecords to combine into a plasmid
+        enzymes: Enzymes to digest each SeqRecord with
     
-    Keyword Arguments:
-        include {List[str]} -- feature names to filter plasmids against (default: {None})
-        min_count {int} -- mininum # of SeqRecords in each output plasmid (default: {-1})
+    Keyword Args:
+        include: feature names to filter plasmids against (default: {None})
+        min_count: mininum # of SeqRecords in each output plasmid (default: {-1})
     """
 
     cloned_plasmids: List[SeqRecord] = []
@@ -63,12 +63,12 @@ def goldengate(
     Accepts lists of SeqRecords that may combine and returns the lists
     of SeqRecords that may circularize into new vectors.
 
-    Arguments:
-        record_set {Iterable[List[SeqRecord]]} -- possible combinations of fragments
+    Args:
+        record_set: possible combinations of fragments
 
-    Keyword Arguments:
-        include {List[str]} -- the feature to filter assemblies on (default: {""})
-        min_count {int} -- minimum number of SeqRecords for an assembly to be considered
+    Keyword Args:
+        include: the feature to filter assemblies on (default: {""})
+        min_count: minimum number of SeqRecords for an assembly to be considered
 
     Returns:
         List[Tuple[List[SeqRecord], List[SeqRecord]]] -- list of tuples with:
@@ -91,11 +91,11 @@ def clone_many_combinatorial(
     the overhangs and the edges are the linear fragments post-digest/catalyzing
     with BsaI/BpiI.
 
-    Arguments:
-        record_set {List[SeqRecord]} -- single record set that might circularize
-        enzymes {List[Enzyme]} -- list of enzymes to digest the input records with
-        include {str} -- the include to filter assemblies
-        min_count {int} -- mininum number of SeqRecords for an assembly to be considered
+    Args:
+        record_set: single record set that might circularize
+        enzymes: list of enzymes to digest the input records with
+        include: the include to filter assemblies
+        min_count: mininum number of SeqRecords for an assembly to be considered
 
     Returns:
         List[Tuple[List[SeqRecord], List[SeqRecord]]] -- list of tuples with:
@@ -133,11 +133,11 @@ def clone_combinatorial(
     the overhangs and the edges are the linear fragments
     post-digest/catalyzing with BsaI/BpiI.
 
-    Arguments:
-        record_set {List[SeqRecord]} -- single record set that might circularize
-        enzymes {List[Enzyme]} -- list of enzymes to digest the input records with
-        include {str} -- the include to filter assemblies
-        min_count {int} -- mininum number of SeqRecords for an assembly to be considered
+    Args:
+        record_set: single record set that might circularize
+        enzymes: list of enzymes to digest the input records with
+        include: the include to filter assemblies
+        min_count: mininum number of SeqRecords for an assembly to be considered
 
     Returns:
         List[Tuple[List[SeqRecord], List[SeqRecord]]] -- list of tuples with:
@@ -231,9 +231,9 @@ def _reorder_fragments(
 
     This works because the SeqRecords are going to anneal to one another in a plasmid.
 
-    Arguments:
-        input_set {List[SeqRecord]} -- SeqRecords set to clone_combinatorial
-        output_set {List[SeqRecord]} -- SeqRecords after circularization
+    Args:
+        input_set: SeqRecords set to clone_combinatorial
+        output_set: SeqRecords after circularization
 
     Returns:
         List[SeqRecord] -- re-ordered SeqRecords
@@ -249,11 +249,11 @@ def _reorder_fragments(
 def _hash_fragments(record_set: List[SeqRecord]) -> str:
     """Create a unique ID for a list of records
 
-    Arguments:
-        record_set {List[SeqRecord]} -- set of Records to make unique ID for
+    Args:
+        record_set: set of Records to make unique ID for
 
     Returns:
-        str -- unique ID concatenating records IDs/Seqs
+        unique ID concatenating records IDs/Seqs
     """
 
     fragment_ids = [content_id(f) for f in record_set]
@@ -270,9 +270,9 @@ def _catalyze(
     in the 5' end (^) and 3' end (_). So a 5' overhang may be:
     ^AAAA_. But a 3' overhang may be: _AAAA^.
 
-    Arguments:
-        record {SeqRecord} -- the SeqRecord to digest with enzymes
-        enzymes {List[Enzyme]} -- list of enzymes to digest the input records with
+    Args:
+        record: the SeqRecord to digest with enzymes
+        enzymes: list of enzymes to digest the input records with
 
     Returns:
         List[Tuple[str, SeqRecord, str]] --
@@ -365,12 +365,12 @@ def _catalyze(
 def _has_features(record: SeqRecord, include: Optional[List[str]]) -> bool:
     """Return whether any of a record's features/qualifiers match the include specified.
 
-    Arguments:
-        record {SeqRecord} -- the record being checked for include
-        include {Optional[List[str]]} -- the include to filter for
+    Args:
+        record: the record being checked for include
+        include: the include to filter for
 
     Returns:
-        bool -- whether the record has any features or qualifiers with specified include
+        whether the record has any features or qualifiers with specified include
     """
 
     if not include:

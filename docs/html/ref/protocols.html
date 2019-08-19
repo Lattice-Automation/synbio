@@ -87,8 +87,6 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html#assembly">Assembly</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html#protocols">Protocols</a></li>
 </ul>
 
             
@@ -169,9 +167,11 @@ assemblies, and create a protocol for preparing and ligating the fragments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Keyword Arguments</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>{List</strong><strong>[</strong><strong>str</strong><strong>]</strong><strong>} -- include only plasmids with a feature matching something</strong> (<em>include</em>) – in the include list use in backbone selection (default: {None})</p></li>
-<li><p><strong>{Mix} -- the assembly mix to use when mixing the assemblies with enzymes</strong> (<em>mix</em>) – </p></li>
-<li><p><strong>{int} -- the minimum number of SeqRecords in an assembly for it to</strong> (<em>min_count</em>) – be considered valid. smaller assemblies are ignored</p></li>
+<li><p><strong>include</strong> – include only plasmids with a feature matching something
+in the include list use in backbone selection (default: {None})</p></li>
+<li><p><strong>mix</strong> – the assembly mix to use when mixing the assemblies with enzymes</p></li>
+<li><p><strong>min_count</strong> – the minimum number of SeqRecords in an assembly for it to
+be considered valid. smaller assemblies are ignored</p></li>
 </ul>
 </dd>
 </dl>
@@ -201,8 +201,8 @@ assemblies, and create a protocol for preparing and ligating the fragments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Keyword Arguments</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>{bool} -- whether to use NEB's HiFi assembly method</strong> (<em>hifi</em>) – </p></li>
-<li><p><strong>{Mix} -- the assembly mix to use when mixing the Gibson wells. Based on NEB's</strong> (<em>gibson_mix</em>) – </p></li>
+<li><p><strong>hifi</strong> – whether to use NEB’s HiFi assembly method</p></li>
+<li><p><strong>gibson_mix</strong> – the assembly mix to use when mixing the Gibson wells. Based on NEB’s (e5510)</p></li>
 </ul>
 </dd>
 </dl>
@@ -250,9 +250,11 @@ SeqRecords that will circularize into valid new plasmids.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Keyword Arguments</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>{List</strong><strong>[</strong><strong>str</strong><strong>]</strong><strong>} -- include only plasmids with a feature matching something</strong> (<em>include</em>) – in the include list use in backbone selection (default: {None})</p></li>
-<li><p><strong>{Mix} -- the assembly mix to use when mixing the GoldenGate assemblies</strong> (<em>mix</em>) – </p></li>
-<li><p><strong>{int} -- the minimum number of SeqRecords in an assembly for it to</strong> (<em>min_count</em>) – be considered valid. smaller assemblies are ignored</p></li>
+<li><p><strong>include</strong> – include only plasmids with a feature matching something
+in the include list use in backbone selection (default: {None})</p></li>
+<li><p><strong>mix</strong> – the assembly mix to use when mixing the GoldenGate assemblies</p></li>
+<li><p><strong>min_count</strong> – the minimum number of SeqRecords in an assembly for it to
+be considered valid. smaller assemblies are ignored</p></li>
 </ul>
 </dd>
 </dl>

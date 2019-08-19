@@ -34,10 +34,10 @@ class Step:
 class Protocol:
     """A Protocol for assembling DNA via steps in a laboratory.
 
-    Arguments:
-        name {str} -- the name of the protocol
-        design {Design} -- the design specification for the build
-        how {Union[Step, Iterable[Step]]} -- a single composite step for assembling the Design
+    Args:
+        name: the name of the protocol
+        design: the design specification for the build
+        how: a single composite step for assembling the Design
     """
 
     def __init__(
@@ -68,8 +68,8 @@ class Protocol:
     def add(self, step: Step) -> "Protocol":
         """Add a step to the protocol.
 
-        Arguments:
-            step {Step} -- the Step to add to this protocol
+        Args:
+            step: the Step to add to this protocol
         """
 
         if not isinstance(step, Step):
@@ -141,11 +141,11 @@ class Protocol:
 
         Uses `SeqIO.write(records, filename, "fasta")`.
 
-        Arguments:
-            filename {str} -- the filename to write the FASTA file to
+        Args:
+            filename: the filename to write the FASTA file to
 
         Returns:
-            int -- the number of records that were written
+            the number of records that were written
         """
 
         if not filename:
@@ -161,12 +161,12 @@ class Protocol:
 
         TODO: add a separate flag for writing one GB per record
 
-        Arguments:
-            filename {str} -- the filename to write the Genbanks to
-            split {bool} -- write a separate Genbank for each SeqRecord
+        Args:
+            filename: the filename to write the Genbanks to
+            split: write a separate Genbank for each SeqRecord
 
         Returns:
-            int -- the number of records that were written
+            the number of records that were written
         """
 
         self._check_output()
@@ -198,8 +198,8 @@ class Protocol:
     def to_txt(self, filename: str = ""):
         """Write the protocol's instructions to a text file.
 
-        Arguments:
-            filename {str} -- the filename of the instructin file
+        Args:
+            filename: the filename of the instructin file
         """
 
         if not filename:
@@ -220,8 +220,8 @@ class Protocol:
         protocol.to_csv('instructions.csv')
         ```
 
-        Arguments:
-            filename {str} -- the name of the CSV(s) to write
+        Args:
+            filename: the name of the CSV(s) to write
         """
 
         if not filename:
@@ -257,9 +257,9 @@ class Protocol:
         If there are multiple passable steps, each are saved with their
         index in their filename. Ex: picklist.1.gwl, picklist.2.gwl
 
-        Keyword Arguments:
-            filename {str} -- name of picklist file (default: {self.name})
-            platform {str} -- picklist platform (default: {"tecan"})
+        Keyword Args:
+            filename: name of picklist file (default: {self.name})
+            platform: picklist platform (default: {"tecan"})
         """
 
         picklist_generators = {
@@ -323,8 +323,8 @@ class Protocol:
         because I'm also counting the number of "pipette-able" Layout after
         each step in instruction_to_plate_count.
 
-        Arguments:
-            instruction {Instruction} -- the instruction to add to Protocol
+        Args:
+            instruction: the instruction to add to Protocol
         """
 
         self.instructions.append(instruction)
@@ -406,7 +406,7 @@ class Protocol:
         """Return the number of steps in this protocol.
 
         Returns:
-            int -- the number of steps
+            the number of steps
         """
 
         return len(self.steps)

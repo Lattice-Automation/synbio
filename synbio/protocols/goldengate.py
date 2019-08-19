@@ -40,11 +40,11 @@ class GoldenGate(Clone):
             "mutate" method for the step after ThermoCycle()
         5. add steps to carry out the rest of the assembly (heat shock, incubate, etc)
 
-    Keyword Arguments:
-        include {List[str]} -- include only plasmids with a feature matching something
+    Keyword Args:
+        include: include only plasmids with a feature matching something
             in the include list use in backbone selection (default: {None})
-        mix {Mix} -- the assembly mix to use when mixing the GoldenGate assemblies
-        min_count {int} -- the minimum number of SeqRecords in an assembly for it to
+        mix: the assembly mix to use when mixing the GoldenGate assemblies
+        min_count: the minimum number of SeqRecords in an assembly for it to
             be considered valid. smaller assemblies are ignored
     """
 
