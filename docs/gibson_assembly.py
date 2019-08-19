@@ -2,7 +2,6 @@
 
 import os
 
-# 'synbio' uses the enzymes provided in Bio.Restriction
 from Bio.SeqIO import parse
 from synbio.assembly import gibson
 
