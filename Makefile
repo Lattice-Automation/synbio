@@ -1,4 +1,4 @@
-.PHONY: test
+.PHONY: docs test
 
 test:
 	mkdir -p ./tests/output
@@ -16,3 +16,6 @@ patch: test
 	bumpversion patch
 	python3 setup.py sdist bdist_wheel
 	python3 -m twine upload dist/* --skip-existing
+
+docs:
+	cd docs && make html
