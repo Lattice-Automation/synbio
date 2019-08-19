@@ -1,3 +1,5 @@
+# Examples
+
 ## Assembly
 
 - Gibson Assembly with primer generation [gibson_assembly.py](gibson_assembly.py)
@@ -6,15 +8,11 @@
 
 ## Protocols
 
-### Gibson Assembly
-
 - Gibson Assembly of a plasmid library
   [gibson_library.py](gibson_library.py)
 
 - Gibson Assembly of a single plasmid
   [gibson_plasmid.py](gibson_plasmid.py)
-
-### Golden Gate Assembly
 
 - Golden Gate Assembly of a single plasmid
   [goldengate_plasmid.py](goldengate_plasmid.py)
