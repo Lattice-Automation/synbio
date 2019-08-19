@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Steps &mdash; synbio 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Examples" href="../examples.html" />
+    <link rel="prev" title="Protocols" href="protocols.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> synbio
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ref.html">Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="designs.html">Designs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="protocols.html">Protocols</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#assembly">Assembly</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#gibson-assembly-with-primer-generation">Gibson Assembly with primer generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#cloning-via-restriction-digest-and-ligation">Cloning via restriction digest and ligation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#protocols">Protocols</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#gibson-assembly-of-a-plasmid-library">Gibson Assembly of a plasmid library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#gibson-assembly-of-a-single-plasmid">Gibson Assembly of a single plasmid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#golden-gate-assembly-of-a-single-plasmid">Golden Gate Assembly of a single plasmid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#combinatorial-golden-gate-assembly-all-valid-plasmid-combinations">Combinatorial Golden Gate Assembly: all valid plasmid combinations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#combinatorial-golden-gate-assembly-with-bins-all-plasmid-combinations-between-bins">Combinatorial Golden Gate Assembly with bins: all plasmid combinations between bins</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">synbio</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="ref.html">Reference</a> &raquo;</li>
+        
+      <li>Steps</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/ref/steps.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="steps">
+<h1>Steps<a class="headerlink" href="#steps" title="Permalink to this headline">¶</a></h1>
+<p>Steps represent each step of a protocol for assembling the <cite>Design</cite>. If using
+pre-made protocols like <cite>Gibson</cite> and <cite>GoldenGate</cite>, these Steps aren’t necessary.</p>
+<span class="target" id="module-synbio.steps"></span><p>Steps: lab processes to assemble a design.</p>
+<dl class="class">
+<dt id="synbio.steps.Add">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">Add</code><span class="sig-paren">(</span><em class="sig-param">add: Union[Bio.SeqRecord.SeqRecord, Bio.Restriction.Restriction.RestrictionType, synbio.primers.Primers, synbio.reagents.Reagent, synbio.species.Species], volume: float, name: str = '', instructions: List[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.Add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add contents to the existing containers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>add</strong> – the src container or content to add</p></li>
+<li><p><strong>volume</strong> – the volume of the new content to add</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>name</strong> – the name of this step in the protocol</p></li>
+<li><p><strong>instructions</strong> – extra instructions to add to this step</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="data">
+<dt id="synbio.steps.HeatShock">
+<code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">HeatShock</code><em class="property"> = [&lt;synbio.steps.Move object&gt;, &lt;synbio.steps.Add object&gt;, &lt;synbio.steps.ThermoCycle object&gt;, &lt;synbio.steps.Add object&gt;, &lt;synbio.steps.Incubate object&gt;]</em><a class="headerlink" href="#synbio.steps.HeatShock" title="Permalink to this definition">¶</a></dt>
+<dd><p>A composite HeatShock step for getting DNA into E coli.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="synbio.steps.Incubate">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">Incubate</code><span class="sig-paren">(</span><em class="sig-param">temp: synbio.instructions.Temperature, name: str = 'Incubate', mutate: Optional[Callable[[synbio.containers.Container], synbio.containers.Container]] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.Incubate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Incubate contents for some time at a set temperature.</p>
+<p>Incubate the contents of containers and in a fridge or some other incubator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – the name of this step in the protocol</p></li>
+<li><p><strong>temp</strong> – the target the container should be in (default: {None})</p></li>
+<li><p><strong>mutate</strong> – a function to mutate the contents of a container after thermo cycling.
+Used to anneal digested/ligated fragments or amplify DNA with primers</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="synbio.steps.Move">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">Move</code><span class="sig-paren">(</span><em class="sig-param">volume: float</em>, <em class="sig-param">dest: synbio.containers.Container = None</em>, <em class="sig-param">name: str = ''</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.Move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move a fixed volume from each container to another container of same or new type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>volume</strong> – the amount in millileters to move to the new container</p></li>
+<li><p><strong>type</strong> – the type of new container to move the contents to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="synbio.steps.Pipette">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">Pipette</code><span class="sig-paren">(</span><em class="sig-param">target: Sequence[synbio.containers.Container], name: str = '', instructions: List[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.Pipette" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pipette the input containers to match a ‘target’ list of containers</p>
+<p>Create transfers to map the input containers to a new list of output containers (target)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – target container list/ordering (default: {None})</p></li>
+<li><p><strong>name</strong> – the name of this step in the protocol</p></li>
+<li><p><strong>instructions</strong> – extra instructions to add to this step</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="synbio.steps.Setup">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">Setup</code><span class="sig-paren">(</span><em class="sig-param">target: Sequence[synbio.containers.Container], dest: synbio.containers.Container = None, name: str = '', instructions: List[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.Setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a list of transfers to make a list of setup containers</p>
+<p>All transfers for a Setup step come from the magical and bottomless ‘Fridge’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – target container list/ordering (default: {None})</p></li>
+<li><p><strong>dest</strong> – the type of target container (default: {first target container})</p></li>
+<li><p><strong>name</strong> – the name of this step in the protocol</p></li>
+<li><p><strong>instructions</strong> – extra instructions to add to this step</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="synbio.steps.ThermoCycle">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">ThermoCycle</code><span class="sig-paren">(</span><em class="sig-param">temps: List[synbio.instructions.Temperature], name: str = '', cycles: int = 1, mutate: Optional[Callable[[synbio.containers.Container], synbio.containers.Container]] = None, extension: synbio.instructions.Temperature = None, instructions: List[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.ThermoCycle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thermo cycle for PCR, digestion/ligation, etc.</p>
+<p>Make a list of temperature instructions with the temperature
+to set it at, the length of time and the number of cycles.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ThermoCycle</span><span class="p">(</span><span class="n">cycles</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">temps</span><span class="o">=</span><span class="p">[</span>
+<span class="gp">... </span>   <span class="n">Temperature</span><span class="p">(</span><span class="n">temp</span><span class="o">=</span><span class="mi">97</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">5</span> <span class="o">*</span> <span class="mi">60</span><span class="p">),</span>  <span class="c1"># denature</span>
+<span class="gp">... </span>   <span class="n">Temperature</span><span class="p">(</span><span class="n">temp</span><span class="o">=</span><span class="mi">55</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>  <span class="c1"># annealing</span>
+<span class="gp">... </span>   <span class="n">Temperature</span><span class="p">(</span><span class="n">temp</span><span class="o">=</span><span class="mi">72</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">60</span><span class="p">),</span>  <span class="c1"># extension</span>
+<span class="go">...])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>temps</strong> – list of temperatures in a gradient</p>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>name</strong> – the name of this step in the protocol</p></li>
+<li><p><strong>cycles</strong> – the number of thermo cycles (default: {1})</p></li>
+<li><p><strong>mutate</strong> – a function to mutate the contents of a container after thermo cycling.
+Used to anneal digested/ligated fragments or amplify DNA with primers</p></li>
+<li><p><strong>instructions</strong> – list of additional instructions to add</p></li>
+<li><p><strong>extension</strong> – last extension after other thermocycle steps.
+Example is a final 5 minute extension at the end of PCR that’s common</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="protocols.html" class="btn btn-neutral float-left" title="Protocols" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

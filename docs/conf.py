@@ -15,14 +15,14 @@ import os
 import shutil
 import sys
 
+sys.path.append(os.path.abspath(os.path.join("..")))
+
 for filename in glob.glob(os.path.join(".", "*.py")):
-    if "conf" not in filename:
+    if "conf" not in filename:  # don't delete this...
         os.remove(filename)
 
 for filename in glob.glob(os.path.join("..", "examples", "*.py")):
-    shutil.copy(filename, ".")
-
-sys.path.append(os.path.abspath(os.path.join("..")))
+    shutil.copy(filename, ".")  # copy example file to this doc dir
 
 
 # -- Project information -----------------------------------------------------
@@ -70,13 +70,3 @@ html_theme_options = {"display_version": True, "collapse_navigation": False}
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
-# remove docstring from auto-modules
-# from https://stackoverflow.com/a/18031024
-def remove_module_docstring(app, what, name, obj, options, lines):
-    if what == "module" and name == "yourmodule":
-        del lines[:]
-
-
-def setup(app):
-    app.connect("autodoc-process-docstring", remove_module_docstring)

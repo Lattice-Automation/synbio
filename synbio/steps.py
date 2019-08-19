@@ -256,15 +256,12 @@ class ThermoCycle(Step):
     Make a list of temperature instructions with the temperature
     to set it at, the length of time and the number of cycles.
 
-    For example, a ThermoCycle for a typical PCR would be expressed as:
-
-    ```python
-    ThermoCycle(cycles=30, temps=[
-        Temperature(temp=97, time=5 * 60),  # denature
-        Temperature(temp=55, time=30),  # annealing
-        Temperature(temp=72, time=60),  # extension
-    ])
-    ```
+    Example:
+        >>> ThermoCycle(cycles=30, temps=[
+        ...    Temperature(temp=97, time=5 * 60),  # denature
+        ...    Temperature(temp=55, time=30),  # annealing
+        ...    Temperature(temp=72, time=60),  # extension
+        ...])
 
     Args:
         temps: list of temperatures in a gradient
