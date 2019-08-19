@@ -15,7 +15,7 @@ class Setup(Step):
 
     All transfers for a Setup step come from the magical and bottomless 'Fridge'
 
-    Keyword Args:
+    Attributes:
         target: target container list/ordering (default: {None})
         dest: the type of target container (default: {first target container})
         name: the name of this step in the protocol
@@ -93,7 +93,7 @@ class Pipette(Step):
 
     Create transfers to map the input containers to a new list of output containers (target)
 
-    Keyword Args:
+    Attributes:
         target: target container list/ordering (default: {None})
         name: the name of this step in the protocol
         instructions: extra instructions to add to this step
@@ -155,7 +155,7 @@ class Pipette(Step):
 class Move(Step):
     """Move a fixed volume from each container to another container of same or new type
 
-    Args:
+    Attributes:
         volume: the amount in millileters to move to the new container
         type: the type of new container to move the contents to
     """
@@ -201,11 +201,9 @@ class Move(Step):
 class Add(Step):
     """Add contents to the existing containers.
 
-    Args:
+    Attributes:
         add: the src container or content to add
         volume: the volume of the new content to add
-
-    Keyword Args:
         name: the name of this step in the protocol
         instructions: extra instructions to add to this step
     """
@@ -257,16 +255,15 @@ class ThermoCycle(Step):
     to set it at, the length of time and the number of cycles.
 
     Example:
+        An example of a ThermoCycle for PCR:
         >>> ThermoCycle(cycles=30, temps=[
         ...    Temperature(temp=97, time=5 * 60),  # denature
         ...    Temperature(temp=55, time=30),  # annealing
         ...    Temperature(temp=72, time=60),  # extension
         ...])
 
-    Args:
+    Attributes:
         temps: list of temperatures in a gradient
-
-    Keyword Args:
         name: the name of this step in the protocol
         cycles: the number of thermo cycles (default: {1})
         mutate:
@@ -327,7 +324,7 @@ class Incubate(Step):
 
     Incubate the contents of containers and in a fridge or some other incubator.
 
-    Keyword Args:
+    Attributes:
         name: the name of this step in the protocol
         temp: the target the container should be in (default: {None})
         mutate:
