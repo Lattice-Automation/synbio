@@ -98,7 +98,7 @@ class Plasmid(Design):
 
 
 class Combinatorial(Plasmid):
-    """A list of SeqRecords. Find and use all valid combinations.
+    """A list of SeqRecords. Find and use all valid combinations.  
 
     Code structure-wise it's the same as a Plasmid but multiple assemblies
     are possible given a single set of SeqRecords. List of SeqRecords in,
