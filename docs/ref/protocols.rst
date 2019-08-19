@@ -1,12 +1,11 @@
 Protocols
 =========
 
-.. automodule:: synbio.protocols.clone
+.. autoclass:: synbio.protocol.Protocol
    :members:
 
-.. automodule:: synbio.protocols.gibson
-   :members:
+.. autoclass:: synbio.protocols.clone.Clone
 
+.. autoclass:: synbio.protocols.gibson.Gibson
 
-.. automodule:: synbio.protocols.goldengate
-   :members:
+.. autoclass:: synbio.protocols.goldengate.GoldenGate
