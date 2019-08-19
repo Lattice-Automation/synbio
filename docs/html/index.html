@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>README &#8212; synbio 0.4.4 documentation</title>
+    <title>synbio &#8212; synbio 0.4.4 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -14,6 +14,7 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference" href="ref/ref.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -30,10 +31,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="readme">
-<h1>README<a class="headerlink" href="#readme" title="Permalink to this headline">¶</a></h1>
-</div>
-<div class="section" id="synbio">
+  <div class="section" id="synbio">
 <h1>synbio<a class="headerlink" href="#synbio" title="Permalink to this headline">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">synbio</span></code> is a library for designing and assembling DNA. Users can design plasmids or libraries and export multi-step build protocols. Input SeqRecords; output assembly SeqRecords, protocols, plate maps, and robotic picklists.</p>
 <div class="section" id="installation">
@@ -51,7 +49,7 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Combinatorial</span></code> - list of SeqRecords to combinatorially anneal into all valid assemblies</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CombinatorialBins</span></code> - list of bins of SeqRecords for combinatorial assembly between bins</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Library</span></code> - list of list of SeqRecords to combine into plasmids</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PlasmidLibrary</span></code> - list of list of SeqRecords to combine into plasmids</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Plasmid</span></code> - single list of SeqRecords to combine into a plasmid</p></li>
 </ul>
 </div>
@@ -158,111 +156,27 @@ W;;;;;;;;;
 </ul>
 <div class="toctree-wrapper compound">
 </div>
-<span class="target" id="module-synbio.designs"></span><p>Designs are build specifications that return lists of SeqRecord lists.</p>
-<dl class="class">
-<dt id="synbio.designs.Combinatorial">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.designs.</code><code class="sig-name descname">Combinatorial</code><span class="sig-paren">(</span><em class="sig-param">records: Iterable[Bio.SeqRecord.SeqRecord] = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/synbio/designs.html#Combinatorial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#synbio.designs.Combinatorial" title="Permalink to this definition">¶</a></dt>
-<dd><p>A list of SeqRecords. Find and use all valid combinations.</p>
-<p>Code structure-wise it’s the same as a Plasmid but multiple assemblies
-are possible given a single set of SeqRecords. List of SeqRecords in,
-list of SeqRecords out. Versus List of SeqRecords in one SeqRecord
-out for a Plasmid design</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>{Iterable</strong><strong>[</strong><strong>SeqRecord</strong><strong>]</strong><strong>} -- list of SeqRecord</strong> (<em>records</em>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="class">
-<dt id="synbio.designs.CombinatorialBins">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.designs.</code><code class="sig-name descname">CombinatorialBins</code><span class="sig-paren">(</span><em class="sig-param">bins: Iterable[List[Bio.SeqRecord.SeqRecord]] = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/synbio/designs.html#CombinatorialBins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#synbio.designs.CombinatorialBins" title="Permalink to this definition">¶</a></dt>
-<dd><p>A list of bins of SeqRecords. All combinations between bins are attempted.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>{Iterable</strong><strong>[</strong><strong>List</strong><strong>[</strong><strong>SeqRecord</strong><strong>]</strong><strong>]</strong><strong>} -- list of SeqRecord bins</strong> (<em>bins</em>) – </p>
-</dd>
-</dl>
-<dl class="method">
-<dt id="synbio.designs.CombinatorialBins.append">
-<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">records: Union[Bio.SeqRecord.SeqRecord, List[Bio.SeqRecord.SeqRecord]]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/synbio/designs.html#CombinatorialBins.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#synbio.designs.CombinatorialBins.append" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add the SeqRecords as a bin for combinatorial design</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>{Union</strong><strong>[</strong><strong>SeqRecord</strong><strong>, </strong><strong>List</strong><strong>[</strong><strong>SeqRecord</strong><strong>]</strong><strong>]</strong><strong>} -- the records to add as a bin</strong> (<em>record</em>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="synbio.designs.Design">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.designs.</code><code class="sig-name descname">Design</code><a class="reference internal" href="_modules/synbio/designs.html#Design"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#synbio.designs.Design" title="Permalink to this definition">¶</a></dt>
-<dd><p>A SynBio design specification.</p>
-<dl class="method">
-<dt id="synbio.designs.Design.append">
-<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">records: List[Bio.SeqRecord.SeqRecord]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/synbio/designs.html#Design.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#synbio.designs.Design.append" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add to an existing design.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="synbio.designs.Design.get_all_records">
-<code class="sig-name descname">get_all_records</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; List[Bio.SeqRecord.SeqRecord]<a class="reference internal" href="_modules/synbio/designs.html#Design.get_all_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#synbio.designs.Design.get_all_records" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return all unique SeqRecords across all designs.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>List[SeqRecord] – a unique list of SeqRecords used across designs</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="synbio.designs.Library">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.designs.</code><code class="sig-name descname">Library</code><span class="sig-paren">(</span><em class="sig-param">sets: Iterable[List[Bio.SeqRecord.SeqRecord]] = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/synbio/designs.html#Library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#synbio.designs.Library" title="Permalink to this definition">¶</a></dt>
-<dd><p>An Iterable of SeqRecord lists. Each list of combined via the assembly method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>{Iterable</strong><strong>[</strong><strong>List</strong><strong>[</strong><strong>SeqRecord</strong><strong>]</strong><strong>]</strong><strong>} -- Iterable of SeqRecord sets</strong> (<em>sets</em>) – </p>
-</dd>
-</dl>
-<dl class="method">
-<dt id="synbio.designs.Library.append">
-<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">records: Union[Bio.SeqRecord.SeqRecord, List[Bio.SeqRecord.SeqRecord]]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/synbio/designs.html#Library.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#synbio.designs.Library.append" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a new set or SeqRecord to the library</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>{Union</strong><strong>[</strong><strong>SeqRecord</strong><strong>, </strong><strong>List</strong><strong>[</strong><strong>SeqRecord</strong><strong>]</strong><strong>]</strong><strong>} -- the records to add as a set</strong> (<em>records</em>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="synbio.designs.Plasmid">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.designs.</code><code class="sig-name descname">Plasmid</code><span class="sig-paren">(</span><em class="sig-param">records: Iterable[Bio.SeqRecord.SeqRecord] = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/synbio/designs.html#Plasmid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#synbio.designs.Plasmid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a plasmid from a list of SeqRecords</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>{List</strong><strong>[</strong><strong>SeqRecord</strong><strong>]</strong><strong>} -- SeqRecords to concatenate into a plasmid</strong> (<em>records</em>) – </p>
-</dd>
-</dl>
-<dl class="method">
-<dt id="synbio.designs.Plasmid.append">
-<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">records: Union[Bio.SeqRecord.SeqRecord, List[Bio.SeqRecord.SeqRecord]]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/synbio/designs.html#Plasmid.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#synbio.designs.Plasmid.append" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add the SeqRecord to this plasmid’s list of SeqRecords/fragments</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>{SeqRecord} -- the SeqRecord to add to the plasmid specification</strong> (<em>record</em>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ref/ref.html">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ref/designs.html">Designs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ref/protocols.html">Protocols</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Assembly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html#protocols">Protocols</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#gibson-assembly">Gibson Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#golden-gate-assembly">Golden Gate Assembly</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -291,11 +205,21 @@ out for a Plasmid design</p>
 
 
 <h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ref/ref.html">Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Assembly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html#protocols">Protocols</a></li>
+</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="ref/ref.html" title="next chapter">Reference</a></li>
   </ul></li>
 </ul>
 </div>

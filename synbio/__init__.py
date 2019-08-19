@@ -1,4 +1,4 @@
-"""Library for synthetic biology design and build."""
+"""PlasmidLibrary for synthetic biology design and build."""
 
 from .mix import Mix
 from .primers import Primers

@@ -221,7 +221,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">records</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="Library"><a class="viewcode-back" href="../../index.html#synbio.designs.Library">[docs]</a><span class="k">class</span> <span class="nc">Library</span><span class="p">(</span><span class="n">Design</span><span class="p">):</span>
+<div class="viewcode-block" id="PlasmidLibrary"><a class="viewcode-back" href="../../index.html#synbio.designs.PlasmidLibrary">[docs]</a><span class="k">class</span> <span class="nc">PlasmidLibrary</span><span class="p">(</span><span class="n">Design</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;An Iterable of SeqRecord lists. Each list of combined via the assembly method.</span>
 
 <span class="sd">    Arguments:</span>
@@ -236,7 +236,7 @@
 
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_bin</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Library requires a list of SeqRecord sets (lists).</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;PlasmidLibrary requires a list of SeqRecord sets (lists).</span><span class="se">\n</span><span class="s2">&quot;</span>
                     <span class="o">+</span> <span class="n">f</span><span class="s2">&quot;First bin is: {type(first_bin)}&quot;</span>
                 <span class="p">)</span>
 
@@ -266,7 +266,7 @@
 
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sets</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Library.append"><a class="viewcode-back" href="../../index.html#synbio.designs.Library.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">records</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">]]):</span>
+<div class="viewcode-block" id="PlasmidLibrary.append"><a class="viewcode-back" href="../../index.html#synbio.designs.PlasmidLibrary.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">records</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">SeqRecord</span><span class="p">]]):</span>
         <span class="sd">&quot;&quot;&quot;Add a new set or SeqRecord to the library</span>
 
 <span class="sd">        Arguments:</span>

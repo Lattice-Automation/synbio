@@ -7,7 +7,7 @@ from Bio.Alphabet.IUPAC import unambiguous_dna
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from synbio.designs import Plasmid, Combinatorial, CombinatorialBins, Library
+from synbio.designs import Plasmid, Combinatorial, CombinatorialBins, PlasmidLibrary
 
 
 class TestDesign(unittest.TestCase):
@@ -96,7 +96,7 @@ class TestDesign(unittest.TestCase):
     def test_library(self):
         """Create and traverse a library of SeqRecords/SeqRecord-lists."""
 
-        lib = Library([[self.r1, self.r2]])
+        lib = PlasmidLibrary([[self.r1, self.r2]])
         lib.append([self.r3, self.r4])
         lib.append(self.r5)
 

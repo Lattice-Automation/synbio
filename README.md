@@ -18,7 +18,7 @@ All are in `synbio.designs`:
 
 - `Combinatorial` - list of SeqRecords to combinatorially anneal into all valid assemblies
 - `CombinatorialBins` - list of bins of SeqRecords for combinatorial assembly between bins
-- `Library` - list of list of SeqRecords to combine into plasmids
+- `PlasmidLibrary` - list of list of SeqRecords to combine into plasmids
 - `Plasmid` - single list of SeqRecords to combine into a plasmid
 
 ### Protocols

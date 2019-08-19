@@ -100,7 +100,7 @@ class Plasmid(Design):
 class Combinatorial(Plasmid):
     """A list of SeqRecords. Find and use all valid combinations.  
 
-    Code structure-wise it's the same as a Plasmid but multiple assemblies
+    Structure-wise it's the same as a Plasmid but multiple assemblies
     are possible given a single set of SeqRecords. List of SeqRecords in,
     list of SeqRecords out. Versus List of SeqRecords in one SeqRecord
     out for a Plasmid design
@@ -188,8 +188,8 @@ class CombinatorialBins(Design):
         self.bins.append(records)
 
 
-class Library(Design):
-    """An Iterable of SeqRecord lists. Each list of combined via the assembly method.
+class PlasmidLibrary(Design):
+    """A list of SeqRecord lists. Each list is combined into a Plasmid.
 
     Arguments:
         sets {Iterable[List[SeqRecord]]} -- Iterable of SeqRecord sets
@@ -203,7 +203,7 @@ class Library(Design):
 
             if not isinstance(first_bin, list):
                 raise ValueError(
-                    "Library requires a list of SeqRecord sets (lists).\n"
+                    "PlasmidLibrary requires a list of SeqRecord sets (lists).\n"
                     + f"First bin is: {type(first_bin)}"
                 )
 

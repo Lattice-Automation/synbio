@@ -1,5 +1,3 @@
-# Examples
-
 ## Assembly
 
 - Gibson Assembly with primer generation [gibson_assembly.py](gibson_assembly.py)

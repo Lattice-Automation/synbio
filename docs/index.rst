@@ -1,14 +1,20 @@
-README
-======
-
 .. mdinclude:: ../README.md
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: synbio.designs
-   :members:
+.. toctree::
+   :caption: Reference:
+   :maxdepth: 3
+
+   ref/ref
+
+.. toctree::
+   :caption: Examples:
+   :maxdepth: 3
+
+   examples
 
 
 Indices and tables

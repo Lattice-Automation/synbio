@@ -4,7 +4,7 @@ import os
 
 from Bio.SeqIO import parse
 
-from synbio.designs import Library
+from synbio.designs import PlasmidLibrary
 from synbio.protocols import Gibson
 
 # read in the SeqRecords from files
@@ -13,7 +13,7 @@ insert2 = next(parse(os.path.join("..", "data", "gibson", "BBa_K1649003.fa"), "f
 backbone = next(parse(os.path.join("..", "data", "gibson", "pSB1C3.fa"), "fasta"))
 
 # concatenate the insert to the backbone
-design = Library([[insert1, backbone], [insert2, backbone]])
+design = PlasmidLibrary([[insert1, backbone], [insert2, backbone]])
 
 # create a protocol using Gibson as the sole composite step and run
 # filter on KanR in a backbone
