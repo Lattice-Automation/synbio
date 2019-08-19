@@ -1,6 +1,8 @@
 Assembly
 --------
 
+Simulating DNA assembly between SeqRecords without a protocol.
+
 Gibson Assembly with primer generation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -13,6 +15,9 @@ Cloning via restriction digest and ligation
 
 Protocols
 ---------
+
+Executing a DNA assembly while accumulating a `Protocol` object for writing
+protocol instructions, plate layouts, DNA files (`gb`, `fa`) and protocol inputs.
 
 Gibson Assembly of a plasmid library
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
