@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>README &#8212; synbio 0.4.3 documentation</title>
+    <title>README &#8212; synbio 0.4.4 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -102,26 +102,26 @@
 <span class="n">protocol</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
 <span class="c1"># export all the output plasmids to a multi-FASTA</span>
-<span class="n">protocol</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span><span class="s2">&quot;composite_parts.fasta&quot;</span><span class="p">)</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span><span class="s2">&quot;plasmids.fasta&quot;</span><span class="p">)</span>
 
 <span class="c1"># export plate layouts</span>
-<span class="n">protocol</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;plate_layouts.csv&quot;</span><span class="p">)</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;plates.csv&quot;</span><span class="p">)</span>
 
 <span class="c1"># export human protocol</span>
 <span class="n">protocol</span><span class="o">.</span><span class="n">to_txt</span><span class="p">(</span><span class="s2">&quot;protocol.txt&quot;</span><span class="p">)</span>
 
 <span class="c1"># export a hamilton picklist</span>
-<span class="n">protocol</span><span class="o">.</span><span class="n">to_picklists</span><span class="p">(</span><span class="s2">&quot;robotic_picklist.gwl&quot;</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="s2">&quot;hamilton&quot;</span><span class="p">)</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_picklists</span><span class="p">(</span><span class="s2">&quot;picklist&quot;</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="s2">&quot;hamilton&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>_composite<em>parts.fasta</em></p>
+<p>plasmids.fasta:</p>
 <div class="highlight-txt notranslate"><div class="highlight"><pre><span></span>&gt;J23100_AB+B0032m_BC+C0012m_CD+B0015_DE+DVK_AE
 GGAGTTGACGGCTAGCTCAGTCCTAGGTACAGTGCTAGCTACTAGAGTCACACAGGAAAG
 TACTAAATGATGGTGAATGTGAAACCAGTAACGTTATACGATGTCGCAGAGTATGCCGGT
 ...
 </pre></div>
 </div>
-<p>_plate<em>layouts.csv</em></p>
+<p>plates.csv:</p>
 <div class="highlight-csv notranslate"><div class="highlight"><pre><span></span>Setup Wells with volumes (uL) shown:
 Plate:1,1,2,3,4,5,6,7,8,9,10,11,12
 A,B0015_DE(4),C0080_CD(18),R0010_AB(54),water(36)
@@ -129,7 +129,7 @@ B,B0015_DE(160),DVK_AE(160),cre_CD(18),water(156)
 ...
 </pre></div>
 </div>
-<p><em>protocol.txt</em></p>
+<p>protocol.txt:</p>
 <div class="highlight-txt notranslate"><div class="highlight"><pre><span></span>Combinatorial GoldenGate:
 1. Setup PCR plate with (volumes) shown:
     1.1. Dilute plasmid DNA to 75 ng/µL in &#39;water&#39;
@@ -137,7 +137,7 @@ B,B0015_DE(160),DVK_AE(160),cre_CD(18),water(156)
 ...
 </pre></div>
 </div>
-<p>_robotic<em>picklist.gwl</em></p>
+<p>picklist.gwl:</p>
 <div class="highlight-txt notranslate"><div class="highlight"><pre><span></span>A;Plate:2;;;15;;2.0;;;
 D;Plate:3;;;80;;2.0;;;
 W;;;;;;;;;
@@ -158,7 +158,7 @@ W;;;;;;;;;
 </ul>
 <div class="toctree-wrapper compound">
 </div>
-<span class="target" id="module-synbio"></span><p>Library for synthetic biology design and build.</p>
+<span class="target" id="module-synbio.designs"></span><p>Designs are build specifications that return lists of SeqRecord lists.</p>
 </div>
 </div>
 <div class="section" id="indices-and-tables">

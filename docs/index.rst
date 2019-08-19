@@ -7,10 +7,7 @@ README
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: synbio
-   :members:
-
-
+.. automodule:: synbio.designs
 
 
 Indices and tables

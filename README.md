@@ -69,19 +69,19 @@ protocol = GoldenGate(
 protocol.run()
 
 # export all the output plasmids to a multi-FASTA
-protocol.to_fasta("composite_parts.fasta")
+protocol.to_fasta("plasmids.fasta")
 
 # export plate layouts
-protocol.to_csv("plate_layouts.csv")
+protocol.to_csv("plates.csv")
 
 # export human protocol
 protocol.to_txt("protocol.txt")
 
 # export a hamilton picklist
-protocol.to_picklists("robotic_picklist.gwl", platform="hamilton")
+protocol.to_picklists("picklist", platform="hamilton")
 ```
 
-_composite_parts.fasta_
+plasmids.fasta:
 
 ```txt
 >J23100_AB+B0032m_BC+C0012m_CD+B0015_DE+DVK_AE
@@ -90,7 +90,7 @@ TACTAAATGATGGTGAATGTGAAACCAGTAACGTTATACGATGTCGCAGAGTATGCCGGT
 ...
 ```
 
-_plate_layouts.csv_
+plates.csv:
 
 ```csv
 Setup Wells with volumes (uL) shown:
@@ -100,7 +100,7 @@ B,B0015_DE(160),DVK_AE(160),cre_CD(18),water(156)
 ...
 ```
 
-_protocol.txt_
+protocol.txt:
 
 ```txt
 Combinatorial GoldenGate:
@@ -110,7 +110,7 @@ Combinatorial GoldenGate:
 ...
 ```
 
-_robotic_picklist.gwl_
+picklist.gwl:
 
 ```txt
 A;Plate:2;;;15;;2.0;;;
