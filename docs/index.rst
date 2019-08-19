@@ -8,9 +8,3 @@ Contents
 
    ref/ref
    examples
-
-
-Index
-=====
-
-:ref:`genindex`
