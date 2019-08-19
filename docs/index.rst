@@ -8,6 +8,7 @@ README
    :caption: Contents:
 
 .. automodule:: synbio.designs
+   :members:
 
 
 Indices and tables
