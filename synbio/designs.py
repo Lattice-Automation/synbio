@@ -189,7 +189,7 @@ class CombinatorialBins(Design):
 
 
 class PlasmidLibrary(Design):
-    """A list of SeqRecord lists. Each list is combined into a Plasmid.
+    """A list of SeqRecord lists. Each nested list is combined into a Plasmid.
 
     Arguments:
         sets {Iterable[List[SeqRecord]]} -- Iterable of SeqRecord sets

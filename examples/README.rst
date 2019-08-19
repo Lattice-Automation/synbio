@@ -5,25 +5,39 @@ Assembly
 ========
 
 Gibson Assembly with primer generation
+--------------------------------------
 
-.. include:: gibson_assembly.py
+.. literalinclude:: gibson_assembly.py
 
-- Cloning via restriction digest and ligation [clone_assembly.py](./clone_assembly.py)
+Cloning via restriction digest and ligation
+-------------------------------------------
+
+.. literalinclude:: clone_assembly.py
 
 Protocols
 =========
 
-- Gibson Assembly of a plasmid library
-  [gibson_library.py](./gibson_library.py)
+Gibson Assembly of a plasmid library
+------------------------------------
 
-- Gibson Assembly of a single plasmid
-  [gibson_plasmid.py](./gibson_plasmid.py)
+.. literalinclude:: gibson_library.py
 
-- Golden Gate Assembly of a single plasmid
-  [goldengate_plasmid.py](./goldengate_plasmid.py)
+Gibson Assembly of a single plasmid
+------------------------------------
 
-- Combinatorial Golden Gate Assembly (all valid plasmid combinations)
-  [goldengate_combinatorial.py](./goldengate_combinatorial.py)
+.. literalinclude:: gibson_plasmid.py
 
-- Combinatorial Golden Gate Assembly with bins (all plasmid combinations between bins)
-  [goldengate_combinatorial_bins.py](./goldengate_combinatorial_bins.py)
+Golden Gate Assembly of a single plasmid
+----------------------------------------
+
+.. literalinclude:: goldengate_plasmid.py
+
+Combinatorial Golden Gate Assembly (all valid plasmid combinations)
+-------------------------------------------------------------------
+
+.. literalinclude:: goldengate_combinatorial.py
+
+Combinatorial Golden Gate Assembly with bins (all plasmid combinations between bins)
+------------------------------------------------------------------------------------
+
+.. literalinclude:: goldengate_combinatorial_bins.py

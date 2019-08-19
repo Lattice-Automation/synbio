@@ -10,8 +10,13 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import glob
 import os
+import shutil
 import sys
+
+for filename in glob.glob(os.path.join("..", "examples", "*.py")):
+    shutil.copy(filename, ".")
 
 sys.path.append(os.path.abspath(os.path.join("..")))
 
@@ -19,7 +24,6 @@ sys.path.append(os.path.abspath(os.path.join("..")))
 # -- Project information -----------------------------------------------------
 
 project = "synbio"
-copyright = "2019, jjtimmons"
 author = "jjtimmons"
 
 # The full version, including alpha/beta/rc tags

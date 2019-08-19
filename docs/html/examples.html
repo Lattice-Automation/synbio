@@ -86,8 +86,19 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#assembly">Assembly</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#protocols">Protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#assembly">Assembly</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gibson-assembly-with-primer-generation">Gibson Assembly with primer generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cloning-via-restriction-digest-and-ligation">Cloning via restriction digest and ligation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#protocols">Protocols</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gibson-assembly-of-a-plasmid-library">Gibson Assembly of a plasmid library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gibson-assembly-of-a-single-plasmid">Gibson Assembly of a single plasmid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#golden-gate-assembly-of-a-single-plasmid">Golden Gate Assembly of a single plasmid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#combinatorial-golden-gate-assembly-all-valid-plasmid-combinations">Combinatorial Golden Gate Assembly (all valid plasmid combinations)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#combinatorial-golden-gate-assembly-with-bins-all-plasmid-combinations-between-bins">Combinatorial Golden Gate Assembly with bins (all plasmid combinations between bins)</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -157,25 +168,277 @@
 </div>
 <div class="section" id="assembly">
 <h1>Assembly<a class="headerlink" href="#assembly" title="Permalink to this headline">¶</a></h1>
-<p>Gibson Assembly with primer generation</p>
-<ul class="simple">
-<li><p>Cloning via restriction digest and ligation [clone_assembly.py](./clone_assembly.py)</p></li>
-</ul>
+<div class="section" id="gibson-assembly-with-primer-generation">
+<h2>Gibson Assembly with primer generation<a class="headerlink" href="#gibson-assembly-with-primer-generation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of Gibson cloning fragments together via PCR.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># &#39;synbio&#39; uses the enzymes provided in Bio.Restriction</span>
+<span class="kn">from</span> <span class="nn">Bio.SeqIO</span> <span class="k">import</span> <span class="n">parse</span>
+<span class="kn">from</span> <span class="nn">synbio.assembly</span> <span class="k">import</span> <span class="n">gibson</span>
+
+<span class="n">insert</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;gibson&quot;</span><span class="p">,</span> <span class="s2">&quot;pdsred2.fa&quot;</span><span class="p">),</span> <span class="s2">&quot;fasta&quot;</span><span class="p">))</span>
+<span class="n">backbone</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;gibson&quot;</span><span class="p">,</span> <span class="s2">&quot;pDusk.fa&quot;</span><span class="p">),</span> <span class="s2">&quot;fasta&quot;</span><span class="p">))</span>
+
+<span class="c1"># assembled the SeqRecords together, creating primers for each SeqRecord so that</span>
+<span class="c1"># after PCR they will anneal to one another</span>
+<span class="n">fragments</span> <span class="o">=</span> <span class="p">[</span><span class="n">insert</span><span class="p">,</span> <span class="n">backbone</span><span class="p">]</span>
+<span class="n">plasmid</span><span class="p">,</span> <span class="n">primer_pairs</span> <span class="o">=</span> <span class="n">gibson</span><span class="p">(</span><span class="n">fragments</span><span class="p">)</span>
+
+<span class="c1"># inspect the plasmids that will be created</span>
+<span class="k">for</span> <span class="n">fragment</span><span class="p">,</span> <span class="n">primers</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fragments</span><span class="p">,</span> <span class="n">primer_pairs</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PCR&quot;</span><span class="p">,</span> <span class="n">fragment</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;with FWD&quot;</span><span class="p">,</span> <span class="n">primers</span><span class="o">.</span><span class="n">fwd</span><span class="p">,</span> <span class="s2">&quot;and REV&quot;</span><span class="p">,</span> <span class="n">primers</span><span class="o">.</span><span class="n">rev</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cloning-via-restriction-digest-and-ligation">
+<h2>Cloning via restriction digest and ligation<a class="headerlink" href="#cloning-via-restriction-digest-and-ligation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of cloning together SeqRecords directly.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># &#39;synbio&#39; uses the enzymes provided in Bio.Restriction</span>
+<span class="kn">from</span> <span class="nn">Bio.Restriction</span> <span class="k">import</span> <span class="n">NotI</span><span class="p">,</span> <span class="n">BamHI</span>
+<span class="kn">from</span> <span class="nn">Bio.SeqIO</span> <span class="k">import</span> <span class="n">parse</span>
+<span class="kn">from</span> <span class="nn">synbio.assembly</span> <span class="k">import</span> <span class="n">clone</span>
+
+<span class="c1"># insert has &quot;DsRed2&quot; between NotI and BamHI</span>
+<span class="n">insert</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;cloning&quot;</span><span class="p">,</span> <span class="s2">&quot;pdsred2.gb&quot;</span><span class="p">),</span> <span class="s2">&quot;genbank&quot;</span><span class="p">))</span>
+
+<span class="c1"># backbone has &quot;KanR&quot; resistance between BamHI and NotI</span>
+<span class="n">backbone</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;cloning&quot;</span><span class="p">,</span> <span class="s2">&quot;pdusk.gb&quot;</span><span class="p">),</span> <span class="s2">&quot;genbank&quot;</span><span class="p">))</span>
+
+<span class="c1"># simulate a digestion and ligation between the backbone and the insert via NotI and BamHI</span>
+<span class="c1"># keep only the plasmids that have both the DsRed2 and KanR features</span>
+<span class="n">plasmids</span> <span class="o">=</span> <span class="n">clone</span><span class="p">([</span><span class="n">insert</span><span class="p">,</span> <span class="n">backbone</span><span class="p">],</span> <span class="p">[</span><span class="n">NotI</span><span class="p">,</span> <span class="n">BamHI</span><span class="p">],</span> <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;DsRed2&quot;</span><span class="p">,</span> <span class="s2">&quot;KanR&quot;</span><span class="p">])</span>
+
+<span class="c1"># inspect the plasmids that will be created</span>
+<span class="k">for</span> <span class="n">plasmid</span> <span class="ow">in</span> <span class="n">plasmids</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">plasmid</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">f</span><span class="s2">&quot;{len(plasmid)}bp&quot;</span><span class="p">,</span> <span class="n">plasmid</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="protocols">
 <h1>Protocols<a class="headerlink" href="#protocols" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><p>Gibson Assembly of a plasmid library
-[gibson_library.py](./gibson_library.py)</p></li>
-<li><p>Gibson Assembly of a single plasmid
-[gibson_plasmid.py](./gibson_plasmid.py)</p></li>
-<li><p>Golden Gate Assembly of a single plasmid
-[goldengate_plasmid.py](./goldengate_plasmid.py)</p></li>
-<li><p>Combinatorial Golden Gate Assembly (all valid plasmid combinations)
-[goldengate_combinatorial.py](./goldengate_combinatorial.py)</p></li>
-<li><p>Combinatorial Golden Gate Assembly with bins (all plasmid combinations between bins)
-[goldengate_combinatorial_bins.py](./goldengate_combinatorial_bins.py)</p></li>
-</ul>
+<div class="section" id="gibson-assembly-of-a-plasmid-library">
+<h2>Gibson Assembly of a plasmid library<a class="headerlink" href="#gibson-assembly-of-a-plasmid-library" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a Gibson Assembly for a library of assemblies.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">Bio.SeqIO</span> <span class="k">import</span> <span class="n">parse</span>
+
+<span class="kn">from</span> <span class="nn">synbio.designs</span> <span class="k">import</span> <span class="n">PlasmidLibrary</span>
+<span class="kn">from</span> <span class="nn">synbio.protocols</span> <span class="k">import</span> <span class="n">Gibson</span>
+
+<span class="c1"># read in the SeqRecords from files</span>
+<span class="n">insert1</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;gibson&quot;</span><span class="p">,</span> <span class="s2">&quot;BBa_K1085023.fa&quot;</span><span class="p">),</span> <span class="s2">&quot;fasta&quot;</span><span class="p">))</span>
+<span class="n">insert2</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;gibson&quot;</span><span class="p">,</span> <span class="s2">&quot;BBa_K1649003.fa&quot;</span><span class="p">),</span> <span class="s2">&quot;fasta&quot;</span><span class="p">))</span>
+<span class="n">backbone</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;gibson&quot;</span><span class="p">,</span> <span class="s2">&quot;pSB1C3.fa&quot;</span><span class="p">),</span> <span class="s2">&quot;fasta&quot;</span><span class="p">))</span>
+
+<span class="c1"># concatenate the insert to the backbone</span>
+<span class="n">design</span> <span class="o">=</span> <span class="n">PlasmidLibrary</span><span class="p">([[</span><span class="n">insert1</span><span class="p">,</span> <span class="n">backbone</span><span class="p">],</span> <span class="p">[</span><span class="n">insert2</span><span class="p">,</span> <span class="n">backbone</span><span class="p">]])</span>
+
+<span class="c1"># create a protocol using Gibson as the sole composite step and run</span>
+<span class="c1"># filter on KanR in a backbone</span>
+<span class="n">protocol</span> <span class="o">=</span> <span class="n">Gibson</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">)</span>
+
+<span class="c1"># export the composite plasmid</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span><span class="s2">&quot;plasmid.fasta&quot;</span><span class="p">)</span>
+
+<span class="c1"># export plate layouts</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;plates.csv&quot;</span><span class="p">)</span>
+
+<span class="c1"># export human readable protocol</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_txt</span><span class="p">(</span><span class="s2">&quot;protocol.txt&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="gibson-assembly-of-a-single-plasmid">
+<h2>Gibson Assembly of a single plasmid<a class="headerlink" href="#gibson-assembly-of-a-single-plasmid" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a Gibson Assembly from two fragments.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">Bio.SeqIO</span> <span class="k">import</span> <span class="n">parse</span>
+
+<span class="kn">from</span> <span class="nn">synbio.designs</span> <span class="k">import</span> <span class="n">Plasmid</span>
+<span class="kn">from</span> <span class="nn">synbio.protocols</span> <span class="k">import</span> <span class="n">Gibson</span>
+
+<span class="c1"># read in the SeqRecords from files</span>
+<span class="n">insert</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;gibson&quot;</span><span class="p">,</span> <span class="s2">&quot;BBa_K1085023.fa&quot;</span><span class="p">),</span> <span class="s2">&quot;fasta&quot;</span><span class="p">))</span>
+<span class="n">backbone</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;gibson&quot;</span><span class="p">,</span> <span class="s2">&quot;pSB1C3.fa&quot;</span><span class="p">),</span> <span class="s2">&quot;fasta&quot;</span><span class="p">))</span>
+
+<span class="c1"># concatenate the insert to the backbone</span>
+<span class="n">design</span> <span class="o">=</span> <span class="n">Plasmid</span><span class="p">([</span><span class="n">insert</span><span class="p">,</span> <span class="n">backbone</span><span class="p">])</span>
+
+<span class="c1"># create a protocol using Gibson as the sole composite step and run</span>
+<span class="c1"># filter on KanR in a backbone</span>
+<span class="n">protocol</span> <span class="o">=</span> <span class="n">Gibson</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">)</span>
+
+<span class="c1"># export the composite plasmid</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span><span class="s2">&quot;plasmid.fasta&quot;</span><span class="p">)</span>
+
+<span class="c1"># export plate layouts</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;plates.csv&quot;</span><span class="p">)</span>
+
+<span class="c1"># export human readable protocol</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_txt</span><span class="p">(</span><span class="s2">&quot;protocol.txt&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="golden-gate-assembly-of-a-single-plasmid">
+<h2>Golden Gate Assembly of a single plasmid<a class="headerlink" href="#golden-gate-assembly-of-a-single-plasmid" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a Golden Gate Assembly from a single list of SeqRecords into a plasmid.</span>
+
+<span class="sd">The SeqRecords are combined into new plasmid SeqRecords:</span>
+<span class="sd">all new combinations of SeqRecords. An error is thrown if no new plasmids are possible.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">Bio.SeqIO</span> <span class="k">import</span> <span class="n">parse</span>
+
+<span class="kn">from</span> <span class="nn">synbio.designs</span> <span class="k">import</span> <span class="n">Plasmid</span>
+<span class="kn">from</span> <span class="nn">synbio.protocols</span> <span class="k">import</span> <span class="n">GoldenGate</span>
+
+
+<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;read a SeqRecord from a file from a Genbank in the &quot;goldengate&quot; dir&quot;&quot;&quot;</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;goldengate&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;genbank&quot;</span><span class="p">))</span>
+
+
+<span class="c1"># read in each SeqRecord: a promoter, RBS, CDS, terminator and backbone</span>
+<span class="n">design</span> <span class="o">=</span> <span class="n">Plasmid</span><span class="p">(</span>
+    <span class="n">read</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="s2">&quot;J23100_AB.gb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;B0032m_BC.gb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;C0012m_CD.gb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;B0015_DE.gb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;DVK_AE.gb&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># create a protocol using GoldenGate as the sole composite step and run</span>
+<span class="c1"># filter on KanR in a backbone</span>
+<span class="n">protocol</span> <span class="o">=</span> <span class="n">GoldenGate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Golden Gate Plasmid&quot;</span><span class="p">,</span> <span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># export the composite plasmid</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span><span class="s2">&quot;plasmid.fasta&quot;</span><span class="p">)</span>
+
+<span class="c1"># export plate layouts</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;plates.csv&quot;</span><span class="p">)</span>
+
+<span class="c1"># export human readable protocol</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_txt</span><span class="p">(</span><span class="s2">&quot;protocol.txt&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="combinatorial-golden-gate-assembly-all-valid-plasmid-combinations">
+<h2>Combinatorial Golden Gate Assembly (all valid plasmid combinations)<a class="headerlink" href="#combinatorial-golden-gate-assembly-all-valid-plasmid-combinations" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a Combinatorial Golden Gate assembly with steps and output.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">Bio.SeqIO</span> <span class="k">import</span> <span class="n">parse</span>
+
+<span class="kn">from</span> <span class="nn">synbio.designs</span> <span class="k">import</span> <span class="n">Combinatorial</span>
+<span class="kn">from</span> <span class="nn">synbio.protocols</span> <span class="k">import</span> <span class="n">GoldenGate</span>
+
+
+<span class="k">def</span> <span class="nf">read_all_records</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Gather all SeqRecords from &quot;goldengate&quot; dir in examples.&quot;&quot;&quot;</span>
+
+    <span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;goldengate&quot;</span><span class="p">)</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">data_dir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.gb&quot;</span><span class="p">):</span>
+            <span class="n">records</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="s2">&quot;genbank&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">records</span>
+
+
+<span class="c1"># create a combinatorial library design from multiple &quot;bins&quot;</span>
+<span class="n">design</span> <span class="o">=</span> <span class="n">Combinatorial</span><span class="p">(</span><span class="n">read_all_records</span><span class="p">())</span>
+
+<span class="c1"># create a protocol using Golden Gate as the sole composite step and run</span>
+<span class="n">protocol</span> <span class="o">=</span> <span class="n">GoldenGate</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Combinatorial Golden Gate&quot;</span><span class="p">,</span> <span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;KanR&quot;</span><span class="p">],</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">5</span>
+<span class="p">)</span>
+
+<span class="c1"># export all the output plasmids to a multi-FASTA</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span><span class="s2">&quot;composite_parts.fasta&quot;</span><span class="p">)</span>
+
+<span class="c1"># export plate layouts</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;plate_layouts.csv&quot;</span><span class="p">)</span>
+
+<span class="c1"># export human protocol</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_txt</span><span class="p">(</span><span class="s2">&quot;protocol.txt&quot;</span><span class="p">)</span>
+
+<span class="c1"># export a hamilton picklist</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_picklists</span><span class="p">(</span><span class="s2">&quot;robotic_picklist.gwl&quot;</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="s2">&quot;tecan&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="combinatorial-golden-gate-assembly-with-bins-all-plasmid-combinations-between-bins">
+<h2>Combinatorial Golden Gate Assembly with bins (all plasmid combinations between bins)<a class="headerlink" href="#combinatorial-golden-gate-assembly-with-bins-all-plasmid-combinations-between-bins" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a CombinatorialBins MoClo assembly with steps and output.</span>
+
+<span class="sd">All possible assemblies from combinations of all SeqRecords across</span>
+<span class="sd">multiple bins are tested and those that will successfully linearize</span>
+<span class="sd">are combined into composite plasmids.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">Bio.SeqIO</span> <span class="k">import</span> <span class="n">parse</span>
+
+<span class="kn">from</span> <span class="nn">synbio.designs</span> <span class="k">import</span> <span class="n">CombinatorialBins</span>
+<span class="kn">from</span> <span class="nn">synbio.protocols</span> <span class="k">import</span> <span class="n">GoldenGate</span>
+
+
+<span class="k">def</span> <span class="nf">read_all_records</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Gather all SeqRecords from &quot;goldengate&quot; dir in examples.&quot;&quot;&quot;</span>
+
+    <span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;goldengate&quot;</span><span class="p">)</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">data_dir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.gb&quot;</span><span class="p">):</span>
+            <span class="n">records</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="s2">&quot;genbank&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">records</span>
+
+
+<span class="c1"># create a combinatorial library design from multiple &quot;bins&quot;</span>
+<span class="n">design</span> <span class="o">=</span> <span class="n">CombinatorialBins</span><span class="p">()</span>
+<span class="n">gg_records</span> <span class="o">=</span> <span class="n">read_all_records</span><span class="p">()</span>
+<span class="k">for</span> <span class="nb">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;promoter&quot;</span><span class="p">,</span> <span class="s2">&quot;RBS&quot;</span><span class="p">,</span> <span class="s2">&quot;CDS&quot;</span><span class="p">,</span> <span class="s2">&quot;terminator&quot;</span><span class="p">,</span> <span class="s2">&quot;KanR&quot;</span><span class="p">]:</span>
+    <span class="n">record_bin</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">gg_records</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="nb">type</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">features</span><span class="p">)]</span>
+    <span class="n">design</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record_bin</span><span class="p">)</span>  <span class="c1"># add a new cominatorial bin</span>
+
+<span class="c1"># create a protocol using GoldenGate as the sole composite step and run</span>
+<span class="c1"># filter on plasmids with a KanR feature in the backbone and at least 5 consituent SeqRecords</span>
+<span class="n">protocol</span> <span class="o">=</span> <span class="n">GoldenGate</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;CombinatorialBins Golden Gate&quot;</span><span class="p">,</span> <span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;KanR&quot;</span><span class="p">],</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">5</span>
+<span class="p">)</span>
+
+<span class="c1"># export all the output plasmids to a multi-FASTA</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span><span class="s2">&quot;plasmids.fasta&quot;</span><span class="p">)</span>
+
+<span class="c1"># export plate layouts</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;plates.csv&quot;</span><span class="p">)</span>
+
+<span class="c1"># export protocol</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_txt</span><span class="p">(</span><span class="s2">&quot;protocol.txt&quot;</span><span class="p">)</span>
+
+<span class="c1"># because this is a larger assembly, make robotic instructions</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_picklists</span><span class="p">(</span><span class="s2">&quot;robotic_picklist.gwl&quot;</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="s2">&quot;tecan&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -196,7 +459,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, jjtimmons
+        &copy; Copyright 
 
     </p>
   </div>
