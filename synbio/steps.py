@@ -260,7 +260,7 @@ class ThermoCycle(Step):
         ...    Temperature(temp=97, time=5 * 60),  # denature
         ...    Temperature(temp=55, time=30),  # annealing
         ...    Temperature(temp=72, time=60),  # extension
-        ...])
+        ... ])
 
     Attributes:
         temps: list of temperatures in a gradient
@@ -369,4 +369,11 @@ HeatShock: List[Step] = [
     Add(add=Reagent("SOC"), volume=150.0),
     Incubate(temp=Temperature(temp=37, time=3600)),
 ]
-"""A composite HeatShock step for getting DNA into E coli."""
+"""A composite HeatShock step for getting DNA into E coli.
+
+>>> Move(volume=3.0),
+... Add(add=Species("E coli"), volume=10.0),
+... ThermoCycle(name="Heat shock", temps=[Temperature(temp=42, time=30)]),
+... Add(add=Reagent("SOC"), volume=150.0),
+... Incubate(temp=Temperature(temp=37, time=3600))
+"""
