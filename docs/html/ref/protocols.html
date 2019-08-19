@@ -86,7 +86,22 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Protocols</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#assembly">Assembly</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#gibson-assembly-with-primer-generation">Gibson Assembly with primer generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#cloning-via-restriction-digest-and-ligation">Cloning via restriction digest and ligation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#protocols">Protocols</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#gibson-assembly-of-a-plasmid-library">Gibson Assembly of a plasmid library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#gibson-assembly-of-a-single-plasmid">Gibson Assembly of a single plasmid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#golden-gate-assembly-of-a-single-plasmid">Golden Gate Assembly of a single plasmid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#combinatorial-golden-gate-assembly-all-valid-plasmid-combinations">Combinatorial Golden Gate Assembly: all valid plasmid combinations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#combinatorial-golden-gate-assembly-with-bins-all-plasmid-combinations-between-bins">Combinatorial Golden Gate Assembly with bins: all plasmid combinations between bins</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -167,6 +182,7 @@ assemblies, and create a protocol for preparing and ligating the fragments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Keyword Arguments</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>enzymes</strong> – the list of enzymes to digest the SeqRecords with</p></li>
 <li><p><strong>include</strong> – include only plasmids with a feature matching something
 in the include list use in backbone selection (default: {None})</p></li>
 <li><p><strong>mix</strong> – the assembly mix to use when mixing the assemblies with enzymes</p></li>
@@ -196,6 +212,8 @@ be considered valid. smaller assemblies are ignored</p></li>
 <dt id="synbio.protocols.gibson.Gibson">
 <em class="property">class </em><code class="sig-prename descclassname">synbio.protocols.gibson.</code><code class="sig-name descname">Gibson</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">hifi: bool = False</em>, <em class="sig-param">pcr_mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;</em>, <em class="sig-param">gibson_mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.gibson.Gibson" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gibson Assembly.</p>
+<p>Create primer pairs that will anneal each SeqRecord to its two neighbors
+so that, after PCR, the fragments will circularize via a Gibson Assembly.</p>
 <p>Based on the Gibson Assembly protocol outlined on the NEB site for kit (e5510):
 <a class="reference external" href="https://www.neb.com/protocols/2012/12/11/gibson-assembly-protocol-e5510">https://www.neb.com/protocols/2012/12/11/gibson-assembly-protocol-e5510</a></p>
 <dl class="field-list simple">
@@ -229,8 +247,9 @@ be considered valid. smaller assemblies are ignored</p></li>
 SeqRecords that will circularize into valid new plasmids.</p>
 <p>This Protocol is derived from NEB’s guide:
 <a class="reference external" href="https://www.neb.com/protocols/2018/10/02/golden-gate-assembly-protocol-for-using-neb-golden-gate-assembly-mix-e1601">https://www.neb.com/protocols/2018/10/02/golden-gate-assembly-protocol-for-using-neb-golden-gate-assembly-mix-e1601</a></p>
-<dl class="simple">
-<dt>Full responsibilities include:</dt><dd><ol class="arabic simple">
+<p>Full responsibilities include</p>
+<blockquote>
+<div><ol class="arabic simple">
 <li><dl class="simple">
 <dt>subselecting the input designs that will form valid plasmids</dt><dd><p>after digestion with BsaI and BpiI</p>
 </dd>
@@ -245,8 +264,7 @@ SeqRecords that will circularize into valid new plasmids.</p>
 </li>
 <li><p>add steps to carry out the rest of the assembly (heat shock, incubate, etc)</p></li>
 </ol>
-</dd>
-</dl>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Keyword Arguments</dt>
 <dd class="field-odd"><ul class="simple">

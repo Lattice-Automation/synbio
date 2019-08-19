@@ -32,13 +32,14 @@ class GoldenGate(Clone):
     https://www.neb.com/protocols/2018/10/02/golden-gate-assembly-protocol-for-using-neb-golden-gate-assembly-mix-e1601
 
     Full responsibilities include
-    1. subselecting the input designs that will form valid plasmids
-        after digestion with BsaI and BpiI
-    2. adding NEB Golden Gate Assembly Mix to the valid designs as Contents for a Container
-    3. computing the final plasmid (SeqRecord) after ligation of digested fragments
-    4. memoize the sorted enzyme + ids -> SeqRecord from step #3, pass as a
-        "mutate" method for the step after ThermoCycle()
-    5. add steps to carry out the rest of the assembly (heat shock, incubate, etc)
+
+        1. subselecting the input designs that will form valid plasmids
+            after digestion with BsaI and BpiI
+        2. adding NEB Golden Gate Assembly Mix to the valid designs as Contents for a Container
+        3. computing the final plasmid (SeqRecord) after ligation of digested fragments
+        4. memoize the sorted enzyme + ids -> SeqRecord from step #3, pass as a
+            "mutate" method for the step after ThermoCycle()
+        5. add steps to carry out the rest of the assembly (heat shock, incubate, etc)
 
     Keyword Args:
         include: include only plasmids with a feature matching something

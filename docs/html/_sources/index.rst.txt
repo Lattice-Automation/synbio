@@ -1,3 +1,5 @@
+:github_url: https://github.com/Lattice-Automation/synbio
+
 .. mdinclude:: ../README.md
 
 Contents
@@ -8,9 +10,3 @@ Contents
 
    ref/ref
    examples
-
-
-Index
-=====
-
-:ref:`genindex`

@@ -1,4 +1,4 @@
-"""Example of cloning together SeqRecords directly."""
+"""Example of cloning together SeqRecords after digestion with enzymes."""
 
 import os
 

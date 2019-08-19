@@ -80,7 +80,11 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="ref/ref.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ref/ref.html">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ref/designs.html">Designs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ref/protocols.html">Protocols</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#assembly">Assembly</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#gibson-assembly-with-primer-generation">Gibson Assembly with primer generation</a></li>
@@ -91,8 +95,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#gibson-assembly-of-a-plasmid-library">Gibson Assembly of a plasmid library</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gibson-assembly-of-a-single-plasmid">Gibson Assembly of a single plasmid</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#golden-gate-assembly-of-a-single-plasmid">Golden Gate Assembly of a single plasmid</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#combinatorial-golden-gate-assembly-all-valid-plasmid-combinations">Combinatorial Golden Gate Assembly (all valid plasmid combinations)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#combinatorial-golden-gate-assembly-with-bins-all-plasmid-combinations-between-bins">Combinatorial Golden Gate Assembly with bins (all plasmid combinations between bins)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#combinatorial-golden-gate-assembly-all-valid-plasmid-combinations">Combinatorial Golden Gate Assembly: all valid plasmid combinations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#combinatorial-golden-gate-assembly-with-bins-all-plasmid-combinations-between-bins">Combinatorial Golden Gate Assembly with bins: all plasmid combinations between bins</a></li>
 </ul>
 </li>
 </ul>
@@ -191,7 +195,7 @@
 </div>
 <div class="section" id="cloning-via-restriction-digest-and-ligation">
 <h3>Cloning via restriction digest and ligation<a class="headerlink" href="#cloning-via-restriction-digest-and-ligation" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of cloning together SeqRecords directly.&quot;&quot;&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of cloning together SeqRecords after digestion with enzymes.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -221,7 +225,7 @@
 <h2>Protocols<a class="headerlink" href="#protocols" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="gibson-assembly-of-a-plasmid-library">
 <h3>Gibson Assembly of a plasmid library<a class="headerlink" href="#gibson-assembly-of-a-plasmid-library" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a Gibson Assembly for a library of assemblies.&quot;&quot;&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a Gibson Assembly for a library of plasmids.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -255,7 +259,7 @@
 </div>
 <div class="section" id="gibson-assembly-of-a-single-plasmid">
 <h3>Gibson Assembly of a single plasmid<a class="headerlink" href="#gibson-assembly-of-a-single-plasmid" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a Gibson Assembly from two fragments.&quot;&quot;&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a Gibson Assembly with two fragments.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -337,7 +341,7 @@
 </div>
 </div>
 <div class="section" id="combinatorial-golden-gate-assembly-all-valid-plasmid-combinations">
-<h3>Combinatorial Golden Gate Assembly (all valid plasmid combinations)<a class="headerlink" href="#combinatorial-golden-gate-assembly-all-valid-plasmid-combinations" title="Permalink to this headline">¶</a></h3>
+<h3>Combinatorial Golden Gate Assembly: all valid plasmid combinations<a class="headerlink" href="#combinatorial-golden-gate-assembly-all-valid-plasmid-combinations" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a Combinatorial Golden Gate assembly with steps and output.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -382,7 +386,7 @@
 </div>
 </div>
 <div class="section" id="combinatorial-golden-gate-assembly-with-bins-all-plasmid-combinations-between-bins">
-<h3>Combinatorial Golden Gate Assembly with bins (all plasmid combinations between bins)<a class="headerlink" href="#combinatorial-golden-gate-assembly-with-bins-all-plasmid-combinations-between-bins" title="Permalink to this headline">¶</a></h3>
+<h3>Combinatorial Golden Gate Assembly with bins: all plasmid combinations between bins<a class="headerlink" href="#combinatorial-golden-gate-assembly-with-bins-all-plasmid-combinations-between-bins" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a CombinatorialBins MoClo assembly with steps and output.</span>
 
 <span class="sd">All possible assemblies from combinations of all SeqRecords across</span>

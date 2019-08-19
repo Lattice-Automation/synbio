@@ -1,3 +1,5 @@
+:github_url: https://github.com/Lattice-Automation/synbio
+
 .. mdinclude:: ../README.md
 
 Contents

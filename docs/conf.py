@@ -64,7 +64,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_theme = "sphinx_rtd_theme"
 
 # see: https://sphinx-rtd-theme.readthedocs.io/en/stable/configuring.html
-html_theme_options = {"display_version": True, "collapse_navigation": True}
+html_theme_options = {"display_version": True, "collapse_navigation": False}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
