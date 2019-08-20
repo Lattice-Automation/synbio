@@ -15,9 +15,9 @@ setup(
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU General Public License v2.0",
         "Operating System :: OS Independent",
     ],
-    url="https://latticeautomation.com/",
+    url="https://github.com/Lattice-Automation/synbio",
     test_suite="tests.suite",
 )
