@@ -15,8 +15,10 @@ setup(
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GNU General Public License v2.0",
+        "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
         "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Development Status :: 2 - Pre-Alpha",
     ],
     url="https://github.com/Lattice-Automation/synbio",
     test_suite="tests.suite",
