@@ -1,3 +1,5 @@
+"""Synbio designs."""
+
 from typing import Dict, Iterable, List, Union
 
 from Bio.SeqRecord import SeqRecord
@@ -48,6 +50,7 @@ class Plasmid(Design):
 
     Attributes:
         records: SeqRecords to concatenate into a plasmid
+        linear: Whether the SeqRecords of the design are linear
     """
 
     __name__ = "plasmid"
@@ -111,6 +114,7 @@ class Combinatorial(Plasmid):
 
     Attributes:
         records: list of SeqRecord
+        linear: Whether the SeqRecords of the design are linear
     """
 
     __name__ = "combinatorial"
@@ -121,6 +125,7 @@ class CombinatorialBins(Design):
 
     Attributes:
         bins: list of SeqRecord bins
+        linear: Whether the SeqRecords of the design are linear
     """
 
     __name__ = "combinatorial_bins"
@@ -198,6 +203,7 @@ class PlasmidLibrary(Design):
 
     Attributes:
         sets: Iterable of SeqRecord sets
+        linear: Whether the SeqRecords of the design are linear
     """
 
     __name__ = "library"

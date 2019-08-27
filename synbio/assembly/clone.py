@@ -57,6 +57,7 @@ def clone(
 
 def goldengate(
     record_set: Iterable[List[SeqRecord]],
+    enzymes: List[RestrictionType] = [BsaI, BpiI],
     include: List[str] = None,
     min_count: int = -1,
     linear: bool = True,
@@ -81,7 +82,7 @@ def goldengate(
     """
 
     return clone_many_combinatorial(
-        record_set, [BsaI, BpiI], include=include, min_count=min_count, linear=linear
+        record_set, enzymes, include=include, min_count=min_count, linear=linear
     )
 
 

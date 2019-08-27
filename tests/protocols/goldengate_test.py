@@ -4,9 +4,9 @@ import os
 import unittest
 
 from Bio import SeqIO
+from Bio.Restriction import BsaI
 from Bio.SeqIO import parse
 
-from synbio.containers import content_id
 from synbio.designs import Combinatorial
 from synbio.protocols import GoldenGate
 
@@ -25,8 +25,10 @@ class TestGoldenGate(unittest.TestCase):
         records = []
         for (_, _, filenames) in os.walk(TEST_DIR):
             for file in filenames:
-                gb_filename = os.path.join(TEST_DIR, file)
-                for record in parse(gb_filename, "genbank"):
+                gb = os.path.join(TEST_DIR, file)
+                if not gb.endswith(".gb"):
+                    continue
+                for record in parse(gb, "genbank"):
                     records.append(record)
 
         record_sets = []
@@ -43,7 +45,6 @@ class TestGoldenGate(unittest.TestCase):
         records = [r for record_set in record_sets for r in record_set] + [
             self.read("DVK_AE.gb")
         ]
-        record_ids = {content_id(r) for r in records}
 
         # create a protocol, add GoldenGate as the sole protocol step, and run
         protocol = GoldenGate(
@@ -62,6 +63,28 @@ class TestGoldenGate(unittest.TestCase):
         protocol.to_picklists(
             os.path.join(OUT_DIR, "gg.labcyte.gwl"), platform="labcyte"
         )
+
+    def test_lincoln(self):
+        """test an assembly."""
+
+        records = []
+        d = "/Users/josh/Downloads/combinatorial_assembly_parts"
+        for (_, _, filenames) in os.walk(d):
+            for file in filenames:
+                if not file.endswith(".fa"):
+                    continue
+                f = os.path.join(d, file)
+                print(f)
+                for record in parse(f, "fasta"):
+                    records.append(record)
+
+        design = Combinatorial(records)
+        protocol = GoldenGate(design, enzymes=[BsaI])
+        protocol.run()
+
+        self.assertTrue(protocol.output)
+        for record in protocol.output:
+            print(record.id)
 
     def read(self, filename):
         """Read in a single Genbank file from the test directory."""

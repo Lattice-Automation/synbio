@@ -105,6 +105,7 @@ class GoldenGate(Clone):
         mixed_wells: List[Container] = []
         for plasmids, fragments in goldengate(
             self.design,
+            self.enzymes,
             include=self.include,
             min_count=self.min_count,
             linear=self.design.linear,
