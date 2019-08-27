@@ -25,6 +25,7 @@ def clone(
     enzymes: List[RestrictionType],
     include: List[str] = None,
     min_count: int = -1,
+    linear: bool = True,
 ):
     """Simulate a digestion/ligation with a list of enzymes to get expected plasmids.
 
@@ -39,15 +40,16 @@ def clone(
     Args:
         record_set: SeqRecords to combine into a plasmid
         enzymes: Enzymes to digest each SeqRecord with
-    
+
     Keyword Args:
         include: feature names to filter plasmids against (default: {None})
         min_count: mininum # of SeqRecords in each output plasmid (default: {-1})
+        linear: Whether the individual SeqRecords are assumed to be linear
     """
 
     cloned_plasmids: List[SeqRecord] = []
     for plasmids, _ in clone_combinatorial(
-        list(record_set), enzymes, include=include, min_count=min_count
+        list(record_set), enzymes, include=include, min_count=min_count, linear=linear
     ):
         cloned_plasmids.extend(plasmids)
     return cloned_plasmids
@@ -57,6 +59,7 @@ def goldengate(
     record_set: Iterable[List[SeqRecord]],
     include: List[str] = None,
     min_count: int = -1,
+    linear: bool = True,
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Simulate a digestion and ligation using BsaI and BpiI.
 
@@ -69,6 +72,7 @@ def goldengate(
     Keyword Args:
         include: the feature to filter assemblies on (default: {""})
         min_count: minimum number of SeqRecords for an assembly to be considered
+        linear: Whether the individual SeqRecords are assumed to be linear
 
     Returns:
         A list of tuples with:
@@ -76,7 +80,9 @@ def goldengate(
             2. SeqRecords that went into each formed plasmid
     """
 
-    return clone_many_combinatorial(record_set, [BsaI, BpiI], include, min_count)
+    return clone_many_combinatorial(
+        record_set, [BsaI, BpiI], include=include, min_count=min_count, linear=linear
+    )
 
 
 def clone_many_combinatorial(
@@ -84,6 +90,7 @@ def clone_many_combinatorial(
     enzymes: List[RestrictionType],
     include: List[str] = None,
     min_count: int = -1,
+    linear: bool = True,
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
@@ -94,8 +101,11 @@ def clone_many_combinatorial(
     Args:
         record_set: single record set that might circularize
         enzymes: list of enzymes to digest the input records with
-        include: the include to filter assemblies
-        min_count: mininum number of SeqRecords for an assembly to be considered
+
+    Keyword Args:
+        include: List of strings to filter assemblies against
+        min_count: The mininum number of SeqRecords for an assembly to be considered
+        linear: Whether the individual SeqRecords are assumed to be linear
 
     Returns:
         List[Tuple[List[SeqRecord], List[SeqRecord]]] -- list of tuples with:
@@ -106,10 +116,9 @@ def clone_many_combinatorial(
     seen_fragment_ids: Set[str] = set()
     all_plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
     for record_set in design:
-        plasmids_and_fragments = clone_combinatorial(
-            record_set, enzymes, include, min_count
-        )
-        for plasmids, fragments in plasmids_and_fragments:
+        for plasmids, fragments in clone_combinatorial(
+            record_set, enzymes, include=include, min_count=min_count, linear=linear
+        ):
 
             # we don't want to re-use the fragment combination more than once
             fragment_ids = _hash_fragments(fragments)
@@ -126,6 +135,7 @@ def clone_combinatorial(
     enzymes: List[RestrictionType],
     include: List[str] = None,
     min_count: int = -1,
+    linear: bool = True,
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
@@ -136,8 +146,11 @@ def clone_combinatorial(
     Args:
         record_set: single record set that might circularize
         enzymes: list of enzymes to digest the input records with
+
+    Keyword Args:
         include: the include to filter assemblies
         min_count: mininum number of SeqRecords for an assembly to be considered
+        linear: Whether the individual SeqRecords are assumed to be linear
 
     Returns:
         A list of tuples with:
@@ -152,8 +165,7 @@ def clone_combinatorial(
         seen_seqs.add(str(record.seq + record.seq).upper())
         seen_seqs.add(str((record.seq + record.seq).reverse_complement().upper()))
 
-        for left, frag, right in _catalyze(record, enzymes):
-            # print(left, right, record.id)
+        for left, frag, right in _catalyze(record, enzymes, linear):
             graph.add_node(left)
             graph.add_node(right)
             graph.add_edge(left, right, frag=frag)
@@ -262,7 +274,7 @@ def _hash_fragments(record_set: List[SeqRecord]) -> str:
 
 
 def _catalyze(
-    record: SeqRecord, enzymes: List[RestrictionType]
+    record: SeqRecord, enzymes: List[RestrictionType], linear=True
 ) -> List[Tuple[str, SeqRecord, str]]:
     """Catalyze a SeqRecord and return all post-digest SeqRecords with overhangs.
 
@@ -271,8 +283,11 @@ def _catalyze(
     ^AAAA_. But a 3' overhang may be: _AAAA^.
 
     Args:
-        record: the SeqRecord to digest with enzymes
-        enzymes: list of enzymes to digest the input records with
+        record: The SeqRecord to digest with enzymes
+        enzymes: List of enzymes to digest the input records with
+
+    Keyword Args:
+        linear: Whether the record to catalyze is linear or circular
 
     Returns:
         Tuple with: (left overhang, cut fragment, right overhang)
@@ -280,7 +295,7 @@ def _catalyze(
 
     record = record.upper()
     batch = RestrictionBatch(enzymes)
-    batch_sites = batch.search(record.seq, linear=False)
+    batch_sites = batch.search(record.seq, linear=linear)
 
     # order all cuts with enzymes based on index
     cuts_seen: Set[int] = set()
@@ -296,15 +311,19 @@ def _catalyze(
     # list of left/right overhangs for each fragment
     frag_w_overhangs: List[Tuple[str, SeqRecord, str]] = []
     for i, (enzyme, cut) in enumerate(enzyme_cuts):
+        if i == len(enzyme_cuts) - 1 and linear:
+            continue
+
         next_enzyme, next_cut = enzyme_cuts[(i + 1) % len(enzyme_cuts)]
 
         enzyme_len = len(enzyme.ovhgseq)
         next_enzyme_len = len(next_enzyme.ovhgseq)
 
-        cut = cut + enzyme_len if enzyme.is_3overhang() else cut
-        next_cut = (
-            next_cut + next_enzyme_len if next_enzyme.is_3overhang() else next_cut
-        )
+        # shift cuts left for 3overhang enzymes
+        if enzyme.is_3overhang():
+            cut -= enzyme_len
+        if next_enzyme.is_3overhang():
+            next_cut -= next_enzyme_len
 
         cut_rc = cut if enzyme.is_3overhang() else cut + enzyme_len
         next_cut_rc = (
@@ -312,16 +331,8 @@ def _catalyze(
         )
 
         # find the cutsite sequences
-        left = (
-            record[cut : cut - enzyme_len]
-            if enzyme.is_3overhang()
-            else record[cut : cut + enzyme_len]
-        )
-        right = (
-            record[next_cut : next_cut - next_enzyme_len]
-            if next_enzyme.is_3overhang()
-            else record[next_cut : next_cut + next_enzyme_len]
-        )
+        left = record[cut : cut + enzyme_len]
+        right = record[next_cut : next_cut + next_enzyme_len]
         left_rc = right.reverse_complement()
         right_rc = left.reverse_complement()
 
@@ -330,16 +341,25 @@ def _catalyze(
         left_rc = str(left_rc.seq)
         right_rc = str(right_rc.seq)
 
-        if next_enzyme.is_3overhang():
+        if enzyme.is_3overhang():
             left += "^"
-            right += "^"
-            left_rc += "^"
             right_rc += "^"
         else:
             left = "^" + left
+            right_rc = "^" + right_rc
+
+        if next_enzyme.is_3overhang():
+            right += "^"
+            left_rc += "^"
+        else:
             right = "^" + right
             left_rc = "^" + left_rc
-            right_rc = "^" + right_rc
+
+        # shift cuts right again for 3overhang enzymes
+        if enzyme.is_3overhang():
+            cut += enzyme_len
+        if next_enzyme.is_3overhang():
+            next_cut += next_enzyme_len
 
         frag = record[cut:next_cut]
         frag_rc = record[cut_rc:next_cut_rc].reverse_complement()
@@ -355,8 +375,6 @@ def _catalyze(
 
         frag_w_overhangs.append((left, frag, right))
         frag_w_overhangs.append((left_rc, frag_rc, right_rc))
-
-    # CATALYZE_CACHE[record_id] = frag_w_overhangs  # store for future look-ups
 
     return frag_w_overhangs
 

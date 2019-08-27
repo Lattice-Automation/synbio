@@ -22,7 +22,9 @@ class TestGibsonProtocol(unittest.TestCase):
         insert = next(parse(os.path.join(TEST_DIR, "pdsred2.fa"), "fasta"))
         backbone = next(parse(os.path.join(TEST_DIR, "pDusk.fa"), "fasta"))
 
-        protocol = Gibson("Gibson plasmid assembly", design=Plasmid([insert, backbone]))
+        protocol = Gibson(
+            design=Plasmid([insert, backbone]), name="Gibson plasmid assembly"
+        )
         protocol.run()
 
         # export human and robotic instructions

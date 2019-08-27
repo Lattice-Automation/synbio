@@ -31,7 +31,7 @@ class TestCloneProtocol(unittest.TestCase):
         protocol = Clone(
             "Cloning Protocol",
             enzymes=[BamHI, NotI],
-            design=Plasmid([insert, backbone]),
+            design=Plasmid([insert, backbone], linear=False),  # circular plasmids
             include=["KanR"],
         )
         protocol.run()

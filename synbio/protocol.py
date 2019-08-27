@@ -1,7 +1,6 @@
 """A Protocol object for build assembly. Based on a Design and series of Steps."""
 
 from collections import defaultdict
-import logging
 import os
 import string
 import unicodedata
@@ -341,9 +340,6 @@ class Protocol:
             )
 
         if self.steps and not self.output:
-            logging.warning(
-                """Steps specified but no output containers created. Running `run()`"""
-            )
             self.run()
 
             if not self.output:

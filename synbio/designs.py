@@ -6,9 +6,14 @@ from .containers import content_id
 
 
 class Design:
-    """A SynBio design specification."""
+    """A SynBio design specification.
+    
+    Attributes:
+        linear: Whether the SeqRecords of the design are linear
+    """
 
     __name__ = "design"
+    linear = True
 
     def __iter__(self):
         raise NotImplementedError
@@ -47,8 +52,9 @@ class Plasmid(Design):
 
     __name__ = "plasmid"
 
-    def __init__(self, records: Iterable[SeqRecord] = None):
+    def __init__(self, records: Iterable[SeqRecord] = None, linear: bool = True):
         self.records = list(records) if records else []
+        self.linear = linear
 
     def __iter__(self) -> Iterable[List[SeqRecord]]:
         return iter([self.records])
@@ -57,7 +63,7 @@ class Plasmid(Design):
         """Return the ids of each piece of DNA in this plasmid
 
         Returns:
-            high level description of this plasmid's design
+            A high level description of this plasmid's design
         """
 
         if not self.records:
@@ -119,7 +125,7 @@ class CombinatorialBins(Design):
 
     __name__ = "combinatorial_bins"
 
-    def __init__(self, bins: Iterable[List[SeqRecord]] = None):
+    def __init__(self, bins: Iterable[List[SeqRecord]] = None, linear: bool = True):
         if bins:
             first_bin = list(bins)[0]
 
@@ -130,6 +136,7 @@ class CombinatorialBins(Design):
                 )
 
         self.bins: List[List[SeqRecord]] = list(bins) if bins else []
+        self.linear = linear
 
     def __iter__(self):
         """Create all combinations of bin SeqRecords. Return each combo as a list."""
@@ -195,7 +202,7 @@ class PlasmidLibrary(Design):
 
     __name__ = "library"
 
-    def __init__(self, sets: Iterable[List[SeqRecord]] = None):
+    def __init__(self, sets: Iterable[List[SeqRecord]] = None, linear: bool = True):
         if sets:
             first_bin = list(sets)[0]
 
@@ -206,6 +213,7 @@ class PlasmidLibrary(Design):
                 )
 
         self.sets: List[List[SeqRecord]] = list(sets) if sets else []
+        self.linear = linear
 
     def __iter__(self) -> Iterable[List[SeqRecord]]:
         """Return an iterator over the sets"""

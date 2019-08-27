@@ -6,6 +6,7 @@ from Bio.SeqRecord import SeqRecord
 
 from ..assembly import gibson
 from ..containers import Container, Well
+from ..designs import Design
 from ..instructions import Temperature
 from ..mix import Mix
 from ..primers import Primers
@@ -49,13 +50,13 @@ class Gibson(Protocol):
 
     def __init__(
         self,
-        *args,
+        design: Design = Design(),
+        name: str = "",
         hifi: bool = False,
         pcr_mix: Mix = PCR_MIX,
         gibson_mix: Mix = GIBSON_MIX,
-        **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(name=name, design=design)
 
         self.hifi = hifi
         self.pcr_mix = pcr_mix

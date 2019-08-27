@@ -9,6 +9,7 @@ from Bio.SeqRecord import SeqRecord
 from .clone import Clone
 from ..assembly import goldengate
 from ..containers import Container, Well
+from ..designs import Design
 from ..instructions import Temperature
 from ..mix import Mix
 from ..reagents import Reagent
@@ -51,12 +52,14 @@ class GoldenGate(Clone):
 
     def __init__(
         self,
-        *args,
+        design: Design = Design(),
+        name: str = "",
         enzymes: List[RestrictionType] = [BsaI, BpiI],
+        include: List[str] = None,
         mix: Mix = GOLDEN_GATE_MIX,
-        **kwargs,
+        min_count: int = -1,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(name=name, design=design)
 
         self.enzymes = enzymes
         self.mix = mix
@@ -101,7 +104,10 @@ class GoldenGate(Clone):
 
         mixed_wells: List[Container] = []
         for plasmids, fragments in goldengate(
-            self.design, include=self.include, min_count=self.min_count
+            self.design,
+            include=self.include,
+            min_count=self.min_count,
+            linear=self.design.linear,
         ):
             # add reaction mix and water
             well_contents, well_volumes = self.mix(fragments)

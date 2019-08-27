@@ -8,6 +8,7 @@ from Bio.SeqRecord import SeqRecord
 
 from ..assembly import clone_many_combinatorial
 from ..containers import Container, Well
+from ..designs import Design
 from ..instructions import Temperature
 from ..mix import Mix
 from ..protocol import Protocol
@@ -42,14 +43,14 @@ class Clone(Protocol):
 
     def __init__(
         self,
-        *args,
+        name: str = "",
+        design: Design = Design(),
         enzymes: List[RestrictionType] = None,
         mix: Mix = CLONING_MIX,
         include: List[str] = None,
         min_count: int = -1,
-        **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(name=name, design=design)
 
         self.enzymes = enzymes or []
         self.include = include
@@ -105,6 +106,7 @@ class Clone(Protocol):
             enzymes=self.enzymes,
             include=self.include,
             min_count=self.min_count,
+            linear=self.design.linear,
         ):
             # add reaction mix and water
             well_contents, well_volumes = self.mix(fragments + self.enzymes)
