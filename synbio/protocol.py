@@ -141,10 +141,10 @@ class Protocol:
         Uses `SeqIO.write(records, filename, "fasta")`.
 
         Args:
-            filename: the filename to write the FASTA file to
+            filename: The filename to write the FASTA file to
 
         Returns:
-            the number of records that were written
+            The number of records that were written
         """
 
         if not filename:
@@ -334,17 +334,12 @@ class Protocol:
         If there are no steps, or if there is no list of output Records
         in self.containers, there is nothing to write to a FASTA file.
         """
-        if not self.steps and not self.output:
-            raise RuntimeError(
-                """No steps or containers specified in Protocol. Running `run()`"""
-            )
-
-        if self.steps and not self.output:
+        if not self.containers:
             self.run()
 
             if not self.output:
                 raise RuntimeError(
-                    """Failed to create valid assemblies after executing all steps."""
+                    "Failed to create assemblies after executing all steps."
                 )
 
     def _filename(self) -> str:

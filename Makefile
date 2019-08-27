@@ -5,7 +5,7 @@ test:
 	python3 -m unittest discover tests -p '*_test.py'
 
 install:
-	pip install -e .
+	pip3 install -e .
 
 minor: test
 	bumpversion minor
@@ -21,3 +21,5 @@ patch: test
 
 docs:
 	cd docs && make html
+	git add .
+	git commit -m "update docs"

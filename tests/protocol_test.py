@@ -40,9 +40,6 @@ class TestProtocol(unittest.TestCase):
 
         curr_steps = len(self.protocol)
 
-        with self.assertRaises(RuntimeError):
-            self.protocol._check_output()  # throws without steps
-
         self.protocol.add(Pipette([]))
         self.assertEqual(curr_steps + 1, len(self.protocol))
 
