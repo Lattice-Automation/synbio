@@ -4,7 +4,6 @@ import os
 import unittest
 
 from Bio import SeqIO
-from Bio.Restriction import BsaI
 from Bio.SeqIO import parse
 
 from synbio.designs import Combinatorial
@@ -63,28 +62,6 @@ class TestGoldenGate(unittest.TestCase):
         protocol.to_picklists(
             os.path.join(OUT_DIR, "gg.labcyte.gwl"), platform="labcyte"
         )
-
-    def test_lincoln(self):
-        """test an assembly."""
-
-        records = []
-        d = "/Users/josh/Downloads/combinatorial_assembly_parts"
-        for (_, _, filenames) in os.walk(d):
-            for file in filenames:
-                if not file.endswith(".fa"):
-                    continue
-                f = os.path.join(d, file)
-                print(f)
-                for record in parse(f, "fasta"):
-                    records.append(record)
-
-        design = Combinatorial(records)
-        protocol = GoldenGate(design, enzymes=[BsaI])
-        protocol.run()
-
-        self.assertTrue(protocol.output)
-        for record in protocol.output:
-            print(record.id)
 
     def read(self, filename):
         """Read in a single Genbank file from the test directory."""
