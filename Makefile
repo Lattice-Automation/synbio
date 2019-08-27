@@ -7,12 +7,12 @@ test:
 install:
 	pip install -e .
 
-minor: test
+minor: test docs
 	bumpversion minor
 	python3 setup.py sdist bdist_wheel
 	python3 -m twine upload dist/* --skip-existing
 
-patch: test
+patch: test docs
 	bumpversion patch
 	python3 setup.py sdist bdist_wheel
 	python3 -m twine upload dist/* --skip-existing

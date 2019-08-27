@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Protocols &mdash; synbio 0.4.4 documentation</title>
+  <title>Protocols &mdash; synbio 0.4.9 documentation</title>
   
 
   
@@ -327,7 +327,7 @@ index in their filename. Ex: picklist.1.gwl, picklist.2.gwl</p>
 
 <dl class="class">
 <dt id="synbio.protocols.clone.Clone">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.protocols.clone.</code><code class="sig-name descname">Clone</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">enzymes: List[Bio.Restriction.Restriction.RestrictionType] = None</em>, <em class="sig-param">mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;</em>, <em class="sig-param">include: List[str] = None</em>, <em class="sig-param">min_count: int = -1</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.clone.Clone" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">synbio.protocols.clone.</code><code class="sig-name descname">Clone</code><span class="sig-paren">(</span><em class="sig-param">name: str = ''</em>, <em class="sig-param">design: synbio.designs.Design = &lt;synbio.designs.Design object&gt;</em>, <em class="sig-param">enzymes: List[Bio.Restriction.Restriction.RestrictionType] = None</em>, <em class="sig-param">mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;</em>, <em class="sig-param">include: List[str] = None</em>, <em class="sig-param">min_count: int = -1</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.clone.Clone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clone SeqRecords together using BioPython enzymes.</p>
 <p>Digest the SeqRecords with all the Enzymes provided, find valid circularized
 assemblies, and create a protocol for preparing and ligating the fragments.</p>
@@ -349,7 +349,7 @@ be considered valid. smaller assemblies are ignored</p></li>
 
 <dl class="class">
 <dt id="synbio.protocols.gibson.Gibson">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.protocols.gibson.</code><code class="sig-name descname">Gibson</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">hifi: bool = False</em>, <em class="sig-param">pcr_mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;</em>, <em class="sig-param">gibson_mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.gibson.Gibson" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">synbio.protocols.gibson.</code><code class="sig-name descname">Gibson</code><span class="sig-paren">(</span><em class="sig-param">design: synbio.designs.Design = &lt;synbio.designs.Design object&gt;</em>, <em class="sig-param">name: str = ''</em>, <em class="sig-param">hifi: bool = False</em>, <em class="sig-param">pcr_mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;</em>, <em class="sig-param">gibson_mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.gibson.Gibson" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gibson Assembly.</p>
 <p>Create primer pairs that will anneal each SeqRecord to its two neighbors
 so that, after PCR, the fragments will circularize via a Gibson Assembly.</p>
@@ -367,7 +367,7 @@ so that, after PCR, the fragments will circularize via a Gibson Assembly.</p>
 
 <dl class="class">
 <dt id="synbio.protocols.goldengate.GoldenGate">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.protocols.goldengate.</code><code class="sig-name descname">GoldenGate</code><span class="sig-paren">(</span><em class="sig-param">*args, enzymes: List[Bio.Restriction.Restriction.RestrictionType] = [BsaI, BpiI], mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;, **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.goldengate.GoldenGate" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">synbio.protocols.goldengate.</code><code class="sig-name descname">GoldenGate</code><span class="sig-paren">(</span><em class="sig-param">design: synbio.designs.Design = &lt;synbio.designs.Design object&gt;, name: str = '', enzymes: List[Bio.Restriction.Restriction.RestrictionType] = [BsaI, BpiI], include: List[str] = None, mix: synbio.mix.Mix = &lt;synbio.mix.Mix object&gt;, min_count: int = -1</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.protocols.goldengate.GoldenGate" title="Permalink to this definition">¶</a></dt>
 <dd><p>GoldenGate assembly.</p>
 <p>Takes the design of a protocol and finds combinations of
 SeqRecords that will circularize into valid new plasmids.</p>
