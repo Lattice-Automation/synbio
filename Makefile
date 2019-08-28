@@ -19,7 +19,6 @@ minor: test
 	python3 -m twine upload dist/* --skip-existing
 	$(MAKE) docs
 	$(MAKE) install
-	$(MAKE) build
 
 patch: test
 	bumpversion patch
@@ -27,7 +26,6 @@ patch: test
 	python3 -m twine upload dist/* --skip-existing
 	$(MAKE) docs
 	$(MAKE) install
-	$(MAKE) build
 
 docs:
 	cd docs && make html
