@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Designs &mdash; synbio 0.4.24 documentation</title>
+  <title>Designs &mdash; synbio 0.4.25 documentation</title>
   
 
   
@@ -169,118 +169,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-synbio.designs">
-<span id="designs"></span><h1>Designs<a class="headerlink" href="#module-synbio.designs" title="Permalink to this headline">¶</a></h1>
-<p>Synbio designs.</p>
-<dl class="class">
-<dt id="synbio.designs.Combinatorial">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.designs.</code><code class="sig-name descname">Combinatorial</code><span class="sig-paren">(</span><em class="sig-param">records: Iterable[Bio.SeqRecord.SeqRecord] = None</em>, <em class="sig-param">linear: bool = True</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.designs.Combinatorial" title="Permalink to this definition">¶</a></dt>
-<dd><p>A list of SeqRecords. Find and use all valid combinations.</p>
-<p>Structure-wise it’s the same as a Plasmid but multiple assemblies
-are possible given a single set of SeqRecords. List of SeqRecords in,
-list of SeqRecords out. Versus List of SeqRecords in one SeqRecord
-out for a Plasmid design</p>
-<dl class="attribute">
-<dt id="synbio.designs.Combinatorial.records">
-<code class="sig-name descname">records</code><a class="headerlink" href="#synbio.designs.Combinatorial.records" title="Permalink to this definition">¶</a></dt>
-<dd><p>list of SeqRecord</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="synbio.designs.Combinatorial.linear">
-<code class="sig-name descname">linear</code><a class="headerlink" href="#synbio.designs.Combinatorial.linear" title="Permalink to this definition">¶</a></dt>
-<dd><p>Whether the SeqRecords of the design are linear</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="synbio.designs.CombinatorialBins">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.designs.</code><code class="sig-name descname">CombinatorialBins</code><span class="sig-paren">(</span><em class="sig-param">bins: Iterable[List[Bio.SeqRecord.SeqRecord]] = None</em>, <em class="sig-param">linear: bool = True</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.designs.CombinatorialBins" title="Permalink to this definition">¶</a></dt>
-<dd><p>A list of bins of SeqRecords. All combinations between bins are attempted.</p>
-<dl class="attribute">
-<dt id="synbio.designs.CombinatorialBins.bins">
-<code class="sig-name descname">bins</code><a class="headerlink" href="#synbio.designs.CombinatorialBins.bins" title="Permalink to this definition">¶</a></dt>
-<dd><p>list of SeqRecord bins</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="synbio.designs.CombinatorialBins.linear">
-<code class="sig-name descname">linear</code><a class="headerlink" href="#synbio.designs.CombinatorialBins.linear" title="Permalink to this definition">¶</a></dt>
-<dd><p>Whether the SeqRecords of the design are linear</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="synbio.designs.CombinatorialBins.append">
-<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">records: Union[Bio.SeqRecord.SeqRecord, List[Bio.SeqRecord.SeqRecord]]</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.designs.CombinatorialBins.append" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add the SeqRecords as a bin for combinatorial design</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>record</strong> – the records to add as a bin</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="synbio.designs.Plasmid">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.designs.</code><code class="sig-name descname">Plasmid</code><span class="sig-paren">(</span><em class="sig-param">records: Iterable[Bio.SeqRecord.SeqRecord] = None</em>, <em class="sig-param">linear: bool = True</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.designs.Plasmid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a plasmid from a list of SeqRecords</p>
-<dl class="attribute">
-<dt id="synbio.designs.Plasmid.records">
-<code class="sig-name descname">records</code><a class="headerlink" href="#synbio.designs.Plasmid.records" title="Permalink to this definition">¶</a></dt>
-<dd><p>SeqRecords to concatenate into a plasmid</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="synbio.designs.Plasmid.linear">
-<code class="sig-name descname">linear</code><a class="headerlink" href="#synbio.designs.Plasmid.linear" title="Permalink to this definition">¶</a></dt>
-<dd><p>Whether the SeqRecords of the design are linear</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="synbio.designs.Plasmid.append">
-<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">records: Union[Bio.SeqRecord.SeqRecord, List[Bio.SeqRecord.SeqRecord]]</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.designs.Plasmid.append" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add the SeqRecord to this plasmid’s list of SeqRecords/fragments</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>record</strong> – the SeqRecord to add to the plasmid specification</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="synbio.designs.PlasmidLibrary">
-<em class="property">class </em><code class="sig-prename descclassname">synbio.designs.</code><code class="sig-name descname">PlasmidLibrary</code><span class="sig-paren">(</span><em class="sig-param">sets: Iterable[List[Bio.SeqRecord.SeqRecord]] = None</em>, <em class="sig-param">linear: bool = True</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.designs.PlasmidLibrary" title="Permalink to this definition">¶</a></dt>
-<dd><p>A list of SeqRecord lists. Each nested list is combined into a Plasmid.</p>
-<dl class="attribute">
-<dt id="synbio.designs.PlasmidLibrary.sets">
-<code class="sig-name descname">sets</code><a class="headerlink" href="#synbio.designs.PlasmidLibrary.sets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Iterable of SeqRecord sets</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="synbio.designs.PlasmidLibrary.linear">
-<code class="sig-name descname">linear</code><a class="headerlink" href="#synbio.designs.PlasmidLibrary.linear" title="Permalink to this definition">¶</a></dt>
-<dd><p>Whether the SeqRecords of the design are linear</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="synbio.designs.PlasmidLibrary.append">
-<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">records: Union[Bio.SeqRecord.SeqRecord, List[Bio.SeqRecord.SeqRecord]]</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.designs.PlasmidLibrary.append" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a new set or SeqRecord to the library</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>records</strong> – the records to add as a set</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+  <div class="section" id="designs">
+<h1>Designs<a class="headerlink" href="#designs" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
