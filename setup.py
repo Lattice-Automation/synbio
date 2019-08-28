@@ -19,13 +19,12 @@ setup(
     license="GNU General Public License v2 (GPLv2)",
     packages=find_packages(),
     install_requires=requirements,
-    setup_requires=["setuptools", "twine"],
     test_suite="tests.suite",
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Development Status :: 2 - Pre-Alpha",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
         "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
-        "Development Status :: 2 - Pre-Alpha",
     ],
 )
