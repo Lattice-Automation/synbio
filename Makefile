@@ -1,7 +1,7 @@
 .PHONY: docs test
 
-env:
-	conda env create
+export:
+	conda env export --name synbio > environment.yml
 
 test:
 	mkdir -p ./tests/output
