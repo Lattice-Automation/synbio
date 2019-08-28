@@ -19,8 +19,7 @@ setup(
     license="GNU General Public License v2 (GPLv2)",
     packages=find_packages(),
     install_requires=requirements,
-    setup_requires=["setuptools"],
-    extras_require=["twine"],
+    setup_requires=["setuptools", "twine"],
     test_suite="tests.suite",
     classifiers=[
         "Programming Language :: Python :: 3",
