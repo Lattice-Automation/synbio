@@ -3,6 +3,9 @@
 export:
 	conda env export --name synbio > environment.yml
 
+build:
+	conda build . -c bioconda
+
 test:
 	mkdir -p ./tests/output
 	python3 -m unittest discover tests -p '*_test.py'

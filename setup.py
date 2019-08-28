@@ -1,4 +1,7 @@
-from setuptools import setup, find_packages
+from setuptools import setup
+
+with open("requirements.txt") as f:
+    requirements = f.read().splitlines()
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -12,7 +15,7 @@ setup(
     description="Synbio design and build library",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=find_packages(),
+    packages=requirements,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",

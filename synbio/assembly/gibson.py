@@ -107,7 +107,7 @@ def gibson(
     _fix_duplicate_junctions(records, primers)
 
     # extend primers in 3' direction to avoid ectopic binding sites
-    _bp_to_add_index_primers(records, primers)
+    _fix_offtarget_primers(records, primers)
 
     # sanity check
     # TODO: add many more tests so this is unnecessary
@@ -318,7 +318,7 @@ def _has_offtarget_junction(f_end: Seq, ends: List[Seq], end_of_record: bool) ->
     return False
 
 
-def _bp_to_add_index_primers(records: List[SeqRecord], primers: List[Primers]):
+def _fix_offtarget_primers(records: List[SeqRecord], primers: List[Primers]):
     """Checks if primers can bind to multiple regions in record's sequence.
     If they do, mutate primers until they do not. Primers should only anneal
     to start and end of record.
