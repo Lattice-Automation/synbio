@@ -11,17 +11,19 @@ source:
 
 build:
   number: 0
-  noarch: python
-  script: python setup.py install --single-version-externally-managed 
+  script: python setup.py install --single-version-externally-managed --record=record.txt
 
 requirements:
+  build:
+    - python
+    - conda-build
   host:
-    - pip
     - python >=3.6
+    - pip
   run:
     - python >=3.6
-    - biopython >=1.74.0
-    - networkx 2.3.0
+    - biopython >=1.74
+    - networkx >=2.3
     - primer3-py
 
 test:
@@ -32,6 +34,8 @@ test:
     - synbio
     - synbio.designs
     - synbio.protocols
+  commands:
+    - python3 -m unittest discover tests -p '*_test.py'
 
 about:
   home: {{ data.get('url') }}
@@ -45,8 +49,7 @@ about:
   dev_url: https://github.com/Lattice-Automation/synbio
 
 extra:
-  recipe-maintainers:
-    - JJTimmons
+  recipe-maintainers: ''
   deploy:
     - anaconda-client
     - setuptools
