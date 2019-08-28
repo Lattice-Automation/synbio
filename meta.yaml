@@ -40,8 +40,6 @@ about:
   license_family: "GPL2"
   license_file: "LICENSE"
   summary: {{ data['description'] }}
-  description: |
-    {{ data['long_description'] | replace("\n", "\n    ") | replace("#", '\#')}}
   doc_url: https://lattice-automation.github.io/synbio/html/index.html
   dev_url: https://github.com/Lattice-Automation/synbio
 
