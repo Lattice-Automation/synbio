@@ -5,7 +5,11 @@
 ## Installation
 
 ```bash
+# with pip
 pip install synbio
+
+# OR with conda
+conda install -c jtimmons synbio
 ```
 
 ## Models
