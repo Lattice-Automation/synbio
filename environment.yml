@@ -1,6 +1,6 @@
 name: synbio
 channels:
-  - bioconda
+  - jtimmons
   - defaults
 dependencies:
   - asn1crypto=0.24.0=py37_0
@@ -34,7 +34,7 @@ dependencies:
   - openssl=1.1.1c=h1de35cc_1
   - pip=19.2.2=py37_0
   - pkginfo=1.5.0.1=py37_0
-  - primer3-py=0.5.4=py37_3
+  - primer3-py=0.6.0=py37_0
   - pycparser=2.19=py37_0
   - pygments=2.4.2=py_0
   - pyopenssl=19.0.0=py37_0
@@ -55,4 +55,5 @@ dependencies:
   - wheel=0.33.4=py37_0
   - xz=5.2.4=h1de35cc_4
   - zlib=1.2.11=h1de35cc_3
-prefix: //miniconda3/envs/synbio
+prefix: //anaconda3/envs/synbio
+

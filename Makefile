@@ -4,7 +4,7 @@ export:
 	conda env export --name synbio > environment.yml
 
 build:
-	conda build . -c bioconda
+	conda build . -c jtimmons
 
 test:
 	mkdir -p ./tests/output
