@@ -14,9 +14,6 @@ build:
   script: python setup.py install --single-version-externally-managed --record=record.txt
 
 requirements:
-  build:
-    - python
-    - conda-build
   host:
     - python >=3.6
     - pip
@@ -49,7 +46,8 @@ about:
   dev_url: https://github.com/Lattice-Automation/synbio
 
 extra:
-  recipe-maintainers: ''
+  recipe-maintainers:
+    - 'JJTimmons'
   deploy:
     - anaconda-client
     - setuptools
