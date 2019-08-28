@@ -1,5 +1,8 @@
 .PHONY: docs test
 
+env:
+	conda env create
+
 test:
 	mkdir -p ./tests/output
 	python3 -m unittest discover tests -p '*_test.py'

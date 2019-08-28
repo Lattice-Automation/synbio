@@ -188,7 +188,7 @@ def clone_combinatorial(
         for i, overhang in enumerate(cycle):
             next_overhang = cycle[(i + 1) % len(cycle)]
             record_bin = []
-            for out_edge in graph.out_edges:
+            for out_edge in graph.out_edges(keys=True):
                 src, dest, index = out_edge
                 if src != overhang or dest != next_overhang:
                     continue
