@@ -1,4 +1,4 @@
-.PHONY: docs test
+.PHONY: docs test build
 
 export:
 	conda env export --name synbio > environment.yml
