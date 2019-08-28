@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Steps &mdash; synbio 0.4.26 documentation</title>
+  <title>Steps &mdash; synbio 0.4.27 documentation</title>
   
 
   
@@ -173,6 +173,211 @@
 <h1>Steps<a class="headerlink" href="#steps" title="Permalink to this headline">¶</a></h1>
 <p>Steps represent each step of a protocol for assembling the <cite>Design</cite>.  These steps are necessary when using
 pre-made protocols like <cite>Gibson</cite> and <cite>GoldenGate</cite>.</p>
+<dl class="class">
+<dt id="synbio.protocol.Step">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.protocol.</code><code class="sig-name descname">Step</code><a class="headerlink" href="#synbio.protocol.Step" title="Permalink to this definition">¶</a></dt>
+<dd><p>A single Step of a Protocol.</p>
+</dd></dl>
+
+<span class="target" id="module-synbio.steps"></span><p>Steps: lab processes to assemble a design.</p>
+<dl class="class">
+<dt id="synbio.steps.Add">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">Add</code><span class="sig-paren">(</span><em class="sig-param">add: Union[Bio.SeqRecord.SeqRecord, Bio.Restriction.Restriction.RestrictionType, synbio.primers.Primers, synbio.reagents.Reagent, synbio.species.Species], volume: float, name: str = '', instructions: List[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.Add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add contents to the existing containers.</p>
+<dl class="attribute">
+<dt id="synbio.steps.Add.add">
+<code class="sig-name descname">add</code><a class="headerlink" href="#synbio.steps.Add.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>the src container or content to add</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.Add.volume">
+<code class="sig-name descname">volume</code><a class="headerlink" href="#synbio.steps.Add.volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>the volume of the new content to add</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.Add.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#synbio.steps.Add.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>the name of this step in the protocol</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.Add.instructions">
+<code class="sig-name descname">instructions</code><a class="headerlink" href="#synbio.steps.Add.instructions" title="Permalink to this definition">¶</a></dt>
+<dd><p>extra instructions to add to this step</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="data">
+<dt id="synbio.steps.HeatShock">
+<code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">HeatShock</code><em class="property"> = [&lt;synbio.steps.Move object&gt;, &lt;synbio.steps.Add object&gt;, &lt;synbio.steps.ThermoCycle object&gt;, &lt;synbio.steps.Add object&gt;, &lt;synbio.steps.Incubate object&gt;]</em><a class="headerlink" href="#synbio.steps.HeatShock" title="Permalink to this definition">¶</a></dt>
+<dd><p>A composite HeatShock step for getting DNA into E coli.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span>
+<span class="gp">... </span>   <span class="n">Move</span><span class="p">(</span><span class="n">volume</span><span class="o">=</span><span class="mf">3.0</span><span class="p">),</span>
+<span class="gp">... </span>   <span class="n">Add</span><span class="p">(</span><span class="n">add</span><span class="o">=</span><span class="n">Species</span><span class="p">(</span><span class="s2">&quot;E coli&quot;</span><span class="p">),</span> <span class="n">volume</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="gp">... </span>   <span class="n">ThermoCycle</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Heat shock&quot;</span><span class="p">,</span> <span class="n">temps</span><span class="o">=</span><span class="p">[</span><span class="n">Temperature</span><span class="p">(</span><span class="n">temp</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">30</span><span class="p">)]),</span>
+<span class="gp">... </span>   <span class="n">Add</span><span class="p">(</span><span class="n">add</span><span class="o">=</span><span class="n">Reagent</span><span class="p">(</span><span class="s2">&quot;SOC&quot;</span><span class="p">),</span> <span class="n">volume</span><span class="o">=</span><span class="mf">150.0</span><span class="p">),</span>
+<span class="gp">... </span>   <span class="n">Incubate</span><span class="p">(</span><span class="n">temp</span><span class="o">=</span><span class="n">Temperature</span><span class="p">(</span><span class="n">temp</span><span class="o">=</span><span class="mi">37</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">3600</span><span class="p">)),</span>
+<span class="gp">... </span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="synbio.steps.Incubate">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">Incubate</code><span class="sig-paren">(</span><em class="sig-param">temp: synbio.instructions.Temperature, name: str = 'Incubate', mutate: Optional[Callable[[synbio.containers.Container], synbio.containers.Container]] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.Incubate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Incubate contents for some time at a set temperature.</p>
+<p>Incubate the contents of containers and in a fridge or some other incubator.</p>
+<dl class="attribute">
+<dt id="synbio.steps.Incubate.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#synbio.steps.Incubate.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>the name of this step in the protocol</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.Incubate.temp">
+<code class="sig-name descname">temp</code><a class="headerlink" href="#synbio.steps.Incubate.temp" title="Permalink to this definition">¶</a></dt>
+<dd><p>the target the container should be in (default: {None})</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.Incubate.mutate">
+<code class="sig-name descname">mutate</code><a class="headerlink" href="#synbio.steps.Incubate.mutate" title="Permalink to this definition">¶</a></dt>
+<dd><p>a function to mutate the contents of a container after thermo cycling.
+Used to anneal digested/ligated fragments or amplify DNA with primers</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="synbio.steps.Move">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">Move</code><span class="sig-paren">(</span><em class="sig-param">volume: float</em>, <em class="sig-param">dest: synbio.containers.Container = None</em>, <em class="sig-param">name: str = ''</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.Move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move a fixed volume from each container to another container of same or new type</p>
+<dl class="attribute">
+<dt id="synbio.steps.Move.volume">
+<code class="sig-name descname">volume</code><a class="headerlink" href="#synbio.steps.Move.volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>the amount in millileters to move to the new container</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.Move.type">
+<code class="sig-name descname">type</code><a class="headerlink" href="#synbio.steps.Move.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>the type of new container to move the contents to</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="synbio.steps.Pipette">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">Pipette</code><span class="sig-paren">(</span><em class="sig-param">target: Sequence[synbio.containers.Container], name: str = '', instructions: List[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.Pipette" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pipette the input containers to match a ‘target’ list of containers</p>
+<p>Create transfers to map the input containers to a new list of output containers (target)</p>
+<dl class="attribute">
+<dt id="synbio.steps.Pipette.target">
+<code class="sig-name descname">target</code><a class="headerlink" href="#synbio.steps.Pipette.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>target container list/ordering (default: {None})</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.Pipette.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#synbio.steps.Pipette.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>the name of this step in the protocol</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.Pipette.instructions">
+<code class="sig-name descname">instructions</code><a class="headerlink" href="#synbio.steps.Pipette.instructions" title="Permalink to this definition">¶</a></dt>
+<dd><p>extra instructions to add to this step</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="synbio.steps.Setup">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">Setup</code><span class="sig-paren">(</span><em class="sig-param">target: Sequence[synbio.containers.Container], dest: synbio.containers.Container = None, name: str = '', instructions: List[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.Setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a list of transfers to make a list of setup containers</p>
+<p>All transfers for a Setup step come from the magical and bottomless ‘Fridge’</p>
+<dl class="attribute">
+<dt id="synbio.steps.Setup.target">
+<code class="sig-name descname">target</code><a class="headerlink" href="#synbio.steps.Setup.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>target container list/ordering (default: {None})</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.Setup.dest">
+<code class="sig-name descname">dest</code><a class="headerlink" href="#synbio.steps.Setup.dest" title="Permalink to this definition">¶</a></dt>
+<dd><p>the type of target container (default: {first target container})</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.Setup.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#synbio.steps.Setup.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>the name of this step in the protocol</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.Setup.instructions">
+<code class="sig-name descname">instructions</code><a class="headerlink" href="#synbio.steps.Setup.instructions" title="Permalink to this definition">¶</a></dt>
+<dd><p>extra instructions to add to this step</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="synbio.steps.ThermoCycle">
+<em class="property">class </em><code class="sig-prename descclassname">synbio.steps.</code><code class="sig-name descname">ThermoCycle</code><span class="sig-paren">(</span><em class="sig-param">temps: List[synbio.instructions.Temperature], name: str = '', cycles: int = 1, mutate: Optional[Callable[[synbio.containers.Container], synbio.containers.Container]] = None, extension: synbio.instructions.Temperature = None, instructions: List[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#synbio.steps.ThermoCycle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thermo cycle for PCR, digestion/ligation, etc.</p>
+<p>Make a list of temperature instructions with the temperature
+to set it at, the length of time and the number of cycles.</p>
+<p class="rubric">Example</p>
+<p>An example of a ThermoCycle for PCR:
+&gt;&gt;&gt; ThermoCycle(cycles=30, temps=[
+…    Temperature(temp=97, time=5 * 60),  # denature
+…    Temperature(temp=55, time=30),  # annealing
+…    Temperature(temp=72, time=60),  # extension
+… ])</p>
+<dl class="attribute">
+<dt id="synbio.steps.ThermoCycle.temps">
+<code class="sig-name descname">temps</code><a class="headerlink" href="#synbio.steps.ThermoCycle.temps" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of temperatures in a gradient</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.ThermoCycle.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#synbio.steps.ThermoCycle.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>the name of this step in the protocol</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.ThermoCycle.cycles">
+<code class="sig-name descname">cycles</code><a class="headerlink" href="#synbio.steps.ThermoCycle.cycles" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of thermo cycles (default: {1})</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.ThermoCycle.mutate">
+<code class="sig-name descname">mutate</code><a class="headerlink" href="#synbio.steps.ThermoCycle.mutate" title="Permalink to this definition">¶</a></dt>
+<dd><p>a function to mutate the contents of a container after thermo cycling.
+Used to anneal digested/ligated fragments or amplify DNA with primers</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.ThermoCycle.instructions">
+<code class="sig-name descname">instructions</code><a class="headerlink" href="#synbio.steps.ThermoCycle.instructions" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of additional instructions to add</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="synbio.steps.ThermoCycle.extension">
+<code class="sig-name descname">extension</code><a class="headerlink" href="#synbio.steps.ThermoCycle.extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>last extension after other thermocycle steps.
+Example is a final 5 minute extension at the end of PCR that’s common</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 

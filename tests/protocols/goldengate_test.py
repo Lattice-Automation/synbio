@@ -74,7 +74,6 @@ class TestGoldenGate(unittest.TestCase):
                 if not file.endswith(".fa"):
                     continue
                 test_file = os.path.join(test_dir, file)
-                print(test_file)
                 for record in parse(test_file, "fasta"):
                     records.append(record)
 
