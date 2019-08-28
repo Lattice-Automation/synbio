@@ -1,6 +1,6 @@
 from setuptools import setup
 
-with open("requirements.txt") as f:
+with open("requirements.txt", "r") as f:
     requirements = f.read().splitlines()
 
 with open("README.md", "r") as fh:
@@ -15,7 +15,7 @@ setup(
     description="Synbio design and build library",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=requirements,
+    install_requires=requirements,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
