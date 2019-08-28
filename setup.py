@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-requirements = ["python>=3.6", "biopython>=1.74.0", "networkx>=2.3.0", "primer3-py"]
+requirements = ["biopython>=1.74.0", "networkx>=2.3.0", "primer3-py"]
 
 setup(
     name="synbio",
