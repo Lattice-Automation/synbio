@@ -1,16 +1,18 @@
-{% set name = "synbio" %}
-{% set version = "0.4.18" %}
+# made with inspiration from: https://github.com/fastai/fastai/blob/master/conda/meta.yaml
+
+{% set data = load_setup_py_data(setup_file='./setup.py', from_recipe_dir=True) %}
 
 package:
-  name: "{{ name|lower }}"
-  version: "{{ version }}"
+  name: "{{ data.name }}"
+  version: "{{ data.version }}"
 
 source:
-  path: .
+  url: ./dist/{{ data.name }}-{{ data.version }}.tar.gz
 
 build:
   number: 0
-  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv "
+  noarch: python
+  script: python setup.py install --single-version-externally-managed 
 
 requirements:
   host:
@@ -18,29 +20,29 @@ requirements:
     - python >=3.6
   run:
     - python >=3.6
-    - biopython 1.74.*
-    - networkx 2.3.*
+    - biopython >=1.74.0
+    - networkx 2.3.0
     - primer3-py
 
 test:
+  files:
+    - data
+    - tests
   imports:
     - synbio
-    - synbio.assembly
-    - synbio.picklists
+    - synbio.designs
     - synbio.protocols
-    - tests
-    - tests.assembly
-    - tests.picklists
-    - tests.protocols
 
 about:
-  home: "https://github.com/Lattice-Automation/synbio"
-  license: "GNU General Public v2 (GPLv2)"
+  home: {{ data.get('url') }}
+  license: {{ data['license'] }}
   license_family: "GPL2"
-  license_file: "https://github.com/Lattice-Automation/synbio/blob/master/LICENSE"
-  summary: "Synbio design and build library"
-  doc_url: "https://lattice-automation.github.io/synbio/html/index.html"
-  dev_url: "https://github.com/Lattice-Automation/synbio"
+  license_file: "LICENSE"
+  summary: {{ data['description'] }}
+  description: |
+    {{ data['long_description'] | replace("\n", "\n    ") | replace("#", '\#')}}
+  doc_url: https://lattice-automation.github.io/synbio/html/index.html
+  dev_url: https://github.com/Lattice-Automation/synbio
 
 extra:
   recipe-maintainers:
