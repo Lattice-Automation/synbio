@@ -9,7 +9,7 @@ with open("requirements.txt", "r") as f:
 
 setup(
     name="synbio",
-    version="0.4.17",
+    version="0.4.18",
     author="JJTimmons",
     author_email="jtimmons@latticeautomation.com",
     description="Synbio design and build library",
