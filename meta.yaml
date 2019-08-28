@@ -17,6 +17,7 @@ requirements:
   host:
     - python >=3.0
     - pip
+    - biopython
   run:
     - python >=3.0
     - biopython >=1.74
