@@ -49,9 +49,9 @@ from synbio.designs import Combinatorial
 from synbio.protocols import GoldenGate
 
 def read_all_records():
-    """Gather all SeqRecords from "goldengate" dir in examples."""
+    """Gather all SeqRecords from "goldengate" dir in data."""
 
-    GG_DIR = os.path.join(".", "examples", "goldengate")
+    GG_DIR = os.path.join(".", "data", "goldengate")
 
     records = []
     for file in os.listdir(GG_DIR):
