@@ -45,9 +45,9 @@ class GoldenGate(Clone):
     Keyword Args:
         include: include only plasmids with a feature matching something
             in the include list use in backbone selection (default: {None})
-        mix: the assembly mix to use when mixing the GoldenGate assemblies
         min_count: the minimum number of SeqRecords in an assembly for it to
             be considered valid. smaller assemblies are ignored
+        separate_reagents: Whether to separate reagent plate from other wells
     """
 
     def __init__(
@@ -56,13 +56,14 @@ class GoldenGate(Clone):
         name: str = "",
         enzymes: List[RestrictionType] = [BsaI, BpiI],
         include: List[str] = None,
-        mix: Mix = GOLDEN_GATE_MIX,
         min_count: int = -1,
+        separate_reagents: bool = False,
     ):
-        super().__init__(name=name, design=design)
+        super().__init__(name=name, design=design, separate_reagents=separate_reagents)
 
+        self.min_count = min_count
         self.enzymes = enzymes
-        self.mix = mix
+        self.mix = GOLDEN_GATE_MIX
 
     def run(self):
         """Filter designs to those that will form valid and new Golden Gate plasmids.

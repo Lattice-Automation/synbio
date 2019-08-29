@@ -78,10 +78,19 @@ class TestGoldenGate(unittest.TestCase):
                     records.append(record)
 
         design = Combinatorial(records)
-        protocol = GoldenGate(design, enzymes=[BsaI])
+        protocol = GoldenGate(design, enzymes=[BsaI], separate_reagents=True)
         protocol.run()
 
+        csv_output = protocol.to_csv(os.path.join(OUT_DIR, "lincoln.layout.csv"))
+        protocol.to_picklists(
+            os.path.join(OUT_DIR, "lincoln.hamilton.csv"), platform="hamilton"
+        )
+
         self.assertTrue(protocol.output)
+        self.assertEqual(1, csv_output.count("Plate:1"))
+        self.assertIn(
+            ",,,,,,,,,,,,,A", csv_output
+        )  # empty wells in plate 1 before plate2
 
     def read(self, filename):
         """Read in a single Genbank file from the test directory."""

@@ -12,7 +12,7 @@ from Bio.SeqRecord import SeqRecord
 from .containers import Container, Content, Fridge, Layout, content_id
 from .designs import Design
 from .instructions import Transfer, Temperature, Instruction, to_txt
-from .picklists import to_labcyte, to_tecan
+from .picklists import to_hamilton, to_labcyte, to_tecan
 
 
 class Step:
@@ -37,6 +37,7 @@ class Protocol:
         name: The name of the protocol
         design: The design specification for the build
         how: A single composite step for assembling the Design
+        separate_reagents: Whether to separate reagent plate from other wells
     """
 
     def __init__(
@@ -44,9 +45,11 @@ class Protocol:
         name: str = "",
         design: Design = Design(),
         how: Union[Step, Iterable[Step]] = None,
+        separate_reagents: bool = False,
     ):
         self.name = name  # name of the protocol
         self.design = design  # the design specification
+        self.separate_reagents = separate_reagents
         self.steps: List[Step] = []  # list of steps for this assembly
 
         # set steps from "how" if they were provided
@@ -83,7 +86,7 @@ class Protocol:
 
         # all input records, each start out assigned to a single Fridge source
         records = self.design.get_all_records()
-        self.containers = [Fridge(r) for r in records]  # first step, all fridge
+        self.containers = [Fridge(r) for r in records]  # everything comes from fridge
 
         for step in self.steps:
             step(self)
@@ -206,7 +209,7 @@ class Protocol:
         with open(filename, "w") as instruction_file:
             instruction_file.write(protocol_txt)
 
-    def to_csv(self, filename: str = ""):
+    def to_csv(self, filename: str = "") -> str:
         """Write CSV file(s) describing the containers/Layout after each step.
 
         Rows of Layout/containers are written in CSV format with each step's name as its heading.
@@ -233,15 +236,18 @@ class Protocol:
                 instruction,
                 existing_plates=self.instruction_to_plate_count[instruction],
                 log_volume=row == 1,
+                separate_reagents=self.separate_reagents,
             ).to_csv()
 
         with open(filename, "w") as csvfile:
             csvfile.write(csv)
 
+        return csv
+
     def to_picklists(self, filename: str = "", platform: str = "tecan"):
         """Create picklists for robotic pipetting.
 
-        Supported platforms are `tecan`, `hamilton`, and `labcyte`
+        Supported platforms are `tecan`, `hamilton`, and `labcyte`.
 
         For each step where there's plate to plate pipetting, create a
         robotic picklists. Steps where reagents or samples come from the Fridge
@@ -257,7 +263,7 @@ class Protocol:
 
         picklist_generators = {
             "tecan": to_tecan,
-            "hamilton": to_tecan,
+            "hamilton": to_hamilton,
             "labcyte": to_labcyte,
         }
         if platform not in picklist_generators:
@@ -294,7 +300,7 @@ class Protocol:
         if not picklist_instructions:
             raise RuntimeWarning(f"no picklist-capable steps in protocol")
 
-        def picklist_name(index: int) -> str:
+        def picklist_filename(index: int) -> str:
             if len(picklist_instructions) == 1:
                 return filename
 
@@ -306,7 +312,7 @@ class Protocol:
                 instruction, self.instruction_to_plate_count[instruction]
             )
 
-            with open(picklist_name(i), "w") as picklist_file:
+            with open(picklist_filename(i), "w") as picklist_file:
                 picklist_file.write(picklist)
 
     def add_instruction(self, instruction: Instruction):
@@ -326,7 +332,11 @@ class Protocol:
         if instruction.transfers:
             dest_containers = {t.dest for t in instruction.transfers}
             if all(not isinstance(c, Fridge) for c in dest_containers):
-                self.plate_count += len(Layout.from_instruction(instruction))
+                self.plate_count += len(
+                    Layout.from_instruction(
+                        instruction, separate_reagents=self.separate_reagents
+                    )
+                )
 
     def _check_output(self):
         """Verify that the Protocol has steps and that they have been run.

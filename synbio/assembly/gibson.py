@@ -339,7 +339,6 @@ def _fix_offtarget_primers(records: List[SeqRecord], primers: List[Primers]):
 
             # we've fixed too many sites, give up and log
             if len(new_primer) >= MAX_PRIMER_LEN:
-                logging.warning("Failed to fix off-target in FWD primer")
                 new_primer = primer_pair.fwd.upper()
                 break
         primer_pair.fwd = new_primer
@@ -354,7 +353,6 @@ def _fix_offtarget_primers(records: List[SeqRecord], primers: List[Primers]):
 
             # we've fixed too many sites, give up and log
             if len(new_primer) >= MAX_PRIMER_LEN:
-                logging.warning("Failed to fix off-target in REV primer")
                 new_primer = primer_pair.rev.upper()
                 break
         primer_pair.rev = new_primer

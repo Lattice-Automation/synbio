@@ -6,7 +6,9 @@ from ..containers import Layout
 from ..instructions import Instruction
 
 
-def to_tecan(instruction: Instruction, existing_plates: int) -> str:
+def to_tecan(
+    instruction: Instruction, existing_plates: int, separate_reagents: bool = False
+) -> str:
     """Given a picklist for the Freedom EVO platform
 
     https://lifesciences.tecan.com/freedom-evo-platform
@@ -25,6 +27,9 @@ def to_tecan(instruction: Instruction, existing_plates: int) -> str:
     Args:
         instruction: a single step's instruction
         existing_plates: number of plates before these in protocol
+
+    Keyword Args:
+        separate_reagents: Whether to separate reagent plate from other wells
 
     Returns:
         the picklist in CSV string format
@@ -48,7 +53,10 @@ def to_tecan(instruction: Instruction, existing_plates: int) -> str:
 
     # set each wells location in setup and destination plates
     plates = Layout.from_instruction(
-        instruction, src_containers=True, existing_plates=existing_plates
+        instruction,
+        src_containers=True,
+        existing_plates=existing_plates,
+        separate_reagents=separate_reagents,
     )
 
     rows: List[Dict[str, Union[str, float]]] = []

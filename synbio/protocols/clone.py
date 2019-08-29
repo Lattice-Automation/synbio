@@ -49,8 +49,9 @@ class Clone(Protocol):
         mix: Mix = CLONING_MIX,
         include: List[str] = None,
         min_count: int = -1,
+        separate_reagents: bool = False,
     ):
-        super().__init__(name=name, design=design)
+        super().__init__(name=name, design=design, separate_reagents=separate_reagents)
 
         self.enzymes = enzymes or []
         self.include = include

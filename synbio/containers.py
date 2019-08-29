@@ -2,7 +2,7 @@
 
 import math
 import string
-from typing import Dict, Iterable, List, Union, Optional
+from typing import Dict, Iterable, List, Optional, Union, Tuple
 import uuid
 
 from Bio.Restriction.Restriction import RestrictionType
@@ -21,13 +21,13 @@ def content_id(content: Content) -> str:
     """Return a "unique" ID for each set of content.
 
     Args:
-        content: contents of some container
+        content: The contents of some container
 
     Returns:
-        the unique ID associated with the content
+        The unique ID associated with the content
 
     Raises:
-        TypeError: if unrecognized content type
+        TypeError: If unrecognized content type
     """
 
     if isinstance(content, SeqRecord):
@@ -88,7 +88,7 @@ class Container:
         """Add more content to this container
 
         Args:
-            contents: single content or list
+            contents: Single content or list
         """
 
         if isinstance(contents, list):
@@ -237,21 +237,18 @@ class Fridge(Container):
     def withdraw(self, volume: float):
         """Do nothing, Fridge is infinite."""
 
-        pass
-
 
 class Layout:
     """Layout on a bench or a robotic platform
 
     Allocates positions to each grouped container (plate/reservoir, etc)
 
-    Args:
-        containers: the list of containers to put in the plates
-
-    Keyword Args:
-        src_containers: list of source containers (default: {None})
-        existing_plates: the number of already existing plates
-        log_volume: whether to log volume to csv output (ex water(20)) (default: {False})
+    Attributes:
+        containers: The list of containers to put in the plates
+        src_containers: List of source containers (default: {None})
+        existing_plates: The number of already existing plates
+        log_volume: Whether to log volume to csv output (ex water(20)) (default: {False})
+        separate_reagents: Whether to separate reagent plate from other wells
     """
 
     def __init__(
@@ -260,17 +257,19 @@ class Layout:
         src_containers: Iterable[Container] = None,
         existing_plates: int = 0,
         log_volume: bool = False,
+        separate_reagents: bool = False,
     ):
         self.containers = sorted(containers)
         self.existing_plates = existing_plates
         self.log_volume = log_volume
+        self.separate_reagents = separate_reagents
 
         def get_containers(containers: Optional[Iterable[Container]], ctype: type):
             # keep order consistent, see Container.__lt__ for sort method
             return sorted([c for c in (containers or []) if isinstance(c, ctype)])
 
         # get reservoirs
-        src_reservoir = get_containers(src_containers, Reservoir)
+        src_reservoirs = get_containers(src_containers, Reservoir)
         self.reservoirs = get_containers(self.containers, Reservoir)
 
         # get the tubes
@@ -294,8 +293,9 @@ class Layout:
         well_count = well.rows * well.cols
         dest_shift = 0
         if src_wells:
-            src_well_plate = src_wells[0].rows * src_wells[0].cols
-            dest_shift += well_count * math.ceil(len(src_wells) / src_well_plate)
+            dest_shift = (
+                self._plate_count(self.reservoirs, self.tubes, self.wells) * well_count
+            )
             src_wells = sorted(src_wells)
             self._set_well_meta(src_wells, 0)
         self._set_well_meta(self.wells, dest_shift)
@@ -307,17 +307,21 @@ class Layout:
         src_containers: bool = False,
         existing_plates: int = 0,
         log_volume: bool = False,
+        separate_reagents: bool = False,
     ) -> "Layout":
         """Create a Layout from an instruction with transfers.
 
         Args:
-            instruction: the instruction with transfers
-            src_containers: whether to also map out source containers
-            existing_plates: the number of already existing plates
-            log_volume: whether to log each wells volume during to_csv
+            instruction: The instruction with transfers
+
+        Keyword Args:
+            src_containers: Whether to also map out source containers
+            existing_plates: The number of already existing plates
+            log_volume: Whether to log each wells volume during to_csv
+            separate_reagents: Whether to separate reagent plate from other wells
 
         Returns:
-            new Layout for plates, reservoirs, etc
+            A new Layout for plates, reservoirs, etc
         """
 
         if not instruction.transfers:
@@ -330,9 +334,15 @@ class Layout:
                 src_containers={t.src for t in instruction.transfers},
                 existing_plates=existing_plates,
                 log_volume=log_volume,
+                separate_reagents=separate_reagents,
             )
 
-        return cls(dest_wells, existing_plates=existing_plates, log_volume=log_volume)
+        return cls(
+            dest_wells,
+            existing_plates=existing_plates,
+            log_volume=log_volume,
+            separate_reagents=separate_reagents,
+        )
 
     def to_csv(self) -> str:
         """Return self in CSV representation for a CSV/Excel file.
@@ -342,51 +352,29 @@ class Layout:
         Each cells holds the ids of all well containers.
 
         Returns:
-            CSV representation of plate row
+            A CSV representation of row of containers, usually wells in plates
         """
 
         if not self.wells:
             return ""
 
-        well = self.wells[0]
-        wells = well.rows * well.cols
-        rows = string.ascii_uppercase[: well.rows]
+        # initalize the cells with plates for the wells
+        cells = self._wells_to_cells()
 
-        csv_wells: List[List[str]] = [[] for _ in range(well.rows + 1)]
-        for i, container in enumerate(self.wells):
-            if i % wells == 0:
-                if i != 0:
-                    for j in range(well.rows + 1):
-                        csv_wells[j].append("")
-
-                # add a plate name header
-                csv_wells[0].append(
-                    "Plate:" + str(math.floor(i / wells) + 1 + self.existing_plates)
-                )
-
-                for j in range(well.cols):  # add column headers
-                    csv_wells[0].append(str(j + 1))
-
-                for j in range(well.rows):  # add row headers
-                    csv_wells[j + 1].append(rows[j])
-
-            contents = "|".join(  # add contents to a well
-                [
-                    content_id(c)
-                    if not self.log_volume
-                    else content_id(c) + f"({round(container.volumes[k], 1)})"
-                    for k, c in enumerate(container)
-                ]
-            )
-            csv_wells[i % well.rows + 1].append(contents)
+        if self.reservoirs:
+            for i, reservoir in enumerate(self.reservoirs):
+                res_name = "Reservoir:" + str(i + 1)
+                res_volume = sum(reservoir.volumes)
+                res_contents = "|".join(content_id(c) for c in reservoir)
+                cells[0] += ["", f"{res_name}", f"{res_contents}({res_volume})"]
 
         plate_output = ""
-        for row in csv_wells:
+        for row in cells:
             plate_output += ",".join(row) + "\n"
         return plate_output + "\n"
 
     def _set_well_meta(self, containers: List[Well], shift: int):
-        """Cache meta about a container: plate, well name and index."""
+        """Save meta about a container: plate, well name and index."""
 
         if not containers:
             return
@@ -397,21 +385,93 @@ class Layout:
 
         col_names = {n: str(n + 1) for n in range(cols + 1)}
         row_names = string.ascii_uppercase[: rows + 1]
-        well_count = rows * cols
+        wells_per_plate = rows * cols
 
-        for i, container in enumerate(containers):
-            i += shift
-            plate_index = math.floor(i / well_count)
-            plate_name = "Plate:" + str(plate_index + 1 + self.existing_plates)
+        def set_well_meta(wells: List[Well], well_shift: int):
+            for i, container in enumerate(wells):
+                i += well_shift
+                plate_index = math.floor(i / wells_per_plate)
+                plate_name = "Plate:" + str(plate_index + 1 + self.existing_plates)
 
-            well_index = i % well_count + 1  # 1-based well index: A2 == 2
-            row_name = row_names[i % rows]
-            col_name = col_names[math.floor(plate_index / rows)]
-            well_name = row_name + col_name
+                well_index = i % wells_per_plate + 1  # 1-based well index: A2 == 2
+                row_name = row_names[i % rows]
+                col_name = col_names[math.floor(plate_index / rows)]
+                well_name = row_name + col_name
 
-            self.container_to_plate_name[container] = plate_name
-            self.container_to_well_index[container] = well_index
-            self.container_to_well_name[container] = well_name
+                self.container_to_plate_name[container] = plate_name
+                self.container_to_well_index[container] = well_index
+                self.container_to_well_name[container] = well_name
+
+        if self.separate_reagents:
+            wells_reagents, wells_other = self._separate_reagents(containers)
+            set_well_meta(wells_other, shift)
+            shift += (
+                math.ceil(float(len(wells_other)) / wells_per_plate) * wells_per_plate
+            )
+            set_well_meta(wells_reagents, shift)
+        else:
+            set_well_meta(containers, shift)
+
+    def _wells_to_cells(self) -> List[List[str]]:
+        """Convert a list of wells to a list of list of strings for each well
+        
+        Returns:
+            A list of list of strings, each a cell in CSV worksheet
+        """
+
+        well = self.wells[0]
+        well_count = well.rows * well.cols
+        rows = string.ascii_uppercase[: well.rows]
+
+        cells: List[List[str]] = [[] for _ in range(well.rows + 1)]
+
+        def add_wells(wells: List[Well]):
+            for i, container in enumerate(wells):
+                if i % well_count == 0:
+                    if cells[0]:  # there are already other plates
+                        for j in range(well.rows + 1):
+                            cells[j].append("")
+
+                    # add a plate name header
+                    cells[0].append(self.container_to_plate_name[container])
+
+                    # add column headers
+                    for j in range(well.cols):
+                        cells[0].append(str(j + 1))
+
+                    # add row headers
+                    for j in range(well.rows):
+                        cells[j + 1].append(rows[j])
+
+                contents = "|".join(  # add contents to a well
+                    [
+                        content_id(c)
+                        if not self.log_volume
+                        else content_id(c) + f"({round(container.volumes[k], 1)})"
+                        for k, c in enumerate(container)
+                    ]
+                )
+
+                cells[i % well.rows + 1].append(contents)
+
+            # append a bunch of commas for the empty wells
+            cells_remaining = well_count - len(wells) % well_count
+            row = len(wells) % well.rows  # the last row
+            for _ in range(cells_remaining):
+                row += 1
+                cells[row % well.rows + 1].append("")
+
+        if self.separate_reagents:
+            wells_reagents, wells_others = self._separate_reagents(self.wells)
+            add_wells(wells_others)
+            add_wells(wells_reagents)
+        else:
+            add_wells(self.wells)
+
+        if not self.wells:
+            cells = [[]]
+
+        return cells
 
     def __len__(self) -> int:
         """Return the number of plate spaces this object requires on a robotic deck."""
@@ -428,9 +488,9 @@ class Layout:
         the number or rows/columns of their respective rack/plate
 
         Args:
-            reservoirs: large liquid reservoirs
-            tubes: list of tubes for a rack
-            wells: list of wells for a plate
+            reservoirs: Large liquid reservoirs
+            tubes: Tubes for a rack
+            wells: Wells for a plate
 
         Returns:
             the number of "plate" spaces this layout requires
@@ -445,6 +505,33 @@ class Layout:
 
         if wells:
             wells_per_plate = wells[0].rows * wells[0].cols
-            count += math.ceil(float(len(wells)) / wells_per_plate)
+            if self.separate_reagents:
+                wells_reagents, wells_other = self._separate_reagents(wells)
+                count += math.ceil(float(len(wells_reagents)) / wells_per_plate)
+                count += math.ceil(float(len(wells_other)) / wells_per_plate)
+            else:
+                count += math.ceil(float(len(wells)) / wells_per_plate)
 
         return count
+
+    def _separate_reagents(
+        self, containers: List[Container]
+    ) -> Tuple[List[Container], List[Container]]:
+        """Separate containers with only reagents from those with a mix of other things.
+        
+        Args:
+            containers: The containers to separate by those with just reagents vs others
+        
+        Returns:
+            A tuple with 1. containers with just reagents 2. containers with other contents
+        """
+
+        containers_reagents: List[Container] = []
+        containers_other: List[Container] = []
+
+        for container in containers:
+            if all(isinstance(c, Reagent) for c in container):
+                containers_reagents.append(container)
+            else:
+                containers_other.append(container)
+        return containers_reagents, containers_other

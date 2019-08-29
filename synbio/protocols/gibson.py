@@ -55,8 +55,9 @@ class Gibson(Protocol):
         hifi: bool = False,
         pcr_mix: Mix = PCR_MIX,
         gibson_mix: Mix = GIBSON_MIX,
+        separate_reagents: bool = False,
     ):
-        super().__init__(name=name, design=design)
+        super().__init__(name=name, design=design, separate_reagents=separate_reagents)
 
         self.hifi = hifi
         self.pcr_mix = pcr_mix

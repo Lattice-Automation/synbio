@@ -64,7 +64,7 @@ class TestSteps(unittest.TestCase):
         """Test Pipette step to move SeqRecords into new wells."""
 
         def contents(containers):  # get lists of ids (SeqRecords not comparable)
-            return [[c.id for c in container] for container in containers]
+            return [c.id for container in containers for c in container]
 
         target = [
             Well([self.r1, self.r3], volumes=[20.0, 20.0]),

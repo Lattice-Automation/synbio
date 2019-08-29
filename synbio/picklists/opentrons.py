@@ -16,7 +16,10 @@ class Robot(Enum):
 
 
 def to_opentrons(
-    instruction: Instruction, existing_plates: int, robot: Robot = Robot.OT2
+    instruction: Instruction,
+    existing_plates: int,
+    robot: Robot = Robot.OT2,
+    separate_reagents: bool = False,
 ) -> str:
     """Given an instruction from a Protocol (from some Step), create an Opentrons script.
 
@@ -32,6 +35,7 @@ def to_opentrons(
 
     Keyword Args:
         robot: which of the Opentrons robots to make the script for
+        separate_reagents: Whether to separate reagent plate from other wells
 
     Returns:
         the python script

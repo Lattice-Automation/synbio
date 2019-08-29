@@ -70,8 +70,6 @@ protocol = GoldenGate(
     min_count=5,  # only keep circularized plasmids from >=5 SeqRecords
 )
 
-protocol.run()
-
 # export all the output plasmids to a multi-FASTA
 protocol.to_fasta("plasmids.fasta")
 

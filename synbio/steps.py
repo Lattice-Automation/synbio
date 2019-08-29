@@ -19,7 +19,7 @@ class Setup(Step):
         target: target container list/ordering (default: {None})
         dest: the type of target container (default: {first target container})
         name: the name of this step in the protocol
-        instructions: extra instructions to add to this step
+        instructions: extra instructions to add to this step,
     """
 
     def __init__(

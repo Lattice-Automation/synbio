@@ -16,7 +16,9 @@ https://github.com/Edinburgh-Genome-Foundry/Plateo/blob/master/plateo/exporters/
 """
 
 
-def to_labcyte(instruction: Instruction, existing_plates: int) -> str:
+def to_labcyte(
+    instruction: Instruction, existing_plates: int, separate_reagents: bool = False
+) -> str:
     """Given an instruction from a Protocol (from some Step), create a Labcyte picklist.
 
     Transfers have to be in multiples of 2.5 nL and cannot be more than 10 uL:
@@ -28,6 +30,9 @@ def to_labcyte(instruction: Instruction, existing_plates: int) -> str:
     Args:
         instruction: a single step's instruction
         existing_plates: number of plates before these in protocol
+
+    Keyword Args:
+        separate_reagents: Whether to separate reagent plate from other wells
 
     Returns:
         the picklist in CSV string format
@@ -46,7 +51,10 @@ def to_labcyte(instruction: Instruction, existing_plates: int) -> str:
 
     # set each wells location in setup and destination plates
     plates = Layout.from_instruction(
-        instruction, src_containers=True, existing_plates=existing_plates
+        instruction,
+        src_containers=True,
+        existing_plates=existing_plates,
+        separate_reagents=separate_reagents,
     )
 
     rows: List[Dict[str, Union[str, float]]] = []

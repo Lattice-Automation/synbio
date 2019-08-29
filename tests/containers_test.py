@@ -28,8 +28,8 @@ class TestContainers(unittest.TestCase):
         with self.assertRaises(TypeError):
             content_id("")
 
-    def test_plates(self):
-        """Plate creation and serialization to CSV format."""
+    def test_layout(self):
+        """Layout creation and serialization to CSV format."""
 
         plate_contents = [Well(SeqRecord(Seq("ATGATAGAT"))) for i in range(140)]
         plates = Layout(plate_contents)
@@ -51,6 +51,18 @@ class TestContainers(unittest.TestCase):
         self.assertEqual(2, plates.container_to_well_index[plate_contents[1]])
         self.assertEqual("B1", plates.container_to_well_name[plate_contents[1]])
         self.assertEqual(2, len(plates))  # two plates
+
+        # STILL just two plates, no reagents in contents
+        plates = Layout(plate_contents, separate_reagents=True)
+        self.assertEqual(2, len(plates))
+
+        # Three plates, reagents are in a separate plate
+        plate_reagent_contents = plate_contents + [
+            Well(Reagent("water")),
+            Well(Reagent("mix")),
+        ]
+        plates = Layout(plate_reagent_contents, separate_reagents=True)
+        self.assertEqual(3, len(plates))
 
     def test_hash(self):
         """Hash containers."""
