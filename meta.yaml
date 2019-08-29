@@ -17,7 +17,7 @@ requirements:
   host:
     - python >=3.0
     - pip
-    - biopython
+    - biopython >=1.74
   run:
     - python >=3.0
     - biopython >=1.74
@@ -49,5 +49,3 @@ extra:
     - 'JJTimmons'
   deploy:
     - anaconda-client
-    - setuptools
-    - twine

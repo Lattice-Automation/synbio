@@ -82,8 +82,6 @@ class TestGoldenGate(unittest.TestCase):
         protocol.run()
 
         self.assertTrue(protocol.output)
-        for record in protocol.output:
-            print(record.id)
 
     def read(self, filename):
         """Read in a single Genbank file from the test directory."""
