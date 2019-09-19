@@ -1,2 +1,5 @@
 include requirements.txt
-include data/features/*.pickle
+include data/features/dna.id.pickle
+include data/features/dna.kmermap.pickle
+include data/features/protein.id.pickle
+include data/features/dna.kmermap.pickle
