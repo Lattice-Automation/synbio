@@ -18,7 +18,7 @@ setup(
     long_description_content_type="text/markdown",
     keywords="synbio, lab automation, dna assembly",
     license="GNU General Public License v2 (GPLv2)",
-    packages=find_packages(),
+    packages=find_packages(exclude=["data"]),
     install_requires=requirements,
     data_files=[
         (
