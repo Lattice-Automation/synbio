@@ -1,2 +1,2 @@
 include requirements.txt
-recursive-include data *
+recursive-include data/features/*
