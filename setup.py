@@ -7,7 +7,7 @@ requirements = ["biopython>=1.74.0", "networkx>=2.3.0", "primer3-py"]
 
 setup(
     name="synbio",
-    version="0.5.0",
+    version="0.6.0",
     python_requires=">=3",
     author="JJTimmons",
     author_email="jtimmons@latticeautomation.com",
