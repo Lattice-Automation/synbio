@@ -86,6 +86,7 @@ dependencies:
   - xz=5.2.4=h1de35cc_4
   - zlib=1.2.11=h1de35cc_3
   - pip:
+    - bumpversion==0.5.3
     - fuzzywuzzy==0.17.0
     - m2r==0.2.1
     - mistune==0.8.4
