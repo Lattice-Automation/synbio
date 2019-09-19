@@ -20,9 +20,17 @@ setup(
     license="GNU General Public License v2 (GPLv2)",
     packages=find_packages(),
     install_requires=requirements,
-    package_dir={"synbio": "synbio"},
-    package_data={"synbio": ["../data/features/*.pickle"]},
-    include_package_data=True,
+    data_files=[
+        (
+            "data",
+            [
+                "data/features/dna.id.pickle",
+                "data/features/dna.kmermap.pickle",
+                "data/features/protein.id.pickle",
+                "data/features/protein.kmermap.pickle",
+            ],
+        )
+    ],
     test_suite="tests.suite",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
