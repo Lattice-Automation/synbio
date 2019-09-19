@@ -1,3 +1,8 @@
+DNA_IGEM    = ./data/features/igem/dna.db
+PROTEIN_IGEM = ./data/features/igem/protein.db
+DNA_SG      = ./data/features/snapgene/dna.db
+PROTEIN_SG  = ./data/features/snapgene/protein.db
+
 .PHONY: test docs build
 
 test:
@@ -12,6 +17,20 @@ docs:
 build:
 	conda build . -c jtimmons
 	conda build purge
+
+reset:
+	rm -f data/features/**/dna*
+	rm -f data/features/**/protein*
+	rm -f data/features/igem/igem.pickle
+
+features: reset
+	python3 -c "import synbio.features.cluster as c; c.cluster()"
+	python2 ./synbio/features/snapgene.py
+	cat ${DNA_SG} > ./data/features/dna.db
+	cat ${DNA_IGEM} >> ./data/features/dna.db
+	cat ${PROTEIN_SG} > ./data/features/protein.db
+	cat ${PROTEIN_IGEM} >> ./data/features/protein.db
+	python3 -c "import synbio.features.seed as s; s.seed()"
 
 minor: test
 	bumpversion minor

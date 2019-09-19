@@ -4,6 +4,10 @@
 # Test output files
 tests/output/
 
+# Feature input files for clustering (the iGEM dump is too large for Github)
+data/features/igem
+data/features/snapgene
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

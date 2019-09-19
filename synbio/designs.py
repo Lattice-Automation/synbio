@@ -9,7 +9,7 @@ from .containers import content_id
 
 class Design:
     """A SynBio design specification.
-    
+
     Attributes:
         linear: Whether the SeqRecords of the design are linear
     """

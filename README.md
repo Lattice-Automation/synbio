@@ -1,6 +1,6 @@
 # synbio
 
-`synbio` is a library for designing and assembling DNA. Users can design plasmids or libraries and export multi-step build protocols. Input SeqRecords; output assembly SeqRecords, protocols, plate maps, and robotic picklists.
+`synbio` is a library for designing and assembling DNA. Users can design plasmids or libraries and export multi-step build protocols. Input SeqRecords. Output assembly SeqRecords, protocols, plate maps, and robotic picklists.
 
 ## Installation
 
@@ -119,6 +119,19 @@ A;Plate:2;;;15;;2.0;;;
 D;Plate:3;;;80;;2.0;;;
 W;;;;;;;;;
 ...
+```
+
+## Annotation
+
+In addition to DNA assembly, `synbio` exposes a plasmid annotation function in `synbio.features`. An example is below, where a new SeqRecord is created with additional SeqFeatures from a curated database of common plasmid features.
+
+```python
+
+from synbio.features import annotate
+
+record = parse("plasmid.fa", "fasta")
+
+record_with_features = annotate(record, identity=0.96)
 ```
 
 ## Alternatives

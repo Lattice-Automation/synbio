@@ -34,18 +34,19 @@ class GoldenGate(Clone):
 
     Full responsibilities include
 
-        1. subselecting the input designs that will form valid plasmids
-            after digestion with BsaI and BpiI
-        2. adding NEB Golden Gate Assembly Mix to the valid designs as Contents for a Container
-        3. computing the final plasmid (SeqRecord) after ligation of digested fragments
-        4. memoize the sorted enzyme + ids -> SeqRecord from step #3, pass as a
-            "mutate" method for the step after ThermoCycle()
-        5. add steps to carry out the rest of the assembly (heat shock, incubate, etc)
+    * subselecting the input designs that will form valid plasmids after digestion with BsaI and BpiI
+    * adding NEB Golden Gate Assembly Mix to the valid designs as Contents for a Container
+    * computing the final plasmid (SeqRecord) after ligation of digested fragments
+    * memoize the sorted enzyme + ids -> SeqRecord from step #3, pass as a
+    * "mutate" method for the step after ThermoCycle()
+    * add steps to carry out the rest of the assembly (heat shock, incubate, etc)
 
     Keyword Args:
-        include: include only plasmids with a feature matching something
+        name: Name of this protocol
+        enzymes: List of digest enzymes to catalyze SeqRecords with
+        include: Include only plasmids with a feature matching something
             in the include list use in backbone selection (default: {None})
-        min_count: the minimum number of SeqRecords in an assembly for it to
+        min_count: The minimum number of SeqRecords in an assembly for it to
             be considered valid. smaller assemblies are ignored
         separate_reagents: Whether to separate reagent plate from other wells
     """
