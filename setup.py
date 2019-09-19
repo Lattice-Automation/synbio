@@ -20,7 +20,8 @@ setup(
     license="GNU General Public License v2 (GPLv2)",
     packages=find_packages(),
     install_requires=requirements,
-    package_data={"synbio": ["data/features/*.pickle"]},
+    package_dir={"synbio": "synbio"},
+    package_data={"synbio": ["../data/features/*.pickle"]},
     include_package_data=True,
     test_suite="tests.suite",
     classifiers=[
