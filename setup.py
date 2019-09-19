@@ -3,7 +3,8 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-requirements = ["biopython>=1.74.0", "networkx>=2.3.0", "primer3-py"]
+with open("requirements.txt") as f:
+    requirements = f.read().splitlines()
 
 setup(
     name="synbio",
@@ -19,6 +20,7 @@ setup(
     license="GNU General Public License v2 (GPLv2)",
     packages=find_packages(),
     install_requires=requirements,
+    include_package_data=True,
     test_suite="tests.suite",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
