@@ -353,12 +353,12 @@ def _get_matches(seq: str, hits: List[Hit], identity: float) -> List[Match]:
     """Expand Hits with an alignment against the query sequence, turn into Matches.
 
     Filter out hits/matches that fall beneath the identity threshold after expansion.
-    
+
     Args:
         seq: The query sequence
         hits: Filtered hits to be expanded
         identity: The identity threshold below which features are ignored
-    
+
     Returns:
         Matches with ranges on the query sequence
     """
@@ -411,12 +411,12 @@ def _cull(seq: str, features: List[SeqFeature], identity: float) -> List[SeqFeat
     Features are removed if any of the following occurs:
         1. 100% engulfed by another feature
         2. percentage identity bp in common with another feature
-    
+
     Args:
         seq: The query sequence
         features: Features to cull
         identity: The ratio identity used during aligning
-    
+
     Returns:
         Culled features
     """

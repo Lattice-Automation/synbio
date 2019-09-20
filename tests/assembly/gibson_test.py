@@ -1,6 +1,5 @@
 """Gibson testing."""
 
-import logging
 import os
 import unittest
 
@@ -9,7 +8,6 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 
 from synbio.assembly import gibson
-from synbio.assembly.gibson import _hamming_set
 from synbio.primers import MIN_PRIMER_LEN, MAX_PRIMER_LEN
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))
@@ -64,16 +62,6 @@ class TestGibson(unittest.TestCase):
         plasmid, primer_pairs = gibson([insert, backbone])
 
         self.assertTrue(plasmid and primer_pairs)
-
-    def test_hamming_set(self):
-        """Create a set of off-by-one DNA sequences."""
-
-        hset = _hamming_set("ATG")
-
-        self.assertEqual(10, len(hset))
-        self.assertTrue(all(len(s) == 3 for s in hset))
-        self.assertIn("TTG", hset)
-        self.assertNotIn("TAG", hset)
 
     def _run_and_verify(self, records):
         """Verify the primers and plasmid sequence are correct."""

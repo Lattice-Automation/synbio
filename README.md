@@ -63,7 +63,7 @@ design = Combinatorial(read_all_records())
 protocol = GoldenGate(
     name="Combinatorial Golden Gate",
     design=design,
-    include=["KanR"],  # only keep circularized plasmids with KanR
+    include=["KanR"],  # only keep circularized plasmids with a KanR SeqFeature
     min_count=5,  # only keep circularized plasmids from >=5 SeqRecords
 )
 protocol.to_fasta("plasmids.fasta")  # export multi-FASTA
@@ -115,10 +115,10 @@ W;;;;;;;;;
 In addition to DNA assembly, `synbio` exposes a plasmid annotation function in `synbio.features`. An example is below, where a new SeqRecord is created with additional SeqFeatures from a curated database of common plasmid features.
 
 ```python
-
+from Bio.SeqIO import parse
 from synbio.features import annotate
 
-record = parse("plasmid.fa", "fasta")
+record = next(parse("plasmid.fa", "fasta"))
 
 record_with_features = annotate(record, identity=0.96)
 ```

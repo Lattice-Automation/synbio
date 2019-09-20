@@ -414,7 +414,7 @@ class Layout:
 
     def _wells_to_cells(self) -> List[List[str]]:
         """Convert a list of wells to a list of list of strings for each well
-        
+
         Returns:
             A list of list of strings, each a cell in CSV worksheet
         """

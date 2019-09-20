@@ -1,11 +1,15 @@
 """Primers for PCR."""
 
-from typing import Dict, Tuple
+from collections import defaultdict
+from typing import Dict, Tuple, Union
 
 from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from primer3.bindings import designPrimers
+
+from .seq import mutate
+
 
 MIN_PRIMER_LEN = 18
 """The minimum number of bp in a primer."""
@@ -31,23 +35,25 @@ class Primers:
         self.rev_tm = rev_tm
 
     @classmethod
-    def for_record(cls, record: SeqRecord) -> "Primers":
+    def pcr(cls, record: Union[str, Seq, SeqRecord]) -> "Primers":
         """Create Primers to amplify a SeqRecord.
 
         Args:
             record: the sequence to amplify via primers
 
         Returns:
-            to PCR the record
+            A Primers object to amplify the SeqRecord
         """
+
+        template = _get_seq(record)
 
         p3_output = designPrimers(
             {
-                "SEQUENCE_TEMPLATE": str(record.seq),
-                "SEQUENCE_INCLUDED_REGION": [0, len(record.seq)],
+                "SEQUENCE_TEMPLATE": template,
+                "SEQUENCE_INCLUDED_REGION": [0, len(template)],
             },
             {
-                "PRIMER_PRODUCT_SIZE_RANGE": [len(record.seq), len(record.seq)],
+                "PRIMER_PRODUCT_SIZE_RANGE": [len(template), len(template)],
                 "PRIMER_TASK": "pick_cloning_primers",
                 "PRIMER_NUM_RETURN": 1,
                 "PRIMER_PICK_ANYWAY": 1,
@@ -93,3 +99,112 @@ class Primers:
         rev_seq, rev_tm = primer("RIGHT")
 
         return cls(fwd_seq, fwd_tm, rev_seq, rev_tm)
+
+    def __eq__(self, other) -> bool:
+        """Primers equality checking.
+
+        Primers are the same if their sequences are same in FWD/REV direction.
+
+        Args:
+            other: Other Primers object
+
+        Returns:
+            Whether the two Primers objects are the same
+        """
+
+        if not isinstance(other, Primers):
+            return False
+
+        return self.fwd == other.fwd and self.rev == other.rev
+
+    def specific(
+        self,
+        seq: Union[str, Seq, SeqRecord],
+        check_len: int = 12,
+        edit_distance: int = 1,
+    ) -> bool:
+        """Return whether the primers will produce a single, unambiguous PCR product.
+
+        This returns false if either:
+            1. The primers don't anneal to the template sequence and won't amplify
+            2. The primers bind in multiple locations and may create multiple
+                PCR product via ectopic binding
+
+        Ectopic/off-target binding is checked by looking at the last 10 bp of the primer.
+        If there is a binding site anywhere in the template sequence with only
+        one bp of difference between either of the primers' 3' end and the template
+        sequence, we classify that as being sufficient for an ectopic binding site.
+        This assumption is based on the following paper, which looked at the effects
+        of single bp mutations in qPCR rates. Single bp changes had a deleterious effect:
+
+        "Quantitative effects of position and type of single mismatch on
+        single base primer extension". Journal of Microbiological Methods, 2009.
+
+        Args:
+            seq: A template sequence like object (str, Seq or SeqRecord)
+
+        Keyword Args:
+            check_len: The number of bp from 3' end of primers to check for
+                binding in the template sequence. Larger number bp mean this
+                is less likely to find ectopic binding sites. Conversely,
+                smaller check_len's mean this is more likely to find
+                off-target, ectopic sites and not count the primers as specific
+            edit_distance: The number of edits to check for within the
+                ends of each primer when looking for ectopic binding sites
+
+        Returns:
+            Whether the primers will create a single PCR product
+        """
+
+        template = _get_seq(seq).upper()
+        template_rc = str(Seq(template).reverse_complement())
+
+        kmer_count: Dict[str, int] = defaultdict(int)
+        for i in range(len(template) - check_len + 1):
+            kmer = template[i : i + check_len]
+            kmer_rc = template_rc[i : i + check_len]
+
+            kmer_count[kmer] += 1
+            kmer_count[kmer_rc] += 1
+
+        end_fwd = self.fwd[-check_len:]
+        end_rev = self.rev[-check_len:]
+
+        # return False if the fwd and rev primer don't bind
+        # to opposite strands
+        if not (
+            (end_fwd in template and end_rev in template_rc)
+            or (end_fwd in template_rc and end_rev in template)
+        ):
+            return False
+
+        # return False if the fwd and or rev primer bind more than once
+        if kmer_count[end_fwd] > 1 or kmer_count[end_rev] > 1:
+            return False
+
+        fwd_mutants = mutate(end_fwd, edit_distance=edit_distance)
+        rev_mutants = mutate(end_rev, edit_distance=edit_distance)
+        mutants = fwd_mutants.union(rev_mutants)
+
+        # remove the original binding sites, those were checked above
+        mutants.remove(end_fwd)
+        mutants.remove(end_rev)
+
+        # return False if any of the off-by one sequences will bind
+        # more than once
+        if any(kmer_count[m] > 0 for m in mutants):
+            return False
+
+        return True
+
+
+def _get_seq(seq: Union[str, Seq, SeqRecord]) -> str:
+    """Get the sequence as a str from seq-like object."""
+
+    if isinstance(seq, str):
+        return seq
+    if isinstance(seq, Seq):
+        return str(seq)
+    if isinstance(seq, SeqRecord):
+        return str(seq.seq)
+    raise TypeError(seq)

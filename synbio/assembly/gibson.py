@@ -1,7 +1,6 @@
 """Create primers to assembly SeqRecords via Gibson Assembly."""
 
-import logging
-from typing import Tuple, List, Set, Optional, Iterable
+from typing import Tuple, List, Optional, Iterable
 
 from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Seq import Seq
@@ -9,6 +8,7 @@ from Bio.SeqRecord import SeqRecord
 
 from ..designs import Combinatorial
 from ..primers import Primers, MIN_PRIMER_LEN, MAX_PRIMER_LEN
+from ..seq import mutate
 
 
 MIN_HOMOLOGY = 20
@@ -71,14 +71,14 @@ def gibson(
 
     records = [r.upper() for r in records]
     plasmid = records[0].upper()
-    primers: List[Primers] = [Primers.for_record(records[0])]
+    primers: List[Primers] = [Primers.pcr(records[0])]
 
     for i, f1 in enumerate(records):
         j = (i + 1) % len(records)
         f2 = records[j]
 
         if j != 0:
-            primers.append(Primers.for_record(f2))
+            primers.append(Primers.pcr(f2))
 
         # if hifi is false, mismatches is 0
         homology, homology_length, mismatch_lengths = _record_homology(
@@ -377,7 +377,7 @@ def _bp_to_add_index(primer: Seq, seq: Seq) -> int:
 
     assert next_non_primer_bp > 0
 
-    off_by_one_set = _hamming_set(str(primer[-OFFTARGET_CHECK_LEN:]))
+    off_by_one_set = mutate(str(primer[-OFFTARGET_CHECK_LEN:]), edit_distance=1)
 
     for i in range(len(primer), len(seq)):
         # check record sequence $OFFTARGET_CHECK_LEN bp at a time
@@ -388,20 +388,3 @@ def _bp_to_add_index(primer: Seq, seq: Seq) -> int:
         ):
             return next_non_primer_bp
     return -1
-
-
-def _hamming_set(seq: str) -> Set[str]:
-    """Constructs all possible 1-off variations of given sequence.
-
-    Args:
-        seq: the end of a primer sequence
-
-    Returns:
-        A set of possible offtarget binding sites
-    """
-
-    hamming_set: Set[str] = set()
-    for i in range(len(seq)):
-        for base in "AGCT":
-            hamming_set.add(seq[:i] + base + seq[i + 1 :])
-    return hamming_set
