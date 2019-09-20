@@ -1,4 +1,8 @@
-"""Synbio designs."""
+"""Synbio designs.
+
+Design encode plasmids, libraries (of plasmids) or combinatorial builds
+for DNA assembly. They are the design specification used for the assembly step.
+"""
 
 from typing import Dict, Iterable, List, Union
 

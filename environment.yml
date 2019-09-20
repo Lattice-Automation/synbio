@@ -46,7 +46,7 @@ dependencies:
   - networkx=2.3=py_0
   - numpy=1.16.4=py37hacdab7b_0
   - numpy-base=1.16.4=py37h6575580_0
-  - openssl=1.1.1c=h1de35cc_1
+  - openssl=1.1.1d=h1de35cc_1
   - packaging=19.1=py37_0
   - pip=19.2.2=py37_0
   - pkginfo=1.5.0.1=py37_0
@@ -63,6 +63,7 @@ dependencies:
   - readme_renderer=24.0=py37_0
   - requests=2.22.0=py37_0
   - requests-toolbelt=0.9.1=py_0
+  - ripgrep=0.10.0=hc07d326_0
   - setuptools=41.0.1=py37_0
   - six=1.12.0=py37_0
   - snowballstemmer=1.9.0=py_0
@@ -90,6 +91,7 @@ dependencies:
     - fuzzywuzzy==0.17.0
     - m2r==0.2.1
     - mistune==0.8.4
+    - python-levenshtein==0.12.0
     - sphinx-rtd-theme==0.4.3
 prefix: //anaconda3/envs/synbio
 

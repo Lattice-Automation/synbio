@@ -2,6 +2,8 @@
 
 `synbio` is a library for designing and assembling DNA. Users can design plasmids or libraries and export multi-step build protocols. Input SeqRecords. Output assembly SeqRecords, protocols, plate maps, and robotic picklists.
 
+Documentation is available at [https://lattice-automation.github.io/synbio](https://lattice-automation.github.io/synbio)
+
 ## Installation
 
 ```bash
@@ -42,21 +44,16 @@ Behind the scenes, `synbio` is filtering all combinations of SeqRecords from the
 """Example of a Combinatorial Golden Gate assembly with human and robot output protocols."""
 
 import os
-
 from Bio.SeqIO import parse
-
 from synbio.designs import Combinatorial
 from synbio.protocols import GoldenGate
 
 def read_all_records():
-    """Gather all SeqRecords from "goldengate" dir in data."""
-
-    GG_DIR = os.path.join(".", "data", "goldengate")
-
+    gg_dir = os.path.join(".", "data", "goldengate")
     records = []
-    for file in os.listdir(GG_DIR):
+    for file in os.listdir(gg_dir):
         if file.endswith(".gb"):
-            records.extend(parse(os.path.join(GG_DIR, file), "genbank"))
+            records.extend(parse(os.path.join(gg_dir, file), "genbank"))
     return records
 
 # create a combinatorial library design from all valid combinations
@@ -69,18 +66,10 @@ protocol = GoldenGate(
     include=["KanR"],  # only keep circularized plasmids with KanR
     min_count=5,  # only keep circularized plasmids from >=5 SeqRecords
 )
-
-# export all the output plasmids to a multi-FASTA
-protocol.to_fasta("plasmids.fasta")
-
-# export plate layouts
-protocol.to_csv("plates.csv")
-
-# export human protocol
-protocol.to_txt("protocol.txt")
-
-# export a hamilton picklist
-protocol.to_picklists("picklist", platform="hamilton")
+protocol.to_fasta("plasmids.fasta")  # export multi-FASTA
+protocol.to_csv("plates.csv")  # export plate layouts
+protocol.to_txt("protocol.txt")  # export human protocol
+protocol.to_picklists("picklist", platform="hamilton")  # export a hamilton picklist
 ```
 
 plasmids.fasta:
