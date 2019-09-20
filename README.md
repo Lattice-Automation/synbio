@@ -23,7 +23,7 @@ conda install -c jtimmons synbio
 All are in `synbio.designs`:
 
 - `Combinatorial` - list of SeqRecords to combinatorially anneal into all valid assemblies
-- `CombinatorialBins` - list of bins of SeqRecords for combinatorial assembly between bins
+- `CombinatorialBins` - list of bins of SeqRecords for combinatorial assembly of records between bins
 - `Plasmid` - single list of SeqRecords to combine into a plasmid
 - `PlasmidLibrary` - list of list of SeqRecords to combine into plasmids
 
@@ -61,7 +61,7 @@ design = Combinatorial(read_all_records())
 
 # create a protocol using Golden Gate as the sole composite step and run
 protocol = GoldenGate(
-    name="CombinatorialBins Golden Gate",
+    name="Combinatorial Golden Gate",
     design=design,
     include=["KanR"],  # only keep circularized plasmids with KanR
     min_count=5,  # only keep circularized plasmids from >=5 SeqRecords

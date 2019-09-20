@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Protocols &mdash; synbio 0.5.0 documentation</title>
+  <title>Protocols &mdash; synbio 0.6.12 documentation</title>
   
 
   
@@ -380,29 +380,22 @@ SeqRecords that will circularize into valid new plasmids.</p>
 <p>This Protocol is derived from NEB’s guide:
 <a class="reference external" href="https://www.neb.com/protocols/2018/10/02/golden-gate-assembly-protocol-for-using-neb-golden-gate-assembly-mix-e1601">https://www.neb.com/protocols/2018/10/02/golden-gate-assembly-protocol-for-using-neb-golden-gate-assembly-mix-e1601</a></p>
 <p>Full responsibilities include</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li><dl class="simple">
-<dt>subselecting the input designs that will form valid plasmids</dt><dd><p>after digestion with BsaI and BpiI</p>
-</dd>
-</dl>
-</li>
+<ul class="simple">
+<li><p>subselecting the input designs that will form valid plasmids after digestion with BsaI and BpiI</p></li>
 <li><p>adding NEB Golden Gate Assembly Mix to the valid designs as Contents for a Container</p></li>
 <li><p>computing the final plasmid (SeqRecord) after ligation of digested fragments</p></li>
-<li><dl class="simple">
-<dt>memoize the sorted enzyme + ids -&gt; SeqRecord from step #3, pass as a</dt><dd><p>“mutate” method for the step after ThermoCycle()</p>
-</dd>
-</dl>
-</li>
+<li><p>memoize the sorted enzyme + ids -&gt; SeqRecord from step #3, pass as a</p></li>
+<li><p>“mutate” method for the step after ThermoCycle()</p></li>
 <li><p>add steps to carry out the rest of the assembly (heat shock, incubate, etc)</p></li>
-</ol>
-</div></blockquote>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Keyword Arguments</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>include</strong> – include only plasmids with a feature matching something
+<li><p><strong>name</strong> – Name of this protocol</p></li>
+<li><p><strong>enzymes</strong> – List of digest enzymes to catalyze SeqRecords with</p></li>
+<li><p><strong>include</strong> – Include only plasmids with a feature matching something
 in the include list use in backbone selection (default: {None})</p></li>
-<li><p><strong>min_count</strong> – the minimum number of SeqRecords in an assembly for it to
+<li><p><strong>min_count</strong> – The minimum number of SeqRecords in an assembly for it to
 be considered valid. smaller assemblies are ignored</p></li>
 <li><p><strong>separate_reagents</strong> – Whether to separate reagent plate from other wells</p></li>
 </ul>

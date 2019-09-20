@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>synbio &mdash; synbio 0.5.0 documentation</title>
+  <title>synbio &mdash; synbio 0.6.12 documentation</title>
   
 
   
@@ -173,7 +173,8 @@
             
   <div class="section" id="synbio">
 <h1>synbio<a class="headerlink" href="#synbio" title="Permalink to this headline">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">synbio</span></code> is a library for designing and assembling DNA. Users can design plasmids or libraries and export multi-step build protocols. Input SeqRecords; output assembly SeqRecords, protocols, plate maps, and robotic picklists.</p>
+<p><code class="docutils literal notranslate"><span class="pre">synbio</span></code> is a library for designing and assembling DNA. Users can design plasmids or libraries and export multi-step build protocols. Input SeqRecords. Output assembly SeqRecords, protocols, plate maps, and robotic picklists.</p>
+<p>Documentation is available at <a class="reference external" href="https://lattice-automation.github.io/synbio">https://lattice-automation.github.io/synbio</a></p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># with pip</span>
@@ -192,7 +193,7 @@ conda install -c jtimmons synbio
 <p>All are in <code class="docutils literal notranslate"><span class="pre">synbio.designs</span></code>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Combinatorial</span></code> - list of SeqRecords to combinatorially anneal into all valid assemblies</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">CombinatorialBins</span></code> - list of bins of SeqRecords for combinatorial assembly between bins</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CombinatorialBins</span></code> - list of bins of SeqRecords for combinatorial assembly of records between bins</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Plasmid</span></code> - single list of SeqRecords to combine into a plasmid</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">PlasmidLibrary</span></code> - list of list of SeqRecords to combine into plasmids</p></li>
 </ul>
@@ -213,21 +214,16 @@ conda install -c jtimmons synbio
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of a Combinatorial Golden Gate assembly with human and robot output protocols.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-
 <span class="kn">from</span> <span class="nn">Bio.SeqIO</span> <span class="kn">import</span> <span class="n">parse</span>
-
 <span class="kn">from</span> <span class="nn">synbio.designs</span> <span class="kn">import</span> <span class="n">Combinatorial</span>
 <span class="kn">from</span> <span class="nn">synbio.protocols</span> <span class="kn">import</span> <span class="n">GoldenGate</span>
 
 <span class="k">def</span> <span class="nf">read_all_records</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Gather all SeqRecords from &quot;goldengate&quot; dir in data.&quot;&quot;&quot;</span>
-
-    <span class="n">GG_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;goldengate&quot;</span><span class="p">)</span>
-
+    <span class="n">gg_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;goldengate&quot;</span><span class="p">)</span>
     <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">GG_DIR</span><span class="p">):</span>
+    <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">gg_dir</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.gb&quot;</span><span class="p">):</span>
-            <span class="n">records</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GG_DIR</span><span class="p">,</span> <span class="nb">file</span><span class="p">),</span> <span class="s2">&quot;genbank&quot;</span><span class="p">))</span>
+            <span class="n">records</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gg_dir</span><span class="p">,</span> <span class="nb">file</span><span class="p">),</span> <span class="s2">&quot;genbank&quot;</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">records</span>
 
 <span class="c1"># create a combinatorial library design from all valid combinations</span>
@@ -235,23 +231,15 @@ conda install -c jtimmons synbio
 
 <span class="c1"># create a protocol using Golden Gate as the sole composite step and run</span>
 <span class="n">protocol</span> <span class="o">=</span> <span class="n">GoldenGate</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;CombinatorialBins Golden Gate&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Combinatorial Golden Gate&quot;</span><span class="p">,</span>
     <span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span>
     <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;KanR&quot;</span><span class="p">],</span>  <span class="c1"># only keep circularized plasmids with KanR</span>
     <span class="n">min_count</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>  <span class="c1"># only keep circularized plasmids from &gt;=5 SeqRecords</span>
 <span class="p">)</span>
-
-<span class="c1"># export all the output plasmids to a multi-FASTA</span>
-<span class="n">protocol</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span><span class="s2">&quot;plasmids.fasta&quot;</span><span class="p">)</span>
-
-<span class="c1"># export plate layouts</span>
-<span class="n">protocol</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;plates.csv&quot;</span><span class="p">)</span>
-
-<span class="c1"># export human protocol</span>
-<span class="n">protocol</span><span class="o">.</span><span class="n">to_txt</span><span class="p">(</span><span class="s2">&quot;protocol.txt&quot;</span><span class="p">)</span>
-
-<span class="c1"># export a hamilton picklist</span>
-<span class="n">protocol</span><span class="o">.</span><span class="n">to_picklists</span><span class="p">(</span><span class="s2">&quot;picklist&quot;</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="s2">&quot;hamilton&quot;</span><span class="p">)</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_fasta</span><span class="p">(</span><span class="s2">&quot;plasmids.fasta&quot;</span><span class="p">)</span>  <span class="c1"># export multi-FASTA</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;plates.csv&quot;</span><span class="p">)</span>  <span class="c1"># export plate layouts</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_txt</span><span class="p">(</span><span class="s2">&quot;protocol.txt&quot;</span><span class="p">)</span>  <span class="c1"># export human protocol</span>
+<span class="n">protocol</span><span class="o">.</span><span class="n">to_picklists</span><span class="p">(</span><span class="s2">&quot;picklist&quot;</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="s2">&quot;hamilton&quot;</span><span class="p">)</span>  <span class="c1"># export a hamilton picklist</span>
 </pre></div>
 </div>
 <p>plasmids.fasta:</p>
@@ -282,6 +270,17 @@ B,B0015_DE(160),DVK_AE(160),cre_CD(18),water(156)
 D;Plate:3;;;80;;2.0;;;
 W;;;;;;;;;
 ...
+</pre></div>
+</div>
+</div>
+<div class="section" id="annotation">
+<h2>Annotation<a class="headerlink" href="#annotation" title="Permalink to this headline">¶</a></h2>
+<p>In addition to DNA assembly, <code class="docutils literal notranslate"><span class="pre">synbio</span></code> exposes a plasmid annotation function in <code class="docutils literal notranslate"><span class="pre">synbio.features</span></code>. An example is below, where a new SeqRecord is created with additional SeqFeatures from a curated database of common plasmid features.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synbio.features</span> <span class="kn">import</span> <span class="n">annotate</span>
+
+<span class="n">record</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">&quot;plasmid.fa&quot;</span><span class="p">,</span> <span class="s2">&quot;fasta&quot;</span><span class="p">)</span>
+
+<span class="n">record_with_features</span> <span class="o">=</span> <span class="n">annotate</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">identity</span><span class="o">=</span><span class="mf">0.96</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
