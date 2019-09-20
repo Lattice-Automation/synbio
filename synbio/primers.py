@@ -35,17 +35,32 @@ class Primers:
         self.rev_tm = rev_tm
 
     @classmethod
-    def pcr(cls, record: Union[str, Seq, SeqRecord]) -> "Primers":
-        """Create Primers to amplify a SeqRecord.
+    def pcr(
+        cls,
+        seq: Union[str, Seq, SeqRecord],
+        fwd_padding: str = "",
+        rev_padding: str = "",
+    ) -> "Primers":
+        """Create Primers to amplify a sequence-like object.
 
         Args:
             record: the sequence to amplify via primers
+
+        Keyword Args:
+            fwd_padding: Additional bp that are added to
+                the 5' end of the FWD primer. Example use case:
+                a restriction enzyme
+            rev_padding: Additional bp that are added to
+                the 5' end of the REV primer. Keep in mind that
+                these are added to the 5' end of the rev primer,
+                so they're the reverse complement bp of the
+                template sequence
 
         Returns:
             A Primers object to amplify the SeqRecord
         """
 
-        template = _get_seq(record)
+        template = _get_seq(seq)
 
         p3_output = designPrimers(
             {
@@ -61,7 +76,17 @@ class Primers:
             },
         )
 
-        return cls.from_p3(p3_output)
+        primers = cls.from_p3(p3_output)
+
+        # add additional bp to the primers
+        # the tm of the primers aren't updated: they refer just
+        # to the binding bp of the primers to the template sequence
+        if fwd_padding:
+            primers.fwd = fwd_padding + primers.fwd
+        if rev_padding:
+            primers.rev = rev_padding + primers.rev
+
+        return primers
 
     @classmethod
     def from_p3(cls, p3_output: Dict[str, str]) -> "Primers":

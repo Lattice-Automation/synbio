@@ -21,16 +21,23 @@ class TestPrimers(unittest.TestCase):
 
         seq = Seq(self.mock1)
         record = SeqRecord(seq)
+        fwd_padding = "GATAGAG"
+        rev_padding = "GAGGGG"
 
         record_primers = Primers.pcr(record)
         seq_primers = Primers.pcr(seq)
         str_primers = Primers.pcr(str(seq))
+        primers_with_padding = Primers.pcr(
+            seq, fwd_padding=fwd_padding, rev_padding=rev_padding
+        )
 
         self.assertTrue(record_primers)
         self.assertIn(seq[:10], record_primers.fwd)
         self.assertIn(seq.reverse_complement()[:10], record_primers.rev)
         self.assertEqual(record_primers, seq_primers)  # same w/ just Seq object
         self.assertEqual(record_primers, str_primers)
+        self.assertIn(fwd_padding, primers_with_padding.fwd)
+        self.assertIn(rev_padding, primers_with_padding.rev)
 
     def test_primers_specific(self):
         """Test primer specificity for a template sequence."""
