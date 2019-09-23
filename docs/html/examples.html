@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Examples &mdash; synbio 0.6.12 documentation</title>
+  <title>Examples &mdash; synbio 0.6.13 documentation</title>
   
 
   
@@ -98,6 +98,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#golden-gate-assembly-of-a-single-plasmid">Golden Gate Assembly of a single plasmid</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#combinatorial-golden-gate-assembly-all-valid-plasmid-combinations">Combinatorial Golden Gate Assembly: all valid plasmid combinations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#combinatorial-golden-gate-assembly-with-bins-all-plasmid-combinations-between-bins">Combinatorial Golden Gate Assembly with bins: all plasmid combinations between bins</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#annotation">Annotation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#annotating-a-seqrecord-with-a-curated-seqfeature-database">Annotating a SeqRecord with a curated SeqFeature database</a></li>
 </ul>
 </li>
 </ul>
@@ -440,6 +444,21 @@ protocol instructions, plate layouts, DNA files (<cite>gb</cite>, <cite>fa</cite
 
 <span class="c1"># because this is a larger assembly, make robotic instructions</span>
 <span class="n">protocol</span><span class="o">.</span><span class="n">to_picklists</span><span class="p">(</span><span class="s2">&quot;robotic_picklist.gwl&quot;</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="s2">&quot;tecan&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="annotation">
+<h2>Annotation<a class="headerlink" href="#annotation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="annotating-a-seqrecord-with-a-curated-seqfeature-database">
+<h3>Annotating a SeqRecord with a curated SeqFeature database<a class="headerlink" href="#annotating-a-seqrecord-with-a-curated-seqfeature-database" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example of annotating a Bio.SeqRecord with common plasmid Bio.SeqFeatures.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">Bio.SeqIO</span> <span class="k">import</span> <span class="n">parse</span>
+<span class="kn">from</span> <span class="nn">synbio.features</span> <span class="k">import</span> <span class="n">annotate</span>
+
+<span class="n">record</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;plasmid.fa&quot;</span><span class="p">,</span> <span class="s2">&quot;fasta&quot;</span><span class="p">))</span>
+<span class="n">record_with_features</span> <span class="o">=</span> <span class="n">annotate</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">identity</span><span class="o">=</span><span class="mf">0.96</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
