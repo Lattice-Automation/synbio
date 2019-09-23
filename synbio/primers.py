@@ -21,7 +21,7 @@ MAX_PRIMER_LEN = 50
 class Primers:
     """Primers created by Primer3 for a SeqRecord.
 
-    Args:
+    Attributes:
         fwd: the FWD primer
         fwd_tm: the tm of the FWD primer
         rev: the REV primer
@@ -44,7 +44,7 @@ class Primers:
         """Create Primers to amplify a sequence-like object.
 
         Args:
-            record: the sequence to amplify via primers
+            record: the sequence-like object to amplify via primers
 
         Keyword Args:
             fwd_padding: Additional bp that are added to
