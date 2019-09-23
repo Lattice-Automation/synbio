@@ -232,4 +232,8 @@ def _get_seq(seq: Union[str, Seq, SeqRecord]) -> str:
         return str(seq)
     if isinstance(seq, SeqRecord):
         return str(seq.seq)
-    raise TypeError(seq)
+    raise TypeError(
+        f"invalid non-sequence-like argument: '{seq}'. "
+        + "Expecting str, Bio.Seq, or Bio.SeqRecord"
+    )
+

@@ -22,3 +22,7 @@
 
 - Combinatorial Golden Gate Assembly with bins (all plasmid combinations between bins)
   [goldengate_combinatorial_bins.py](goldengate_combinatorial_bins.py)
+
+## Annotation
+
+- Annotating a SeqRecord with SeqFeatures [annotate.py](annotate.py)

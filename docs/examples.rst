@@ -46,3 +46,11 @@ Combinatorial Golden Gate Assembly with bins: all plasmid combinations between b
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: goldengate_combinatorial_bins.py
+
+Annotation
+----------
+
+Annotating a SeqRecord with a curated SeqFeature database
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: annotate.py
