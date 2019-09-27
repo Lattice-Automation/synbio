@@ -1,6 +1,7 @@
 """Functions for oligos. Tm calc."""
 
 import math
+from typing import Dict, Tuple
 
 from Bio.Seq import Seq
 
@@ -8,10 +9,6 @@ from Bio.Seq import Seq
 DNA_NN = {
     "init": (0.2, -5.7),
     "init_A/T": (2.2, 6.9),
-    "init_G/C": (0, 0),
-    "init_oneG/C": (0, 0),
-    "init_allA/T": (0, 0),
-    "init_5T/A": (0, 0),
     "sym": (0, -1.4),
     "AA/TT": (-7.6, -21.3),
     "AT/TA": (-7.2, -20.4),
@@ -26,11 +23,9 @@ DNA_NN = {
 }
 """
 SantaLucia & Hicks (2004), Annu. Rev. Biophys. Biomol. Struct 33: 415-440
-
-from Bio.SeqUtils
 """
 
-DNA_IMM = {
+DNA_INTERNAL_MM = {
     "AG/TT": (1.0, 0.9),
     "AT/TG": (-2.5, -8.3),
     "CG/GT": (-4.1, -11.7),
@@ -127,11 +122,9 @@ Allawi & SantaLucia (1998), Biochemistry 37: 2170-2179
 Allawi & SantaLucia (1998), Nucl Acids Res 26: 2694-2701
 Peyret et al. (1999), Biochemistry 38: 3468-3477
 Watkins & SantaLucia (2005), Nucl Acids Res 33: 6258-6267
-
-from Bio.SeqUtils
 """
 
-DNA_TMM = {
+DNA_TERMINAL_MM = {
     "AA/TA": (-3.1, -7.8),
     "TA/AA": (-2.5, -6.3),
     "CA/GA": (-4.3, -10.7),
@@ -184,8 +177,345 @@ DNA_TMM = {
 """
 Terminal mismatch table (DNA)
 SantaLucia & Peyret (2001) Patent Application WO 01/94611
+"""
 
-from Bio.SeqUtils
+DNA_DE = {
+    "AA/.T": (0.2, 2.3),
+    "AC/.G": (-6.3, -17.1),
+    "AG/.C": (-3.7, -10.0),
+    "AT/.A": (-2.9, -7.6),
+    "CA/.T": (0.6, 3.3),
+    "CC/.G": (-4.4, -12.6),
+    "CG/.C": (-4.0, -11.9),
+    "CT/.A": (-4.1, -13.0),
+    "GA/.T": (-1.1, -1.6),
+    "GC/.G": (-5.1, -14.0),
+    "GG/.C": (-3.9, -10.9),
+    "GT/.A": (-4.2, -15.0),
+    "TA/.T": (-6.9, -20.0),
+    "TC/.G": (-4.0, -10.9),
+    "TG/.C": (-4.9, -13.8),
+    "TT/.A": (-0.2, -0.5),
+    ".A/AT": (-0.7, -0.8),
+    ".C/AG": (-2.1, -3.9),
+    ".G/AC": (-5.9, -16.5),
+    ".T/AA": (-0.5, -1.1),
+    ".A/CT": (4.4, 14.9),
+    ".C/CG": (-0.2, -0.1),
+    ".G/CC": (-2.6, -7.4),
+    ".T/CA": (4.7, 14.2),
+    ".A/GT": (-1.6, -3.6),
+    ".C/GG": (-3.9, -11.2),
+    ".G/GC": (-3.2, -10.4),
+    ".T/GA": (-4.1, -13.1),
+    ".A/TT": (2.9, 10.4),
+    ".C/TG": (-4.4, -13.1),
+    ".G/TC": (-5.2, -15.0),
+    ".T/TA": (-3.8, -12.6),
+}
+"""DNA dangling ends
+
+Bommarito et al. (2000), Nucl Acids Res 28: 1929-1934
+"""
+
+# the energies are the same for each loop stack in the
+# reverse complementary direction
+DNA_NN.update({k[::-1]: v for k, v in DNA_NN.items()})
+DNA_INTERNAL_MM.update({k[::-1]: v for k, v in DNA_INTERNAL_MM.items()})
+DNA_TERMINAL_MM.update({k[::-1]: v for k, v in DNA_TERMINAL_MM.items()})
+DNA_DE.update({k[::-1]: v for k, v in DNA_DE.items()})
+
+DNA_TRI_TETRA_LOOPS = {
+    "AGAAT": (-1.5, 0.0),
+    "AGCAT": (-1.5, 0.0),
+    "AGGAT": (-1.5, 0.0),
+    "AGTAT": (-1.5, 0.0),
+    "CGAAG": (-2.0, 0.0),
+    "CGCAG": (-2.0, 0.0),
+    "CGGAG": (-2.0, 0.0),
+    "CGTAG": (-2.0, 0.0),
+    "GGAAC": (-2.0, 0.0),
+    "GGCAC": (-2.0, 0.0),
+    "GGGAC": (-2.0, 0.0),
+    "GGTAC": (-2.0, 0.0),
+    "TGAAA": (-1.5, 0.0),
+    "TGCAA": (-1.5, 0.0),
+    "TGGAA": (-1.5, 0.0),
+    "TGTAA": (-1.5, 0.0),
+    "AAAAAT": (0.5, 0.6),
+    "AAAACT": (0.7, -1.6),
+    "AAACAT": (1.0, -1.6),
+    "ACTTGT": (0.0, -4.2),
+    "AGAAAT": (-1.1, -1.6),
+    "AGAGAT": (-1.1, -1.6),
+    "AGATAT": (-1.5, -1.6),
+    "AGCAAT": (-1.6, -1.6),
+    "AGCGAT": (-1.1, -1.6),
+    "AGCTTT": (0.2, -1.6),
+    "AGGAAT": (-1.1, -1.6),
+    "AGGGAT": (-1.1, -1.6),
+    "AGGGGT": (0.5, -0.6),
+    "AGTAAT": (-1.6, -1.6),
+    "AGTGAT": (-1.1, -1.6),
+    "AGTTCT": (0.8, -1.6),
+    "ATTCGT": (-0.2, -1.6),
+    "ATTTGT": (0.0, -1.6),
+    "ATTTTT": (-0.5, -1.6),
+    "CAAAAG": (0.5, 1.3),
+    "CAAACG": (0.7, 0.0),
+    "CAACAG": (1.0, 0.0),
+    "CAACCG": (0.0, 0.0),
+    "CCTTGG": (0.0, -2.6),
+    "CGAAAG": (-1.1, 0.0),
+    "CGAGAG": (-1.1, 0.0),
+    "CGATAG": (-1.5, 0.0),
+    "CGCAAG": (-1.6, 0.0),
+    "CGCGAG": (-1.1, 0.0),
+    "CGCTTG": (0.2, 0.0),
+    "CGGAAG": (-1.1, 0.0),
+    "CGGGAG": (-1.0, 0.0),
+    "CGGGGG": (0.5, 1.0),
+    "CGTAAG": (-1.6, 0.0),
+    "CGTGAG": (-1.1, 0.0),
+    "CGTTCG": (0.8, 0.0),
+    "CTTCGG": (-0.2, 0.0),
+    "CTTTGG": (0.0, 0.0),
+    "CTTTTG": (-0.5, 0.0),
+    "GAAAAC": (0.5, 3.2),
+    "GAAACC": (0.7, 0.0),
+    "GAACAC": (1.0, 0.0),
+    "GCTTGC": (0.0, -2.6),
+    "GGAAAC": (-1.1, 0.0),
+    "GGAGAC": (-1.1, 0.0),
+    "GGATAC": (-1.6, 0.0),
+    "GGCAAC": (-1.6, 0.0),
+    "GGCGAC": (-1.1, 0.0),
+    "GGCTTC": (0.2, 0.0),
+    "GGGAAC": (-1.1, 0.0),
+    "GGGGAC": (-1.1, 0.0),
+    "GGGGGC": (0.5, 1.0),
+    "GGTAAC": (-1.6, 0.0),
+    "GGTGAC": (-1.1, 0.0),
+    "GGTTCC": (0.8, 0.0),
+    "GTTCGC": (-0.2, 0.0),
+    "GTTTGC": (0.0, 0.0),
+    "GTTTTC": (-0.5, 0.0),
+    "GAAAAT": (0.5, 3.2),
+    "GAAACT": (1.0, 0.0),
+    "GAACAT": (1.0, 0.0),
+    "GCTTGT": (0.0, -1.6),
+    "GGAAAT": (-1.1, 0.0),
+    "GGAGAT": (-1.1, 0.0),
+    "GGATAT": (-1.6, 0.0),
+    "GGCAAT": (-1.6, 0.0),
+    "GGCGAT": (-1.1, 0.0),
+    "GGCTTT": (-0.1, 0.0),
+    "GGGAAT": (-1.1, 0.0),
+    "GGGGAT": (-1.1, 0.0),
+    "GGGGGT": (0.5, 1.0),
+    "GGTAAT": (-1.6, 0.0),
+    "GGTGAT": (-1.1, 0.0),
+    "GTATAT": (-0.5, 0.0),
+    "GTTCGT": (-0.4, 0.0),
+    "GTTTGT": (-0.4, 0.0),
+    "GTTTTT": (-0.5, 0.0),
+    "TAAAAA": (0.5, -0.3),
+    "TAAACA": (0.7, -1.6),
+    "TAACAA": (1.0, -1.6),
+    "TCTTGA": (0.0, -4.2),
+    "TGAAAA": (-1.1, -1.6),
+    "TGAGAA": (-1.1, -1.6),
+    "TGATAA": (-1.6, -1.6),
+    "TGCAAA": (-1.6, -1.6),
+    "TGCGAA": (-1.1, -1.6),
+    "TGCTTA": (0.2, -1.6),
+    "TGGAAA": (-1.1, -1.6),
+    "TGGGAA": (-1.1, -1.6),
+    "TGGGGA": (0.5, -0.6),
+    "TGTAAA": (-1.6, -1.6),
+    "TGTGAA": (-1.1, -1.6),
+    "TGTTCA": (0.8, -1.6),
+    "TTTCGA": (-0.2, -1.6),
+    "TTTTGA": (0.0, -1.6),
+    "TTTTTA": (-0.5, -1.6),
+    "TAAAAG": (0.5, 1.6),
+    "TAAACG": (1.0, -1.6),
+    "TAACAG": (1.0, -1.6),
+    "TCTTGG": (0.0, -3.2),
+    "TGAAAG": (-1.0, -1.6),
+    "TGAGAG": (-1.0, -1.6),
+    "TGATAG": (-1.5, -1.6),
+    "TGCAAG": (-1.5, -1.6),
+    "TGCGAG": (-1.0, -1.6),
+    "TGCTTG": (-0.1, -1.6),
+    "TGGAAG": (-1.0, -1.6),
+    "TGGGAG": (-1.0, -1.6),
+    "TGGGGG": (0.5, -0.6),
+    "TGTAAG": (-1.5, -1.6),
+    "TGTGAG": (-1.0, -1.6),
+    "TTTCGG": (-0.4, -1.6),
+    "TTTTAG": (-1.0, -1.6),
+    "TTTTGG": (-0.4, -1.6),
+    "TTTTTG": (-0.5, -1.6),
+}
+"""Experimental delta H and delta S for tri/tetra loops
+
+Supplemental Material: Annu.Rev.Biophs.Biomol.Struct.33:415-40
+doi: 10.1146/annurev.biophys.32.110601.141800
+The Thermodynamics of DNA Structural Motifs
+SantaLucia and Hicks, 2004
+
+delta S was computed using delta G and delta H and is in cal / (K x mol)
+(versus delta H in kcal / mol)
+"""
+
+DNA_MIN_HAIRPIN_LEN = 3
+"""Cannot have extremely sharp angles in DNA.
+This limit is from Nussinov, et al. (1980)
+"""
+
+
+DNA_INTERNAL_LOOPS = {
+    1: (0, 0),
+    2: (0, 0),
+    3: (0, 10.3),
+    4: (0, 11.6),
+    5: (0, 12.9),
+    6: (0, 14.2),
+    7: (0, 14.8),
+    8: (0, 15.5),
+    9: (0, 15.8),
+    10: (0, 15.8),
+    11: (0, 16.1),
+    12: (0, 16.8),
+    13: (0, 16.4),
+    14: (0, 17.4),
+    15: (0, 17.7),
+    16: (0, 18.1),
+    17: (0, 18.4),
+    18: (0, 18.7),
+    19: (0, 18.7),
+    20: (0, 19.0),
+    21: (0, 19.0),
+    22: (0, 19.3),
+    23: (0, 19.7),
+    24: (0, 20.0),
+    25: (0, 20.3),
+    26: (0, 20.3),
+    27: (0, 20.6),
+    28: (0, 21.0),
+    29: (0, 21.0),
+    30: (0, 21.3),
+}
+"""Enthalpy and entropy increments for length dependence of internal loops
+
+Were calculated from delta G Table 4 of SantaLucia, 2004:
+
+Annu.Rev.Biophs.Biomol.Struct.33:415-40
+doi: 10.1146/annurev.biophys.32.110601.141800
+The Thermodynamics of DNA Structural Motifs
+SantaLucia and Hicks, 2004
+
+Additional loop sizes are accounted for with the Jacobson-Stockmayer
+entry extrapolation formula in paper:
+delta G (loop-n) = delta G (loop-x) + 2.44 x R x 310.15 x ln(n / x)
+
+Additional correction is applied for asymmetric loops in paper:
+delta G (asymmetry) = |length A - length B| x 0.3 (kcal / mol)
+where A and B are lengths of both sides of loop
+"""
+
+DNA_BULGE_LOOPS = {
+    1: (0, 12.9),
+    2: (0, 9.4),
+    3: (0, 10.0),
+    4: (0, 10.3),
+    5: (0, 10.6),
+    6: (0, 11.3),
+    7: (0, 11.9),
+    8: (0, 12.6),
+    9: (0, 13.2),
+    10: (0, 13.9),
+    11: (0, 14.2),
+    12: (0, 14.5),
+    13: (0, 14.8),
+    14: (0, 15.5),
+    15: (0, 15.8),
+    16: (0, 16.1),
+    17: (0, 16.4),
+    18: (0, 16.8),
+    19: (0, 16.8),
+    20: (0, 17.1),
+    21: (0, 17.4),
+    22: (0, 17.4),
+    23: (0, 17.7),
+    24: (0, 17.7),
+    25: (0, 18.1),
+    26: (0, 18.1),
+    27: (0, 18.4),
+    28: (0, 18.7),
+    29: (0, 18.7),
+    30: (0, 19.0),
+}
+"""Enthalpy and entropy increments for length depedence of bulge loops
+
+Were calculated from delta G Table 4 of SantaLucia, 2004:
+
+Annu.Rev.Biophs.Biomol.Struct.33:415-40
+doi: 10.1146/annurev.biophys.32.110601.141800
+The Thermodynamics of DNA Structural Motifs
+SantaLucia and Hicks, 2004
+
+For bulge loops of size 1, the intervening NN energy is used.
+Closing AT penalty is applied on both sides
+"""
+
+DNA_HAIRPIN_LOOPS = {
+    1: (0, 0.0),
+    2: (0, 0.0),
+    3: (0, 11.3),
+    4: (0, 11.3),
+    5: (0, 10.6),
+    6: (0, 12.9),
+    7: (0, 13.5),
+    8: (0, 13.9),
+    9: (0, 14.5),
+    10: (0, 14.8),
+    11: (0, 15.5),
+    12: (0, 16.1),
+    13: (0, 16.1),
+    14: (0, 16.4),
+    15: (0, 16.8),
+    16: (0, 17.1),
+    17: (0, 17.4),
+    18: (0, 17.7),
+    19: (0, 18.1),
+    20: (0, 18.4),
+    21: (0, 18.7),
+    22: (0, 18.7),
+    23: (0, 19.0),
+    24: (0, 19.3),
+    25: (0, 19.7),
+    26: (0, 19.7),
+    27: (0, 19.7),
+    28: (0, 20.0),
+    29: (0, 20.0),
+    30: (0, 20.3),
+}
+"""Enthalpy and entropy increments for length depedence of hairpin loops
+
+Were calculated from delta G Table 4 of SantaLucia, 2004:
+
+Annu.Rev.Biophs.Biomol.Struct.33:415-40
+doi: 10.1146/annurev.biophys.32.110601.141800
+The Thermodynamics of DNA Structural Motifs
+SantaLucia and Hicks, 2004
+
+For hairpins of length 3 and 4, the entropy values are looked up
+in the DNA_TRI_TETRA_LOOPS Dict
+
+From formula 8-9 of the paper:
+An additional 1.6 delta entropy penalty if the hairpin is closed by AT
 """
 
 
@@ -197,7 +527,7 @@ def calc_tm(seq1: str, seq2: str = "", pcr: bool = True) -> float:
     calculate does not account for pseudoknots or anything other
     than an exact, unpadded alignment between seq1 and seq2.
 
-    This is largely a copy-paste from Bio.SeqUtils.MeltingTemp with
+    This is largley influenced by Bio.SeqUtils.MeltingTemp with
     some different defaults. Here, the reaction mixture is assumed to
     be PCR and concentrations for Mg, Tris, K, and dNTPs are included
     that match a typical PCR reaction according to Thermo and NEB. Additionally,
@@ -250,25 +580,18 @@ def calc_tm(seq1: str, seq2: str = "", pcr: bool = True) -> float:
         pair1 = seq1[i] + seq1[i + 1]
         pair2 = seq2[i] + seq2[i + 1]
         pair = pair1 + "/" + pair2
-        pair_rev = pair[::-1]
 
         # assuming internal neighbor pair
         pair_delta_h, pair_delta_s = 0.0, 0.0
         if pair in DNA_NN:
             pair_delta_h, pair_delta_s = DNA_NN[pair]
-        elif pair_rev in DNA_NN:
-            pair_delta_h, pair_delta_s = DNA_NN[pair_rev]
-        elif pair in DNA_IMM:
-            pair_delta_h, pair_delta_s = DNA_IMM[pair]
-        elif pair_rev in DNA_IMM:
-            pair_delta_h, pair_delta_s = DNA_IMM[pair_rev]
+        elif pair in DNA_INTERNAL_MM:
+            pair_delta_h, pair_delta_s = DNA_INTERNAL_MM[pair]
 
         # overwrite if it's a terminal pair
         if i in (0, len(seq1) - 2):
-            if pair in DNA_TMM:
-                pair_delta_h, pair_delta_s = DNA_TMM[pair]
-            elif pair_rev in DNA_TMM:
-                pair_delta_h, pair_delta_s = DNA_TMM[pair_rev]
+            if pair in DNA_TERMINAL_MM:
+                pair_delta_h, pair_delta_s = DNA_TERMINAL_MM[pair]
 
         delta_h += pair_delta_h
         delta_s += pair_delta_s
@@ -299,8 +622,7 @@ def calc_tm(seq1: str, seq2: str = "", pcr: bool = True) -> float:
     mon = Mon * 1e-3
 
     # coefficients to a multi-variate from the paper
-    a, b, c, d = 3.92, -0.911, 6.26, 1.42
-    e, f, g = -48.2, 52.5, 8.31
+    a, b, c, d, e, f, g = 3.92, -0.911, 6.26, 1.42, -48.2, 52.5, 8.31
 
     if dNTPs > 0:
         dntps = dNTPs * 1e-3
@@ -337,6 +659,315 @@ def calc_tm(seq1: str, seq2: str = "", pcr: bool = True) -> float:
     tm = 1 / (1 / (tm + 273.15) + corr) - 273.15
 
     return tm
+
+
+Cache = Dict[Tuple[int, int], float]
+"""A map from i, j tuple to a value."""
+
+def fold(seq: str, temp: float = 32.0) -> float:
+    """Fold the DNA sequence and return lowest free energy score.
+
+    Based on the approach described in:
+    Nussinov R, Jacobson AB.
+    Fast algorithm for predicting the secondary structure of single-stranded RNA.
+    Proc Natl Acad Sci U S A. 1980;77(11):6309–6313. doi:10.1073/pnas.77.11.6309
+
+    Args:
+        seq: The sequence to fold
+
+    Keyword Args:
+        temp: The temperature the fold takes place in, in Celcius
+
+    Returns:
+        The lowest free energy fold possible for the sequences.
+    """
+
+    seq = seq.upper()
+    temp = temp + 273.15  # kelvin
+
+    # store energies and fold indexes
+    e_cache: Cache = {}
+    k_cache: Cache = {}
+    for f_len in range(4, len(seq)):  # for increasing fragment length
+        for i in range(len(seq) - f_len + 1):  # for increasing start index
+            _e(seq, i, i + f_len, temp, e_cache, k_cache)
+
+    print(e_cache)
+    print(k_cache)
+
+    return 0
+
+
+def _e(seq: str, i: int, j: int, temp: float, e_cache: Cache, k_cache: Cache) -> float:
+    """Find, store and return the minimum free energy structure between i and j
+
+    Based on formula E(i,j) (2) from Nussinov, et al. (1980)
+
+    Args:
+        seq: The sequence being folded
+        i: The start index
+        j: The end index (inclusive)
+        temp: The temperature in Kelvin
+        e_cache: A free energy cache with key (start, end)
+            to value (min energy structure)
+        k_cache: A cache for which value of i, j is the best base
+            for separating the "upper" and "lower" sections of the RNA (see paper)
+
+    Returns:
+        The minimum energy folding structure possible between i and j on seq
+    """
+
+    key = (i, j)
+    if key in e_cache:
+        return e_cache[key]
+
+    # check whether it's too short a distance for any k-j interaction
+    if j - i <= DNA_MIN_HAIRPIN_LEN:
+        e_cache[key] = 0
+        return 0
+
+    # check whether it's a small hairpin with a pre-computed energy
+    if j - i <= DNA_MIN_HAIRPIN_LEN + 2:
+        loop = seq[i : j + 1]
+        d_g = _hairpin_d_g(loop, temp)
+        e_cache[key] = d_g
+        k_cache[key] = 0
+        return d_g
+
+    # check all possible interactions between k and j
+    min_e, min_k = _e(seq, i, j - 1, temp, e_cache, k_cache), j - 1
+    for k in range(i, j - DNA_MIN_HAIRPIN_LEN):
+        # calculate E_kj, which depends on the energies of
+        # the inward basepairs. See Fig 5 of paper.
+        # Be it a pair (A), single strand bulge on k side (B),
+        # single strand bulge on k side (C), internal loop (D),
+        # or branched structure (E)
+        k_i = k + 1  # k inwards
+        j_i = j - 1  # j inwards
+        k_1 = k_cache[(k_i, j_i)]  # index of j that matches k
+        while not k_1:
+            j_i -= 1
+            k_1 = k_cache[(k_i, j_i)]
+
+        # energy of the kj association
+        e_kj = 0
+        bulge_left = k_1 > k + 1
+        bulge_right = j_i < j - 1
+        if k_1 == k + 1 and j_i == j - 1:
+            # Fig 5A: it's a neighboring pair in a helix (simplest case)
+            pair = seq[k] + seq[k_1] + "/" + seq[j] + seq[j_i]
+            e_kj = _pair_d_g(pair, seq, k, j, temp)
+        if bulge_left and bulge_right:
+            # Fig 5D: it's an internal loop
+            loop_left = seq[k:k_1 + 1]
+            loop_right = seq[j_i: j + 1]
+            e_kj = _internal_loop_d_g(loop_left, loop_right, temp)
+        elif bulge_left or bulge_right:
+            # Fig 5B: it's a bulge on the k side OR
+            # Fig 5C: it's a bulge on the j side
+            pair = seq[k] + seq[k_1] + "/" + seq[j] + seq[j_i]
+            bulge_len = k_1 - k - 1
+            e_kj = _bulge_d_g(pair, seq, bulge_len, k, j, temp)
+
+        # sum the energy and compare to alternatives
+        min_e_left = _e(seq, i, k - 1, temp, e_cache, k_cache)
+        min_e_right = _e(seq, k + 1, j - 1, temp, e_cache, k_cache)
+        e_total = min_e_left + e_kj + min_e_right
+        if e_total < min_e:
+            min_e = e_total
+            min_k = k
+
+    e_cache[key] = min_e
+    k_cache[key] = min_k
+    return min_e
+
+
+def _d_g(d_h: float, d_s: float, temp: float) -> float:
+    """Find the free energy given delta h, s and temp
+
+    Args:
+        d_h: The enthalpy increment
+        d_s: The entropy increment
+        temp: The temperature in Kelvin
+
+    Returns:
+        The free energy increment in kcal / (mol x K)
+    """
+
+    return d_h + temp * (d_s * 1000.0)
+
+
+def _j_s(n: int, x: int, d_g_x: float, temp: float) -> float:
+    """Estimate the free energy of length n based on one of length x.
+
+    The Jacobson-Stockmayer entry extrapolation formula is used
+    for bulges, hairpins, etc that fall outside the 30nt upper limit
+    for pre-calculated free-energies. See SantaLucia and Hicks (2014).
+
+    Args:
+        n: Length of element without known free energy value
+        x: Length of element with known free energy value (d_g_x)
+        d_g_x: The free energy of the element x
+        temp: Temperature in Kelvin
+
+    Returns:
+        The free energy for a structure of length n
+    """
+
+    R = 1.9872e-3
+    return d_g_x + 2.44 * R * temp * math.log(n / float(x))
+
+
+def _pair_d_g(pair: str, seq: str, k: int, j: int, temp: float) -> float:
+    """Get the free energy for a pair.
+
+    Using the indexes k and j, check whether it's at the end of
+    the sequence or internal. Then check whether it's a match
+    or mismatch, and return.
+
+    Args:
+        pair: The pair sequence, ex: (AG/TC)
+        seq: The full folding sequence
+        k: The start index on left size of helix
+        j: The end index on right size of helix
+        temp: Temperature in Kelvin
+
+    Returns:
+        The free energy of the NN pairing
+    """
+
+    if k > 0 and j < len(seq) - 1:
+        # it's internal
+        d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_INTERNAL_MM[pair]
+        return _d_g(d_h, d_s, temp)
+
+    # it's terminal
+    d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_TERMINAL_MM[pair]
+    return _d_g(d_h, d_s, temp)
+
+
+def _hairpin_d_g(hairpin: str, temp: float) -> float:
+    """Calculate the free energy of the hairpin
+
+    Args:
+        hairpin: The hairpin sequence
+        temp: Temperature in Kelvin
+
+    Returns:
+        float: [description]
+    """
+
+    d_g = 0
+    if hairpin in DNA_TRI_TETRA_LOOPS:
+        # it's a pre-known hairpin with known value
+        d_h, d_s = DNA_TRI_TETRA_LOOPS[hairpin]
+        d_g = _d_g(d_h, d_s, temp)
+
+    # add penalty based on size
+    if len(hairpin) in DNA_HAIRPIN_LOOPS:
+        d_h, d_s = DNA_HAIRPIN_LOOPS[len(hairpin)]
+        d_g += _d_g(d_h, d_s, temp)
+    else:
+        # it's too large, extrapolate
+        hairpin_max_len = max(DNA_HAIRPIN_LOOPS.keys())
+        d_h, d_s = DNA_HAIRPIN_LOOPS[hairpin_max_len]
+        d_g_inc = _d_g(d_h, d_s, temp)
+        d_g += _j_s(len(hairpin), hairpin_max_len, d_g_inc, temp)
+
+    # add penalty for closing AT bases
+    if len(hairpin) == 3 and (hairpin[0] + hairpin[-1]).count("A"):
+        d_g += 0.5
+
+    return d_g
+
+
+def _bulge_d_g(pair: str, seq: str, n: int, k: int, j: int, temp: float) -> float:
+    """Calculate the free energy associated with a bulge.
+
+    Args:
+        pair: The NN pair outside the bulge
+        seq: The full folding DNA sequence
+        n: The length of the bulge
+        k: The index on k side
+        j: The index on the j side
+        temp: Temperature in Kelvin
+
+    Returns:
+        The free energy associated with the bulge's length
+    """
+
+    # add penalty based on size
+    if n in DNA_BULGE_LOOPS:
+        d_h, d_s = DNA_BULGE_LOOPS[n]
+        d_g = _d_g(d_h, d_s, temp)
+    else:
+        # it's too large for pre-calculated list, extrapolate
+        bulge_max_len = max(DNA_BULGE_LOOPS.keys())
+        d_h, d_s = DNA_BULGE_LOOPS[bulge_max_len]
+        d_g = _d_g(d_h, d_s, temp)
+        d_g = _j_s(n, bulge_max_len, d_g, temp)
+
+    if n == 1:
+        # if len 1, include the delta G of intervening NN (SantaLucia 2004)
+        d_g += _pair_d_g(pair, seq, k, j, temp)
+
+    # penalize AT terminal bonds
+    if pair.count("A"):
+        d_g += 0.5
+
+    return d_g
+
+
+def _internal_loop_d_g(left: str, right: str, temp: float) -> float:
+    """Calculate the free energy of an internal loop.
+
+    The first and last bp of both left and right sequences
+    are not themselves parts of the loop, but are the terminal
+    bp on either side of it. They are needed for when there's
+    a single internal looping bp (where just the mismatching
+    free energies are used)
+
+    Note that both left and right sequences are in 5' to 3' direction
+
+    Args:
+        left: The sequence on the left side
+        right: The sequence on the right side
+        temp: Temperature in Kelvin
+    
+    Returns:
+        The free energy associated with the internal loop
+    """
+
+    loop_left = len(left) - 2
+    loop_right = len(right) - 2
+
+    # apply a penalty based on loop size
+    loop_len = loop_left + loop_right
+    if loop_len in DNA_INTERNAL_LOOPS:
+        d_h, d_s = DNA_INTERNAL_LOOPS[loop_len]
+        d_g = _d_g(d_h, d_s, temp)
+    else:
+        # it's too large an internal loop, extrapolate
+        loop_max_len = max(DNA_INTERNAL_LOOPS.keys())
+        d_h, d_s = DNA_INTERNAL_LOOPS[loop_max_len]
+        d_g = _d_g(d_h, d_s, temp)
+        d_g = _j_s(loop_len, loop_max_len, d_g, temp)
+
+    # apply an assymmetry penalty
+    loop_asymmetry = abs(loop_left - loop_right)
+    d_g += 0.3 * loop_asymmetry
+
+    # apply penalty based on the mismatching pairs
+    # on either side the loop
+    pair_left = left[:2] + "/" + right[-2::][::-1]
+    d_h, d_s = DNA_TERMINAL_MM[pair_left]
+    d_g += _d_g(d_h, d_s, temp)
+    pair_right = left[-2:] + "/" + right[:2][::-1]
+    d_h, d_s = DNA_TERMINAL_MM[pair_right]
+    d_g += _d_g(d_h, d_s, temp)
+
+    return d_g
+
 
 
 def _gc(seq: str) -> float:

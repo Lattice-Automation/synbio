@@ -2,13 +2,13 @@
 
 import unittest
 
-from synbio.oligos import calc_tm
+from synbio.oligos import calc_tm, fold
 
 
 class TestOligos(unittest.TestCase):
     """Test oligo functions"""
 
-    def test_mix_init(self):
+    def test_calc_tm(self):
         """Test oligo tm calculation."""
 
         # values are from Table 1 of IDT's:
@@ -25,8 +25,15 @@ class TestOligos(unittest.TestCase):
 
         for seq, actual in experimental_tms.items():
             calc = calc_tm(seq)
-            actual = actual
+
             if abs(calc - actual) > 3:
                 raise AssertionError(
-                    f"large tm diff: got {calc} expected {actual} for {seq}"
+                    f"large experimental tm diff: got {calc} expected {actual} for {seq}"
                 )
+
+    def test_fold(self):
+        """Test DNA folding to find min energy secondary structure."""
+
+        seq = "CGGGCGGCCGGCCCCCGGGCCGCGGC"
+
+        fold(seq)

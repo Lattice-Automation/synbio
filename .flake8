@@ -1,4 +1,4 @@
 [flake8]
 min-public-methods=0
-max-line-length=92
+max-line-length=88
 ignore=E252
