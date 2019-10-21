@@ -1,13 +1,14 @@
 """Functions for oligos. Tm calc."""
 
 import math
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 from Bio.Seq import Seq
 
 
 DNA_NN = {
     "init": (0.2, -5.7),
+    "init_G/C": (0.0, 0.0),
     "init_A/T": (2.2, 6.9),
     "sym": (0, -1.4),
     "AA/TT": (-7.6, -21.3),
@@ -378,34 +379,34 @@ This limit is from Nussinov, et al. (1980)
 DNA_INTERNAL_LOOPS = {
     1: (0, 0),
     2: (0, 0),
-    3: (0, 10.3),
-    4: (0, 11.6),
-    5: (0, 12.9),
-    6: (0, 14.2),
-    7: (0, 14.8),
-    8: (0, 15.5),
-    9: (0, 15.8),
-    10: (0, 15.8),
-    11: (0, 16.1),
-    12: (0, 16.8),
-    13: (0, 16.4),
-    14: (0, 17.4),
-    15: (0, 17.7),
-    16: (0, 18.1),
-    17: (0, 18.4),
-    18: (0, 18.7),
-    19: (0, 18.7),
-    20: (0, 19.0),
-    21: (0, 19.0),
-    22: (0, 19.3),
-    23: (0, 19.7),
-    24: (0, 20.0),
-    25: (0, 20.3),
-    26: (0, 20.3),
-    27: (0, 20.6),
-    28: (0, 21.0),
-    29: (0, 21.0),
-    30: (0, 21.3),
+    3: (0, -10.3),
+    4: (0, -11.6),
+    5: (0, -12.9),
+    6: (0, -14.2),
+    7: (0, -14.8),
+    8: (0, -15.5),
+    9: (0, -15.8),
+    10: (0, -15.8),
+    11: (0, -16.1),
+    12: (0, -16.8),
+    13: (0, -16.4),
+    14: (0, -17.4),
+    15: (0, -17.7),
+    16: (0, -18.1),
+    17: (0, -18.4),
+    18: (0, -18.7),
+    19: (0, -18.7),
+    20: (0, -19.0),
+    21: (0, -19.0),
+    22: (0, -19.3),
+    23: (0, -19.7),
+    24: (0, -20.0),
+    25: (0, -20.3),
+    26: (0, -20.3),
+    27: (0, -20.6),
+    28: (0, -21.0),
+    29: (0, -21.0),
+    30: (0, -21.3),
 }
 """Enthalpy and entropy increments for length dependence of internal loops
 
@@ -426,36 +427,36 @@ where A and B are lengths of both sides of loop
 """
 
 DNA_BULGE_LOOPS = {
-    1: (0, 12.9),
-    2: (0, 9.4),
-    3: (0, 10.0),
-    4: (0, 10.3),
-    5: (0, 10.6),
-    6: (0, 11.3),
-    7: (0, 11.9),
-    8: (0, 12.6),
-    9: (0, 13.2),
-    10: (0, 13.9),
-    11: (0, 14.2),
-    12: (0, 14.5),
-    13: (0, 14.8),
-    14: (0, 15.5),
-    15: (0, 15.8),
-    16: (0, 16.1),
-    17: (0, 16.4),
-    18: (0, 16.8),
-    19: (0, 16.8),
-    20: (0, 17.1),
-    21: (0, 17.4),
-    22: (0, 17.4),
-    23: (0, 17.7),
-    24: (0, 17.7),
-    25: (0, 18.1),
-    26: (0, 18.1),
-    27: (0, 18.4),
-    28: (0, 18.7),
-    29: (0, 18.7),
-    30: (0, 19.0),
+    1: (0, -12.9),
+    2: (0, -9.4),
+    3: (0, -10.0),
+    4: (0, -10.3),
+    5: (0, -10.6),
+    6: (0, -11.3),
+    7: (0, -11.9),
+    8: (0, -12.6),
+    9: (0, -13.2),
+    10: (0, -13.9),
+    11: (0, -14.2),
+    12: (0, -14.5),
+    13: (0, -14.8),
+    14: (0, -15.5),
+    15: (0, -15.8),
+    16: (0, -16.1),
+    17: (0, -16.4),
+    18: (0, -16.8),
+    19: (0, -16.8),
+    20: (0, -17.1),
+    21: (0, -17.4),
+    22: (0, -17.4),
+    23: (0, -17.7),
+    24: (0, -17.7),
+    25: (0, -18.1),
+    26: (0, -18.1),
+    27: (0, -18.4),
+    28: (0, -18.7),
+    29: (0, -18.7),
+    30: (0, -19.0),
 }
 """Enthalpy and entropy increments for length depedence of bulge loops
 
@@ -473,34 +474,34 @@ Closing AT penalty is applied on both sides
 DNA_HAIRPIN_LOOPS = {
     1: (0, 0.0),
     2: (0, 0.0),
-    3: (0, 11.3),
-    4: (0, 11.3),
-    5: (0, 10.6),
-    6: (0, 12.9),
-    7: (0, 13.5),
-    8: (0, 13.9),
-    9: (0, 14.5),
-    10: (0, 14.8),
-    11: (0, 15.5),
-    12: (0, 16.1),
-    13: (0, 16.1),
-    14: (0, 16.4),
-    15: (0, 16.8),
-    16: (0, 17.1),
-    17: (0, 17.4),
-    18: (0, 17.7),
-    19: (0, 18.1),
-    20: (0, 18.4),
-    21: (0, 18.7),
-    22: (0, 18.7),
-    23: (0, 19.0),
-    24: (0, 19.3),
-    25: (0, 19.7),
-    26: (0, 19.7),
-    27: (0, 19.7),
-    28: (0, 20.0),
-    29: (0, 20.0),
-    30: (0, 20.3),
+    3: (0, -11.3),
+    4: (0, -11.3),
+    5: (0, -10.6),
+    6: (0, -12.9),
+    7: (0, -13.5),
+    8: (0, -13.9),
+    9: (0, -14.5),
+    10: (0, -14.8),
+    11: (0, -15.5),
+    12: (0, -16.1),
+    13: (0, -16.1),
+    14: (0, -16.4),
+    15: (0, -16.8),
+    16: (0, -17.1),
+    17: (0, -17.4),
+    18: (0, -17.7),
+    19: (0, -18.1),
+    20: (0, -18.4),
+    21: (0, -18.7),
+    22: (0, -18.7),
+    23: (0, -19.0),
+    24: (0, -19.3),
+    25: (0, -19.7),
+    26: (0, -19.7),
+    27: (0, -19.7),
+    28: (0, -20.0),
+    29: (0, -20.0),
+    30: (0, -20.3),
 }
 """Enthalpy and entropy increments for length depedence of hairpin loops
 
@@ -664,6 +665,7 @@ def calc_tm(seq1: str, seq2: str = "", pcr: bool = True) -> float:
 Cache = Dict[Tuple[int, int], float]
 """A map from i, j tuple to a value."""
 
+
 def fold(seq: str, temp: float = 32.0) -> float:
     """Fold the DNA sequence and return lowest free energy score.
 
@@ -685,21 +687,29 @@ def fold(seq: str, temp: float = 32.0) -> float:
     seq = seq.upper()
     temp = temp + 273.15  # kelvin
 
-    # store energies and fold indexes
+    # inductive fill step
     e_cache: Cache = {}
     k_cache: Cache = {}
-    for f_len in range(4, len(seq)):  # for increasing fragment length
-        for i in range(len(seq) - f_len + 1):  # for increasing start index
+    # for increasing fragment length
+    for f_len in range(DNA_MIN_HAIRPIN_LEN + 1, len(seq)):  
+        for i in range(len(seq) - f_len):  # for increasing start index
             _e(seq, i, i + f_len, temp, e_cache, k_cache)
 
-    print(e_cache)
-    print(k_cache)
+    # backtracking for structure
+    pairs = []
+    min_e = round(min(e_cache.values()), 2)
+    _backtrack(seq, 0, len(seq) - 1, k_cache, e_cache, pairs)
+    print("\nfolding:", seq)
+    print("min free energy structure:", min_e)
+    print("pairs:")
+    for pair in sorted(pairs, key=lambda x: x[1]):
+        print(pair[0] + " " + str(pair[1] + 1) + "-" + str(pair[2] + 1) +" " +  str(pair[3]))
 
-    return 0
+    return min_e
 
 
 def _e(seq: str, i: int, j: int, temp: float, e_cache: Cache, k_cache: Cache) -> float:
-    """Find, store and return the minimum free energy structure between i and j
+    """Find, store and return the minimum free energy of the structure between i and j
 
     Based on formula E(i,j) (2) from Nussinov, et al. (1980)
 
@@ -721,22 +731,24 @@ def _e(seq: str, i: int, j: int, temp: float, e_cache: Cache, k_cache: Cache) ->
     if key in e_cache:
         return e_cache[key]
 
-    # check whether it's too short a distance for any k-j interaction
+    # if it's too small to consider
+    # This is described in Nussinov. For allowing closure
     if j - i <= DNA_MIN_HAIRPIN_LEN:
-        e_cache[key] = 0
-        return 0
+        d_g = _bulge("", seq, j - i, i, j, temp)
+        e_cache[key] = d_g
+        k_cache[key] = i
+        return d_g
 
     # check whether it's a small hairpin with a pre-computed energy
     if j - i <= DNA_MIN_HAIRPIN_LEN + 2:
-        loop = seq[i : j + 1]
-        d_g = _hairpin_d_g(loop, temp)
+        d_g = _hairpin(seq, i, j, temp)
         e_cache[key] = d_g
-        k_cache[key] = 0
+        k_cache[key] = i
         return d_g
 
     # check all possible interactions between k and j
-    min_e, min_k = _e(seq, i, j - 1, temp, e_cache, k_cache), j - 1
-    for k in range(i, j - DNA_MIN_HAIRPIN_LEN):
+    min_e, min_k = _e(seq, i, j - 1, temp, e_cache, k_cache), -1
+    for k in range(i, j - (DNA_MIN_HAIRPIN_LEN + 2)):
         # calculate E_kj, which depends on the energies of
         # the inward basepairs. See Fig 5 of paper.
         # Be it a pair (A), single strand bulge on k side (B),
@@ -744,36 +756,41 @@ def _e(seq: str, i: int, j: int, temp: float, e_cache: Cache, k_cache: Cache) ->
         # or branched structure (E)
         k_i = k + 1  # k inwards
         j_i = j - 1  # j inwards
-        k_1 = k_cache[(k_i, j_i)]  # index of j that matches k
-        while not k_1:
+        k_1 = k_cache[(k_i, j_i)]  # index of inward k with lowest divide
+        while k_1 < 0:
             j_i -= 1
             k_1 = k_cache[(k_i, j_i)]
 
-        # energy of the kj association
-        e_kj = 0
-        bulge_left = k_1 > k + 1
-        bulge_right = j_i < j - 1
-        if k_1 == k + 1 and j_i == j - 1:
+        pair = seq[k] + seq[k_1] + "/" + seq[j] + seq[j_i]
+        bulge_left = k_1 > k + 1 and pair in DNA_NN
+        bulge_right = j_i < j - 1 and pair in DNA_NN
+
+        if (
+            k_1 == k + 1 and
+            j_i == j - 1 and
+            (pair in DNA_NN or pair in DNA_INTERNAL_MM)
+        ):
             # Fig 5A: it's a neighboring pair in a helix (simplest case)
-            pair = seq[k] + seq[k_1] + "/" + seq[j] + seq[j_i]
-            e_kj = _pair_d_g(pair, seq, k, j, temp)
-        if bulge_left and bulge_right:
+            e_kj = _pair(pair, seq, k, j, temp)
+        elif bulge_left and bulge_right:
             # Fig 5D: it's an internal loop
-            loop_left = seq[k:k_1 + 1]
-            loop_right = seq[j_i: j + 1]
-            e_kj = _internal_loop_d_g(loop_left, loop_right, temp)
+            loop_left = seq[k : k_1 + 1]
+            loop_right = seq[j_i : j + 1]
+            e_kj = _internal_loop(loop_left, loop_right, temp)
         elif bulge_left or bulge_right:
             # Fig 5B: it's a bulge on the k side OR
             # Fig 5C: it's a bulge on the j side
-            pair = seq[k] + seq[k_1] + "/" + seq[j] + seq[j_i]
-            bulge_len = k_1 - k - 1
-            e_kj = _bulge_d_g(pair, seq, bulge_len, k, j, temp)
+            bulge_len = max([k_1 - k - 1, j - j_i - 1])
+            e_kj = _bulge(pair, seq, bulge_len, k, j, temp)
+        else:
+            e_kj = _hairpin(seq, k, j, temp)
 
         # sum the energy and compare to alternatives
         min_e_left = _e(seq, i, k - 1, temp, e_cache, k_cache)
-        min_e_right = _e(seq, k + 1, j - 1, temp, e_cache, k_cache)
+        min_e_right = _e(seq, k_i, j - 1, temp, e_cache, k_cache)
         e_total = min_e_left + e_kj + min_e_right
-        if e_total < min_e:
+
+        if e_total <= min_e:
             min_e = e_total
             min_k = k
 
@@ -786,15 +803,15 @@ def _d_g(d_h: float, d_s: float, temp: float) -> float:
     """Find the free energy given delta h, s and temp
 
     Args:
-        d_h: The enthalpy increment
-        d_s: The entropy increment
+        d_h: The enthalpy increment in kcal / mol
+        d_s: The entropy increment in cal / mol
         temp: The temperature in Kelvin
 
     Returns:
         The free energy increment in kcal / (mol x K)
     """
 
-    return d_h + temp * (d_s * 1000.0)
+    return d_h - temp * (d_s / 1000.0)
 
 
 def _j_s(n: int, x: int, d_g_x: float, temp: float) -> float:
@@ -818,7 +835,7 @@ def _j_s(n: int, x: int, d_g_x: float, temp: float) -> float:
     return d_g_x + 2.44 * R * temp * math.log(n / float(x))
 
 
-def _pair_d_g(pair: str, seq: str, k: int, j: int, temp: float) -> float:
+def _pair(pair: str, seq: str, k: int, j: int, temp: float) -> float:
     """Get the free energy for a pair.
 
     Using the indexes k and j, check whether it's at the end of
@@ -846,16 +863,26 @@ def _pair_d_g(pair: str, seq: str, k: int, j: int, temp: float) -> float:
     return _d_g(d_h, d_s, temp)
 
 
-def _hairpin_d_g(hairpin: str, temp: float) -> float:
-    """Calculate the free energy of the hairpin
+def _hairpin(seq: str, k: int, j: int, temp: float) -> float:
+    """Calculate the free energy of a hairpin.
 
     Args:
-        hairpin: The hairpin sequence
+        seq: The sequence we're folding
+        k: The index of start of hairpin
+        j: The index of end of hairpin
         temp: Temperature in Kelvin
 
     Returns:
-        float: [description]
+        The free energy increment from the hairpin structure
     """
+
+    hairpin = seq[k : j + 1]
+    hairpin_len = len(hairpin) - 2
+    pair = hairpin[0] + hairpin[1] + "/" + hairpin[-1] + hairpin[-2]
+
+    if pair not in DNA_TERMINAL_MM or hairpin_len < DNA_MIN_HAIRPIN_LEN:
+        # not known terminal pair, nothing to close "hairpin", treat as bulge
+        return _bulge(pair, seq, hairpin_len, k, j, temp)
 
     d_g = 0
     if hairpin in DNA_TRI_TETRA_LOOPS:
@@ -864,37 +891,44 @@ def _hairpin_d_g(hairpin: str, temp: float) -> float:
         d_g = _d_g(d_h, d_s, temp)
 
     # add penalty based on size
-    if len(hairpin) in DNA_HAIRPIN_LOOPS:
-        d_h, d_s = DNA_HAIRPIN_LOOPS[len(hairpin)]
+    if hairpin_len in DNA_HAIRPIN_LOOPS:
+        d_h, d_s = DNA_HAIRPIN_LOOPS[hairpin_len]
         d_g += _d_g(d_h, d_s, temp)
     else:
         # it's too large, extrapolate
         hairpin_max_len = max(DNA_HAIRPIN_LOOPS.keys())
         d_h, d_s = DNA_HAIRPIN_LOOPS[hairpin_max_len]
         d_g_inc = _d_g(d_h, d_s, temp)
-        d_g += _j_s(len(hairpin), hairpin_max_len, d_g_inc, temp)
+        d_g += _j_s(hairpin_len, hairpin_max_len, d_g_inc, temp)
 
-    # add penalty for closing AT bases
-    if len(hairpin) == 3 and (hairpin[0] + hairpin[-1]).count("A"):
-        d_g += 0.5
+    # add penalty for a terminal mismatch
+    d_h, d_s = DNA_TERMINAL_MM[pair]
+    d_g += _d_g(d_h, d_s, temp)
+
+    # add penalty if length 3 and AT closing, formula 8 from SantaLucia, 2004
+    if hairpin_len == 3 and (pair.startswith("A") or pair.startswith("T")):
+        d_g += 0.5  # TODO: convert to entropy
 
     return d_g
 
 
-def _bulge_d_g(pair: str, seq: str, n: int, k: int, j: int, temp: float) -> float:
+def _bulge(pair: str, seq: str, n: int, k: int, j: int, temp: float) -> float:
     """Calculate the free energy associated with a bulge.
 
     Args:
         pair: The NN pair outside the bulge
         seq: The full folding DNA sequence
         n: The length of the bulge
-        k: The index on k side
-        j: The index on the j side
+        k: The start index of the bulge
+        j: The end index of the bulge
         temp: Temperature in Kelvin
 
     Returns:
-        The free energy associated with the bulge's length
+        The increment in free energy from the bulge
     """
+
+    if n <= 0:
+        return 0.0
 
     # add penalty based on size
     if n in DNA_BULGE_LOOPS:
@@ -907,9 +941,9 @@ def _bulge_d_g(pair: str, seq: str, n: int, k: int, j: int, temp: float) -> floa
         d_g = _d_g(d_h, d_s, temp)
         d_g = _j_s(n, bulge_max_len, d_g, temp)
 
-    if n == 1:
+    if n == 1 and (pair in DNA_NN or pair in DNA_INTERNAL_MM):
         # if len 1, include the delta G of intervening NN (SantaLucia 2004)
-        d_g += _pair_d_g(pair, seq, k, j, temp)
+        d_g += _pair(pair, seq, k, j, temp)
 
     # penalize AT terminal bonds
     if pair.count("A"):
@@ -918,7 +952,7 @@ def _bulge_d_g(pair: str, seq: str, n: int, k: int, j: int, temp: float) -> floa
     return d_g
 
 
-def _internal_loop_d_g(left: str, right: str, temp: float) -> float:
+def _internal_loop(left: str, right: str, temp: float) -> float:
     """Calculate the free energy of an internal loop.
 
     The first and last bp of both left and right sequences
@@ -933,7 +967,7 @@ def _internal_loop_d_g(left: str, right: str, temp: float) -> float:
         left: The sequence on the left side
         right: The sequence on the right side
         temp: Temperature in Kelvin
-    
+
     Returns:
         The free energy associated with the internal loop
     """
@@ -953,21 +987,58 @@ def _internal_loop_d_g(left: str, right: str, temp: float) -> float:
         d_g = _d_g(d_h, d_s, temp)
         d_g = _j_s(loop_len, loop_max_len, d_g, temp)
 
-    # apply an assymmetry penalty
+    # apply an asymmetry penalty
     loop_asymmetry = abs(loop_left - loop_right)
     d_g += 0.3 * loop_asymmetry
 
-    # apply penalty based on the mismatching pairs
-    # on either side the loop
+    # apply penalty based on the mismatching pairs on either side the loop
     pair_left = left[:2] + "/" + right[-2::][::-1]
-    d_h, d_s = DNA_TERMINAL_MM[pair_left]
+    d_h, d_s = DNA_NN[pair_left] if pair_left in DNA_NN else DNA_TERMINAL_MM[pair_left]
     d_g += _d_g(d_h, d_s, temp)
+
     pair_right = left[-2:] + "/" + right[:2][::-1]
-    d_h, d_s = DNA_TERMINAL_MM[pair_right]
+    d_h, d_s = (
+        DNA_NN[pair_right] if pair_right in DNA_NN else DNA_TERMINAL_MM[pair_right]
+    )
     d_g += _d_g(d_h, d_s, temp)
 
     return d_g
 
+
+def _backtrack(
+    seq: str, i: int, j: int, k_cache: Cache, e_cache: Cache, pairs: List[Tuple[int, int]]
+):
+    """Backtrack and aquire the list of basepairs and total minimum energy
+
+    Args:
+        seq: The DNA sequence being folded
+        i: The index of the left-side of span
+        j: The index of the right-side of span
+        k_cache: The low energy track cache
+        e_cache: The min energy in a branch cache
+        pairs: The list of basepairs in the min-energy structure
+    """
+
+    key = (i, j)
+    k = k_cache[key]
+
+    while k == i or k < 0:
+        j -= 1
+        key = (i, j)
+
+        if key not in k_cache:
+            return
+
+        k = k_cache[key]
+
+    if len(set([i, j, k])) != 3:
+        return
+
+    pair = seq[k] + seq[j]
+    pairs.append((pair, k, j, round(e_cache[key], 1)))
+
+    _backtrack(seq, i, k, k_cache, e_cache, pairs)
+    _backtrack(seq, k, j, k_cache, e_cache, pairs)
 
 
 def _gc(seq: str) -> float:
@@ -976,4 +1047,3 @@ def _gc(seq: str) -> float:
     seq = seq.upper()
 
     return float(seq.count("G") + seq.count("C")) / float(len(seq))
-
