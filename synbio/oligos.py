@@ -691,14 +691,26 @@ def fold(seq: str, temp: float = 32.0) -> float:
     e_cache: Cache = {}
     k_cache: Cache = {}
     # for increasing fragment length
-    for f_len in range(DNA_MIN_HAIRPIN_LEN + 1, len(seq)):  
-        for i in range(len(seq) - f_len):  # for increasing start index
+    for f_len in range(DNA_MIN_HAIRPIN_LEN + 1, len(seq)):
+        # for increasing start index
+        for i in range(len(seq) - f_len):
+            # fill the energy and backtracking cache
             _e(seq, i, i + f_len, temp, e_cache, k_cache)
 
     # backtracking for structure
     pairs = []
-    min_e = round(min(e_cache.values()), 2)
+
+    min_e = 0.0
+    min_key = None
+    for key, v in e_cache.items():
+        if v < min_e:
+            min_e = v
+            min_key = key
+    print(round(min_e, 2), min_key)
+
     _backtrack(seq, 0, len(seq) - 1, k_cache, e_cache, pairs)
+
+    # print the folding results
     print("\nfolding:", seq)
     print("min free energy structure:", min_e)
     print("pairs:")
@@ -731,17 +743,9 @@ def _e(seq: str, i: int, j: int, temp: float, e_cache: Cache, k_cache: Cache) ->
     if key in e_cache:
         return e_cache[key]
 
-    # if it's too small to consider
-    # This is described in Nussinov. For allowing closure
-    if j - i <= DNA_MIN_HAIRPIN_LEN:
-        d_g = _bulge("", seq, j - i, i, j, temp)
-        e_cache[key] = d_g
-        k_cache[key] = i
-        return d_g
-
     # check whether it's a small hairpin with a pre-computed energy
-    if j - i <= DNA_MIN_HAIRPIN_LEN + 2:
-        d_g = _hairpin(seq, i, j, temp)
+    if j - i <= DNA_MIN_HAIRPIN_LEN + 1:
+        d_g = 1000.0
         e_cache[key] = d_g
         k_cache[key] = i
         return d_g
@@ -780,17 +784,23 @@ def _e(seq: str, i: int, j: int, temp: float, e_cache: Cache, k_cache: Cache) ->
         elif bulge_left or bulge_right:
             # Fig 5B: it's a bulge on the k side OR
             # Fig 5C: it's a bulge on the j side
-            bulge_len = max([k_1 - k - 1, j - j_i - 1])
-            e_kj = _bulge(pair, seq, bulge_len, k, j, temp)
+            if bulge_left:
+                e_kj = _bulge(pair, seq, k, k_1, temp)
+            elif bulge_right:
+                e_kj = _bulge(pair, seq, j_i, j, temp)
         else:
             e_kj = _hairpin(seq, k, j, temp)
 
         # sum the energy and compare to alternatives
-        min_e_left = _e(seq, i, k - 1, temp, e_cache, k_cache)
-        min_e_right = _e(seq, k_i, j - 1, temp, e_cache, k_cache)
-        e_total = min_e_left + e_kj + min_e_right
+        e_left = _e(seq, i, k - 1, temp, e_cache, k_cache)
+        e_right = _e(seq, k + 1, j - 1, temp, e_cache, k_cache)
+        e_total = e_left + e_kj + e_right
 
-        if e_total <= min_e:
+        if i == 0 and j == 30:
+            # print(i, j)
+            pass
+
+        if e_total < min_e:
             min_e = e_total
             min_k = k
 
@@ -863,12 +873,12 @@ def _pair(pair: str, seq: str, k: int, j: int, temp: float) -> float:
     return _d_g(d_h, d_s, temp)
 
 
-def _hairpin(seq: str, k: int, j: int, temp: float) -> float:
+def _hairpin(seq: str, i: int, j: int, temp: float) -> float:
     """Calculate the free energy of a hairpin.
 
     Args:
         seq: The sequence we're folding
-        k: The index of start of hairpin
+        i: The index of start of hairpin
         j: The index of end of hairpin
         temp: Temperature in Kelvin
 
@@ -876,13 +886,16 @@ def _hairpin(seq: str, k: int, j: int, temp: float) -> float:
         The free energy increment from the hairpin structure
     """
 
-    hairpin = seq[k : j + 1]
+    if j - i <= DNA_MIN_HAIRPIN_LEN:
+        return 1000.0
+
+    hairpin = seq[i : j + 1]
     hairpin_len = len(hairpin) - 2
     pair = hairpin[0] + hairpin[1] + "/" + hairpin[-1] + hairpin[-2]
 
     if pair not in DNA_TERMINAL_MM or hairpin_len < DNA_MIN_HAIRPIN_LEN:
         # not known terminal pair, nothing to close "hairpin", treat as bulge
-        return _bulge(pair, seq, hairpin_len, k, j, temp)
+        return _bulge(pair, seq, i, j, temp)
 
     d_g = 0
     if hairpin in DNA_TRI_TETRA_LOOPS:
@@ -912,14 +925,13 @@ def _hairpin(seq: str, k: int, j: int, temp: float) -> float:
     return d_g
 
 
-def _bulge(pair: str, seq: str, n: int, k: int, j: int, temp: float) -> float:
+def _bulge(pair: str, seq: str, i: int, j: int, temp: float) -> float:
     """Calculate the free energy associated with a bulge.
 
     Args:
         pair: The NN pair outside the bulge
         seq: The full folding DNA sequence
-        n: The length of the bulge
-        k: The start index of the bulge
+        i: The start index of the bulge
         j: The end index of the bulge
         temp: Temperature in Kelvin
 
@@ -927,6 +939,7 @@ def _bulge(pair: str, seq: str, n: int, k: int, j: int, temp: float) -> float:
         The increment in free energy from the bulge
     """
 
+    n = j - i - 1
     if n <= 0:
         return 0.0
 
@@ -943,7 +956,7 @@ def _bulge(pair: str, seq: str, n: int, k: int, j: int, temp: float) -> float:
 
     if n == 1 and (pair in DNA_NN or pair in DNA_INTERNAL_MM):
         # if len 1, include the delta G of intervening NN (SantaLucia 2004)
-        d_g += _pair(pair, seq, k, j, temp)
+        d_g += _pair(pair, seq, i, j, temp)
 
     # penalize AT terminal bonds
     if pair.count("A"):
@@ -1020,6 +1033,10 @@ def _backtrack(
     """
 
     key = (i, j)
+
+    if key not in k_cache:
+        return
+
     k = k_cache[key]
 
     while k == i or k < 0:
@@ -1035,9 +1052,9 @@ def _backtrack(
         return
 
     pair = seq[k] + seq[j]
-    pairs.append((pair, k, j, round(e_cache[key], 1)))
+    pairs.append((pair, k, j, round(e_cache[key], 2)))
 
-    _backtrack(seq, i, k, k_cache, e_cache, pairs)
+    _backtrack(seq, i, k - 1, k_cache, e_cache, pairs)
     _backtrack(seq, k, j, k_cache, e_cache, pairs)
 
 

@@ -32,13 +32,13 @@ class TestOligos(unittest.TestCase):
 
         # unafold's estimates for free energy estimates of DNA oligos
         unafold_dgs = {
-            "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA": -3.65,
+            # "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA": -3.65,
             "AAGGGGTTGGTCGCCTCGACTAAGCGGCTGGATTCC": -2.5,
             "TGAGACGGAAGGGGATGATTGTCCCCTTCCGTCTCA": -18.1,
             "TAGCTCAGCTGGGAGAGCGCCTGCTTTGCACGCAGGAGGT": -6.85,
             # the below is a three branched structure
-            # "GGGAGGTCGTTACATCTGGGTAACACCGGTACTGATCCGGTGACCTCCC": 0.0,
-            "TGTCAGAAGTTTCCAAATGGCCAGCAATCAACCCATTCCATTGGGGATACAATGGTACAGTTTCGCATATTGTCGGTGAAAATGGTTCCATTAAACTCC": -9.35,
+            # "GGGAGGTCGTTACATCTGGGTAACACCGGTACTGATCCGGTGACCTCCC": -10.94,
+            # "TGTCAGAAGTTTCCAAATGGCCAGCAATCAACCCATTCCATTGGGGATACAATGGTACAGTTTCGCATATTGTCGGTGAAAATGGTTCCATTAAACTCC": -9.35
         }
 
         for seq, unafold_est in unafold_dgs.items():
@@ -54,9 +54,9 @@ class TestOligos(unittest.TestCase):
         # mock bulge of CAT on one side and AG on other
         # from pg 429 of SantaLucia, 2004
         pair = "CT/GA"
-        seq = "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA"
+        seq = "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA"  # nonsense sequence
 
-        pair_dg = _bulge(pair, seq, 1, 5, 27, 310.15)
+        pair_dg = _bulge(pair, seq, 5, 7, 310.15)
         self.assertAlmostEqual(3.22, pair_dg, delta=0.4)
 
     def test_pair(self):
