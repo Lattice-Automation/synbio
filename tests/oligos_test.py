@@ -2,7 +2,7 @@
 
 import unittest
 
-from synbio.oligos import calc_tm, fold, _bulge, _pair, _hairpin
+from synbio.oligos import calc_tm, fold, _bulge, _pair, _hairpin, _internal_loop
 
 
 class TestOligos(unittest.TestCase):
@@ -32,21 +32,21 @@ class TestOligos(unittest.TestCase):
 
         # unafold's estimates for free energy estimates of DNA oligos
         unafold_dgs = {
-            # "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA": -3.65,
-            "AAGGGGTTGGTCGCCTCGACTAAGCGGCTGGATTCC": -2.5,
-            "TGAGACGGAAGGGGATGATTGTCCCCTTCCGTCTCA": -18.1,
+            "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA": -3.65,
             "TAGCTCAGCTGGGAGAGCGCCTGCTTTGCACGCAGGAGGT": -6.85,
+            "TGAGACGGAAGGGGATGATTGTCCCCTTCCGTCTCA": -18.1,
+            "AAGGGGTTGGTCGCCTCGACTAAGCGGCTGGATTCC": -2.5,
             # the below is a three branched structure
             # "GGGAGGTCGTTACATCTGGGTAACACCGGTACTGATCCGGTGACCTCCC": -10.94,
             # "TGTCAGAAGTTTCCAAATGGCCAGCAATCAACCCATTCCATTGGGGATACAATGGTACAGTTTCGCATATTGTCGGTGAAAATGGTTCCATTAAACTCC": -9.35
         }
 
         for seq, unafold_est in unafold_dgs.items():
-            calc_dg = fold(seq)
+            calc_dg = fold(seq, temp=37.0)
 
             # accepting a 25% difference
             delta = abs(0.25 * unafold_est)
-            self.assertAlmostEqual(unafold_est, calc_dg, delta=delta)
+            self.assertAlmostEqual(calc_dg, unafold_est, delta=delta)
 
     def test_bulge(self):
         """Test delta G calc of a bulge."""
@@ -62,21 +62,42 @@ class TestOligos(unittest.TestCase):
     def test_pair(self):
         """Test delta G of pairs with and without mismatches."""
 
-        # from pg 429 of SantaLucia, 2004
-        pair = "CT/GA"
+        pairs = [("CT/GA", -1.28), ("GG/CC", -1.84), ("TC/AG", -1.3)]
         seq = "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA"
 
-        pair_dg = _pair(pair, seq, 5, 27, 310.15)
-
-        self.assertAlmostEqual(-1.28, pair_dg, delta=0.1)
+        for pair, dg_actual in pairs:
+            dg_est = _pair(pair, seq, 5, 27, 310.15)
+            self.assertAlmostEqual(dg_est, dg_actual, delta=0.02)
 
     def test_hairpin(self):
         """Test delta G of a hairpin structure."""
 
+        seq = "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA"
+        i = 11
+        j = 16
+        temp = 310.15
+        hairpin_dg = _hairpin(seq, i, j, temp)
+        self.assertAlmostEqual(1.7, hairpin_dg, delta=1.0)
+
         # from page 428 of SantaLucia, 2004
         # hairpin = "CGCAAG"
         seq = "ACCCGCAAGCCCTCCTTCCTTGGATCAAGGGGCTCAA"
-        k = 3
+        i = 3
         j = 8
-        hairpin_dg = _hairpin(seq, k, j, 310.15)
+        hairpin_dg = _hairpin(seq, i, j, temp)
         self.assertAlmostEqual(0.67, hairpin_dg, delta=0.1)
+
+    def test_internal_loop(self):
+        """Test internal loop."""
+
+        seq = "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA"
+        i = 6
+        j = 21
+        left = "TCCTT"
+        right = "ATCAA"
+        temp = 310.15
+        temp_est = 3.5
+
+        loop_temp = _internal_loop(seq, i, j, left, right, temp)
+
+        self.assertAlmostEqual(loop_temp, temp_est, delta=0.1)

@@ -4,6 +4,10 @@
 # Test output files
 tests/output/
 
+# Test files for oligo functions
+data/oligos/dna.fa.*
+data/oligos/dna.fa_1.*
+
 # Feature input files for clustering (the iGEM dump is too large for Github)
 data/features/igem
 data/features/snapgene
