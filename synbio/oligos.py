@@ -659,8 +659,8 @@ def fold(seq: str, temp: float = 37.0) -> float:
     v_cache = []
     w_cache = []
     for _ in range(len(seq)):
-        v_cache.append([None] * len(seq))
-        w_cache.append([None] * len(seq))
+        v_cache.append([(None, "")] * len(seq))
+        w_cache.append([(None, "")] * len(seq))
 
     # for increasing fragment length; smaller fragments first
     for f_len in range(4, len(seq)):
@@ -671,28 +671,49 @@ def fold(seq: str, temp: float = 37.0) -> float:
             _w(seq, i, i + f_len, temp, v_cache, w_cache)
 
     # gather the min energy structure over the full sequence
-    min_e = _w(seq, 0, len(seq) - 1, temp, v_cache, w_cache)
+    min_e, _ = _w(seq, 0, len(seq) - 1, temp, v_cache, w_cache)
+
+    print([s for s in _traceback(v_cache, w_cache)])
+
+    return min_e
+
+
+def _debug(v_cache, w_cache):
+    """Temporary _debug function for logging energies
+
+    Args:
+        v_cache: V(i, j)
+        w_cache: W(i,j)
+    """
 
     print("\n")
     for row in w_cache:
         print(
-            str([round(r, 1) if r else 0.0 for r in row])
+            str([round(r, 1) if r else 0 for r, _ in row])
+            .replace("]", "")
+            .replace("[", "")
+        )
+
+    print("\n")
+    for row in w_cache:
+        print(",".join([t if t else "." for _, t in row]))
+
+    print("\n")
+    for row in v_cache:
+        print(
+            str([round(r, 1) if r else 0 for r, _ in row])
             .replace("]", "")
             .replace("[", "")
         )
 
     print("\n")
     for row in v_cache:
-        print(
-            str([round(r, 1) if r else 0.0 for r in row])
-            .replace("]", "")
-            .replace("[", "")
-        )
-
-    return min_e
+        print(",".join([t if t else "." for _, t in row]))
 
 
-def _v(seq: str, i: int, j: int, temp: float, v_cache: Cache, w_cache: Cache) -> float:
+def _v(
+    seq: str, i: int, j: int, temp: float, v_cache: Cache, w_cache: Cache
+) -> Tuple[float, str]:
     """Find, store and return the minimum free energy of the structure between i and j
 
     If i and j don't bp, store and return INF.
@@ -710,24 +731,25 @@ def _v(seq: str, i: int, j: int, temp: float, v_cache: Cache, w_cache: Cache) ->
         float: The minimum energy folding structure possible between i and j on seq
     """
 
-    if v_cache[i][j] is not None:
+    if v_cache[i][j][0] is not None:
         return v_cache[i][j]
 
     # the ends must basepair for V(i,j)
     if DNA_COMPLEMENT[seq[i]] != seq[j]:
-        v_cache[i][j] = math.inf
-        return math.inf
+        v_cache[i][j] = (math.inf, "")
+        return v_cache[i][j]
 
     # E1 = FH(i, j); hairpin
-    e1 = _hairpin(seq, i, j, temp)
+    e1, e1_type = _hairpin(seq, i, j, temp), "HAIRPIN"
     if j - i == 4:  # small hairpin; 4bp
-        v_cache[i][j] = e1
-        return e1
+        v_cache[i][j] = (e1, e1_type)
+        return v_cache[i][j]
 
     # E2 = min{FL(i, j, i', j') + V(i', j')}, i<i'<j'<j
     # stacking region or bulge or interior loop; Figure 2A(2)
     # j-i=d>4; various pairs i',j' for j'-i'<d
     e2 = math.inf
+    e2_type = ""
     for i_1 in range(i + 1, j - 4):
         for j_1 in range(i_1 + 4, j):
             pair = seq[i] + seq[i_1] + "/" + seq[j] + seq[j_1]
@@ -736,46 +758,54 @@ def _v(seq: str, i: int, j: int, temp: float, v_cache: Cache, w_cache: Cache) ->
             pair_outer = pair_left in DNA_NN or pair_right in DNA_NN
 
             stack = i_1 == i + 1 and j_1 == j - 1 and pair in DNA_NN
-            bulge_left = i_1 > i + 1 and pair in DNA_NN and not pair_outer
-            bulge_right = j_1 < j - 1 and pair in DNA_NN and not pair_outer
+            bulge_left = i_1 > i + 1 and pair in DNA_NN
+            bulge_right = j_1 < j - 1 and pair in DNA_NN
 
-            e2_test = math.inf
+            e2_test, e2_test_type = math.inf, None
             if stack:
                 # it's a neighboring/stacking pair in a helix
                 e2_test = _pair(pair, seq, i, j, temp)
-            elif bulge_left and bulge_right:
+                e2_test_type = "STACK"
+            elif bulge_left and bulge_right and not pair_outer:
                 # it's an interior loop
                 loop_left = seq[i : i_1 + 1]
                 loop_right = seq[j_1 : j + 1]
                 e2_test = _internal_loop(seq, i, j, loop_left, loop_right, temp)
-            elif bulge_left:
+                e2_test_type = "INTERIOR_LOOP"
+            elif bulge_left and not bulge_right:
                 # it's a bulge on the left side
                 e2_test = _bulge(pair, seq, i, i_1, temp)
-            elif bulge_right:
+                e2_test_type = "BULGE"
+            elif bulge_right and not bulge_left:
                 # it's a bulge on the right side
                 e2_test = _bulge(pair, seq, j_1, j, temp)
+                e2_test_type = "BULGE"
             else:
                 # it's basically a hairpin, only outside bp match
                 continue
 
             # add V(i', j')
-            e2_test += _v(seq, i_1, j_1, temp, v_cache, w_cache)
-            e2 = min([e2, e2_test])
+            e2_test += _v(seq, i_1, j_1, temp, v_cache, w_cache)[0]
+            if e2_test < e2:
+                e2, e2_type = e2_test, e2_test_type
 
     # E3 = min{W(i+1,i') + W(i'+1,j-1)}, i+1<i'<j-2
-    e3 = math.inf
+    e3, e3_type = math.inf, "BIFURCATION"
     for i_1 in range(i + 2, j - 2):
-        e3_test = _w(seq, i + 1, i_1, temp, v_cache, w_cache) + _w(
-            seq, i_1 + 1, j - 1, temp, v_cache, w_cache
-        )
-        e3 = min([e3, e3_test])
+        e3_left, e3_left_type = _w(seq, i + 1, i_1, temp, v_cache, w_cache)
+        e3_right, e3_right_type = _w(seq, i_1 + 1, j - 1, temp, v_cache, w_cache)
+        e3_test = e3_left + e3_right
+        if e3_test < e3 and e3_left_type and e3_right_type:
+            e3 = e3_test
 
-    e = min([e1, e2, e3])
+    e = min([(e1, e1_type), (e2, e2_type), (e3, e3_type)], key=lambda x: x[0])
     v_cache[i][j] = e
     return e
 
 
-def _w(seq: str, i: int, j: int, temp: float, v_cache: Cache, w_cache: Cache) -> float:
+def _w(
+    seq: str, i: int, j: int, temp: float, v_cache: Cache, w_cache: Cache
+) -> Tuple[float, str]:
     """Find and return the lowest free energy structure in Sij subsequence
 
     Figure 2B
@@ -792,25 +822,26 @@ def _w(seq: str, i: int, j: int, temp: float, v_cache: Cache, w_cache: Cache) ->
         float: The free energy for the subsequence from i to j
     """
 
-    if w_cache[i][j] is not None:
+    if w_cache[i][j][0] is not None:
         return w_cache[i][j]
 
     if j - i < 4:
-        w_cache[i][j] = 0.0
-        return 0.0
+        w_cache[i][j] = (0.0, "")
+        return w_cache[i][j]
 
     w1 = _w(seq, i + 1, j, temp, v_cache, w_cache)
     w2 = _w(seq, i, j - 1, temp, v_cache, w_cache)
     w3 = _v(seq, i, j, temp, v_cache, w_cache)
 
-    w4 = math.inf
+    w4, w4_type = math.inf, "BIFURCATION"
     for i_1 in range(i + 1, j - 1):
-        w4_test_left = _w(seq, i, i_1, temp, v_cache, w_cache)
-        w4_test_right = _w(seq, i_1 + 1, j, temp, v_cache, w_cache)
-        w4_test = w4_test_left + w4_test_right
-        w4 = min([w4, w4_test])
+        w4_left, w4_left_type = _w(seq, i, i_1, temp, v_cache, w_cache)
+        w4_right, w4_right_type = _w(seq, i_1 + 1, j, temp, v_cache, w_cache)
+        if w4_left_type and w4_right_type:
+            w4_test = w4_left + w4_right
+            w4 = min([w4, w4_test])
 
-    w = min([w1, w2, w3, w4])
+    w = min([w1, w2, w3, (w4, w4_type)], key=lambda x: x[0])
     w_cache[i][j] = w
     return w
 
@@ -889,7 +920,7 @@ def _hairpin(seq: str, i: int, j: int, temp: float) -> float:
         temp: Temperature in Kelvin
 
     Returns:
-        The free energy increment from the hairpin structure
+        float: The free energy increment from the hairpin structure
     """
 
     if j - i < 4:
@@ -947,7 +978,7 @@ def _bulge(pair: str, seq: str, i: int, j: int, temp: float) -> float:
         temp: Temperature in Kelvin
 
     Returns:
-        The increment in free energy from the bulge
+        float: The increment in free energy from the bulge
     """
 
     loop_len = j - i - 1
@@ -997,7 +1028,7 @@ def _internal_loop(
         temp: Temperature in Kelvin
 
     Returns:
-        The free energy associated with the internal loop
+        float: The free energy associated with the internal loop
     """
 
     pair_left_mm = left[:2] + "/" + right[-2::][::-1]
@@ -1008,6 +1039,9 @@ def _internal_loop(
 
     # single bp mismatch, sum up the two single mismatch pairs
     if loop_len == 2:
+        if pair_left_mm in DNA_NN or pair_right_mm in DNA_NN:
+            raise RuntimeError()
+
         return _pair(pair_left_mm, seq, i, j, temp) + _pair(
             pair_right_mm, seq, i + 1, j - 1, temp
         )
@@ -1035,6 +1069,42 @@ def _internal_loop(
     d_g += _d_g(d_h, d_s, temp)
 
     return d_g
+
+
+def _traceback(v_cache: Cache, w_cache: Cache):
+    """Traceback thru the V(i,j) and W(i,j) caches to find the structure
+
+    Args:
+        v_cache: Energies/structures where i and j bond
+        w_cache: Energies/sub-structures between or with i and j
+
+    Returns:
+        A list of pairs (i, j) and the type of structure enclosed
+    """
+
+    # _debug(v_cache, w_cache)
+
+    end = len(v_cache) - 1
+    min_e, _ = w_cache[0][end]
+    i, j = 0, end
+
+    while True:
+        while w_cache[i + 1][j][0] and w_cache[i + 1][j][0] == min_e:
+            i += 1
+        while w_cache[i][j - 1][0] and w_cache[i][j - 1][0] == min_e:
+            j -= 1
+
+        if w_cache[i][j][0] == math.inf:
+            return
+
+        struct_w, struct_type = w_cache[i][j]
+        min_e, struct_next_type = w_cache[i + 1][j - 1]
+
+        yield (i, j, round(struct_w - min_e, 2), struct_type)
+
+        if struct_type == "HAIRPIN" or not struct_next_type or min_e == math.inf:
+            return
+    return
 
 
 def _gc(seq: str) -> float:
