@@ -32,17 +32,19 @@ class TestOligos(unittest.TestCase):
 
         # unafold's estimates for free energy estimates of DNA oligos
         unafold_dgs = {
-            # "TAGCTCAGCTGGGAGAGCGCCTGCTTTGCACGCAGGAGGT": -6.85,
-            # "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA": -3.65, getting -2.21 because more bearish on a 4bp hairpin w/ pre-computed energy
-            # "TGAGACGGAAGGGGATGATTGTCCCCTTCCGTCTCA": -18.1,
-            "AAGGGGTTGGTCGCCTCGACTAAGCGGCTGGATTCC": -2.5,
+            "TGAGACGGAAGGGGATGATTGTCCCCTTCCGTCTCA": -18.1,
+            "AAGGGGTTGGTCGCCTCGACTAAGCGGCTGGATTCC": -3.5,  # unafold == -2.5
+            "TAGCTCAGCTGGGAGAGCGCCTGCTTTGCACGCAGGAGGT": -6.85,  # bifurcation
+            "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA": -3.65,
+            # getting -2.21 because more bearish on a 4bp hairpin w/ pre-computed energy
             # the below is a three branched structure
             # "GGGAGGTCGTTACATCTGGGTAACACCGGTACTGATCCGGTGACCTCCC": -10.94,
             # "TGTCAGAAGTTTCCAAATGGCCAGCAATCAACCCATTCCATTGGGGATACAATGGTACAGTTTCGCATATTGTCGGTGAAAATGGTTCCATTAAACTCC": -9.35
         }
 
         for seq, unafold_est in unafold_dgs.items():
-            calc_dg = fold(seq, temp=37.0)
+            structs = fold(seq, temp=37.0)
+            calc_dg = sum([s[-1] for s in structs])
 
             # accepting a 25% difference
             delta = abs(0.25 * unafold_est)
@@ -64,7 +66,13 @@ class TestOligos(unittest.TestCase):
     def test_pair(self):
         """Test delta G of pairs with and without mismatches."""
 
-        pairs = [("CT/GA", -1.28), ("GG/CC", -1.84), ("TC/AG", -1.3)]
+        pairs = [
+            ("CT/GA", -1.28),
+            ("GG/CC", -1.84),
+            ("TC/AG", -1.3),
+            ("GT/CG", -0.59),
+            ("TC/GG", 0.08),
+        ]
         seq = "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA"
 
         for pair, dg_actual in pairs:
