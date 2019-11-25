@@ -1,4 +1,4 @@
-"""Functions for oligos. Tm calc."""
+"""Functions for oligos' Tm and delta G"""
 
 import math
 from typing import Dict, List, Tuple, Any
@@ -746,7 +746,7 @@ def _v(
             loop_left = seq[i : i_1 + 1]
             loop_right = seq[j_1 : j + 1]
 
-            e2_test, e2_test_type = math.inf, None
+            e2_test, e2_test_type = math.inf, ""
             if stack:
                 # it's a neighboring/stacking pair in a helix
                 e2_test = _pair(pair, seq, i, j, temp)
@@ -766,11 +766,11 @@ def _v(
             elif bulge_left and not bulge_right:
                 # it's a bulge on the left side
                 e2_test = _bulge(pair, seq, i, j, loop_left, temp)
-                e2_test_type = "BULGE"
+                e2_test_type = "BULGE:" + str(i) + "-" + str(i_1)
             elif bulge_right and not bulge_left:
                 # it's a bulge on the right side
                 e2_test = _bulge(pair, seq, i, j, loop_right, temp)
-                e2_test_type = "BULGE"
+                e2_test_type = "BULGE:" + str(j_1) + "-" + str(j)
             else:
                 # it's basically a hairpin, only outside bp match
                 continue
@@ -784,12 +784,14 @@ def _v(
     e3, e3_type = math.inf, "BIFURCATION"
     e3_ij: List[Tuple[int, int]] = []
     for i_1 in range(i + 2, j - 2):
-        e3_left, _, _ = _w(seq, i + 1, i_1, temp, v_cache, w_cache)
-        e3_right, _, _ = _w(seq, i_1 + 1, j - 1, temp, v_cache, w_cache)
-        e3_test = e3_left + e3_right
+        e3_test, unpaired, helixes = _multi_branch(
+            seq, i + 1, i_1, j - 1, temp, v_cache, w_cache, True
+        )
+
         if e3_test < e3:
             e3 = e3_test
             e3_ij = [(i + 1, i_1), (i_1 + 1, j - 1)]
+            e3_type = "BIFURCATION:" + str(unpaired) + "n/" + str(helixes) + "h"
 
     e = min(
         [(e1, e1_type, e1_ij), (e2, e2_type, e2_ij), (e3, e3_type, e3_ij)],
@@ -832,12 +834,14 @@ def _w(
     w4, w4_type = math.inf, "BIFURCATION"
     w4_ij: List[Tuple[int, int]] = []
     for i_1 in range(i + 1, j - 1):
-        w4_left, _, _ = _w(seq, i, i_1, temp, v_cache, w_cache)
-        w4_right, _, _ = _w(seq, i_1 + 1, j, temp, v_cache, w_cache)
-        w4_test = w4_left + w4_right
+        w4_test, unpaired, helixes = _multi_branch(
+            seq, i, i_1, j, temp, v_cache, w_cache, False
+        )
+
         if w4_test < w4:
             w4 = w4_test
             w4_ij = [(i, i_1), (i_1 + 1, j)]
+            w4_type = "BIFURCATION:" + str(unpaired) + "n/" + str(helixes) + "h"
 
     w = min([w1, w2, w3, (w4, w4_type, w4_ij)], key=lambda x: x[0])
     w_cache[i][j] = w
@@ -893,6 +897,10 @@ def _pair(pair: str, seq: str, i: int, j: int, temp: float) -> float:
     Using the indexes i and j, check whether it's at the end of
     the sequence or internal. Then check whether it's a match
     or mismatch, and return.
+
+    Two edge-cases are terminal mismatches and dangling ends.
+    The energy of a dangling end is added to the energy of a pair
+    where i XOR j is at the sequence's end.
 
     Args:
         pair: The pair sequence, ex: (AG/TC)
@@ -1101,6 +1109,68 @@ def _internal_loop(
     return d_g
 
 
+def _multi_branch(
+    seq: str,
+    i: int,
+    k: int,
+    j: int,
+    temp: float,
+    v_cache: Cache,
+    w_cache: Cache,
+    helix: bool = False,
+) -> Tuple[float, int, int]:
+    """Calculate a multi-branch energy penalty using linear formula.
+
+    From Jaeger, Turner, and Zuker, 1989.
+    Found to be better than logarithmic in Ward, et al. 2017
+
+    Args:
+        seq: The sequence being folded
+        i: The left starting index
+        k: The mid-point in the search
+        j: The right ending index
+        temp: Folding temp
+        v_cache: Cache of energies where V(i,j) bond
+        w_cache: Cache of min energy of substructures between W(i,j)
+        helix: Whether this multibranch is enclosed by another helix
+
+    Returns:
+        float: The energy of the multi-branch penalty
+    """
+
+    e_left, e_ltype, e_lpairs = _w(seq, i, k, temp, v_cache, w_cache)
+    e_right, e3_rtype, e_rpairs = _w(seq, k + 1, j, temp, v_cache, w_cache)
+
+    # at least three multi-loops here; Fig 2A
+    helixes = 3 if helix else 2
+    if "BIFURCATION" in e_ltype:  # TODO: recurse to go higher
+        helixes += 1
+    if "BIFURCATION" in e3_rtype:
+        helixes += 1
+
+    # add up the unpaired bp count
+    unpaired = 0
+    i2_1 = 0
+    if e_lpairs:
+        i2, i2_1 = e_lpairs[0]
+        unpaired += i2 - i - 1
+
+    if e_rpairs:
+        i3, i3_1 = e_rpairs[0]
+        unpaired += i3 - k - 2
+        unpaired += j - i3_1 - 1
+        if i2_1:
+            unpaired += i3 - k - 2
+
+    # penalty for unmatched bp and multi-branch
+    e_multibranch = 4.6 + 0.4 * unpaired + 0.1 * helixes
+
+    # energy of min-energy neighbors
+    e = e_multibranch + e_left + e_right
+
+    return e, unpaired, helixes
+
+
 def _traceback(
     i: int, j: int, v_cache: Cache, w_cache: Cache
 ) -> List[Tuple[int, int, str, float]]:
@@ -1149,6 +1219,7 @@ def _traceback(
 
         # it's a bifurcation
         (i1, j1), (i2, j2) = ij
+        structs.append((i, j, desc, e))
 
         # next structure might not exist; Figure 2A
         while v_cache[i1][j1][0] == math.inf:
@@ -1170,8 +1241,7 @@ def _traceback(
             e_sum += w_cache[right_i][right_j][0]
 
         if structs:
-            last_i, last_j, last_desc, _ = structs[-1]
-            last_e = w_cache[last_i][last_j][0]
+            last_i, last_j, last_desc, last_e = structs[-1]
             structs[-1] = (last_i, last_j, last_desc, round(last_e - e_sum, 2))
 
         return structs + traceback_left + traceback_right
