@@ -1,4 +1,4 @@
-"""Functions for oligos. Tm calc."""
+"""Functions for oligos' Tm and delta G"""
 
 import math
 from typing import Dict, List, Tuple, Any
@@ -15,14 +15,14 @@ DNA_NN = {
     "sym": (0, -1.4),
     "AA/TT": (-7.6, -21.3),
     "AT/TA": (-7.2, -20.4),
-    "TA/AT": (-7.2, -21.3),
+    "TA/AT": (-7.2, -20.4),
     "CA/GT": (-8.5, -22.7),
     "GT/CA": (-8.4, -22.4),
     "CT/GA": (-7.8, -21.0),
     "GA/CT": (-8.2, -22.2),
     "CG/GC": (-10.6, -27.2),
     "GC/CG": (-9.8, -24.4),
-    "GG/CC": (-8.0, -19.9),
+    "GG/CC": (-8.0, -19.0),
 }
 """
 SantaLucia (1998)
@@ -65,21 +65,21 @@ DNA_INTERNAL_MM = {
     "GC/CA": (-0.7, -3.8),
     "TA/AC": (3.4, 8.0),
     "TC/AA": (7.6, 20.2),
-    "AA/TA": (1.2, 1.9),
-    "CA/GA": (-0.9, -4.3),
-    "GA/CA": (-2.9, -9.9),
+    "AA/TA": (1.2, 1.7),
+    "CA/GA": (-0.9, -4.2),
+    "GA/CA": (-2.9, -9.8),
     "TA/AA": (4.7, 12.9),
-    "AC/TC": (0, -4.3),
-    "CC/GC": (-1.5, -7.1),
-    "GC/CC": (3.6, 9.1),
-    "TC/AC": (6.1, 16.3),
-    "AG/TG": (-3.1, -9.6),
-    "CG/GG": (-4.9, -15.4),
-    "GG/CG": (-6, -15.8),
-    "TG/AG": (1.6, 3.7),
-    "AT/TT": (-2.7, -10.9),
-    "CT/GT": (-5, -15.7),
-    "GT/CT": (-2.2, -8.5),
+    "AC/TC": (0.0, -4.4),
+    "CC/GC": (-1.5, -7.2),
+    "GC/CC": (3.6, 8.9),
+    "TC/AC": (6.1, 16.4),
+    "AG/TG": (-3.1, -9.5),
+    "CG/GG": (-4.9, -15.3),
+    "GG/CG": (-6.0, -15.8),
+    "TG/AG": (1.6, 3.6),
+    "AT/TT": (-2.7, -10.8),
+    "CT/GT": (-5.0, -15.8),
+    "GT/CT": (-2.2, -8.4),
     "TT/AT": (0.2, -1.5),
 }
 """
@@ -519,7 +519,7 @@ def calc_tm(seq1: str, seq2: str = "", pcr: bool = True) -> float:
             that match a typical NEB/ThermoFisher PCR mixture are used
 
     Returns:
-        The estimated tm as a float
+        float: The estimated tm as a float
     """
 
     if not seq2:
@@ -636,7 +636,7 @@ Cache = List[List[Any]]
 """A map from i, j tuple to a value."""
 
 
-def fold(seq: str, temp: float = 37.0) -> float:
+def fold(seq: str, temp: float = 37.0) -> List[Tuple[int, int, str, float]]:
     """Fold the DNA sequence and return lowest free energy score.
 
     Based on the approach described in:
@@ -656,64 +656,42 @@ def fold(seq: str, temp: float = 37.0) -> float:
     seq = seq.upper()
     temp = temp + 273.15  # kelvin
 
-    v_cache = []
-    w_cache = []
+    v_cache: Any = []
+    w_cache: Any = []
     for _ in range(len(seq)):
-        v_cache.append([(None, "")] * len(seq))
-        w_cache.append([(None, "")] * len(seq))
+        v_cache.append([(None, "", [])] * len(seq))
+        w_cache.append([(None, "", [])] * len(seq))
 
     # for increasing fragment length; smaller fragments first
     for f_len in range(4, len(seq)):
         # for increasing start index
         for i in range(len(seq) - f_len):
-            # fill the V cache
+            # fill
             _v(seq, i, i + f_len, temp, v_cache, w_cache)
             _w(seq, i, i + f_len, temp, v_cache, w_cache)
 
     # gather the min energy structure over the full sequence
-    min_e, _ = _w(seq, 0, len(seq) - 1, temp, v_cache, w_cache)
+    min_e, _, _ = _w(seq, 0, len(seq) - 1, temp, v_cache, w_cache)
+    min_e = round(min_e, 2)
 
-    print([s for s in _traceback(v_cache, w_cache)])
+    # get the structure out of the cache
+    # _debug(v_cache, w_cache)
+    structs = _traceback(0, len(seq) - 1, v_cache, w_cache)
+    # structs = _trackback_energy(structs)
 
-    return min_e
+    print(f"\nfolding {seq}: {min_e}")
+    for struct in structs:
+        print(struct)
 
+    total_e = sum(s[-1] for s in structs)
+    assert abs(total_e - min_e) < 0.2, f"{total_e} != {min_e}"
 
-def _debug(v_cache, w_cache):
-    """Temporary _debug function for logging energies
-
-    Args:
-        v_cache: V(i, j)
-        w_cache: W(i,j)
-    """
-
-    print("\n")
-    for row in w_cache:
-        print(
-            str([round(r, 1) if r else 0 for r, _ in row])
-            .replace("]", "")
-            .replace("[", "")
-        )
-
-    print("\n")
-    for row in w_cache:
-        print(",".join([t if t else "." for _, t in row]))
-
-    print("\n")
-    for row in v_cache:
-        print(
-            str([round(r, 1) if r else 0 for r, _ in row])
-            .replace("]", "")
-            .replace("[", "")
-        )
-
-    print("\n")
-    for row in v_cache:
-        print(",".join([t if t else "." for _, t in row]))
+    return structs
 
 
 def _v(
     seq: str, i: int, j: int, temp: float, v_cache: Cache, w_cache: Cache
-) -> Tuple[float, str]:
+) -> Tuple[float, str, List[Tuple[int, int]]]:
     """Find, store and return the minimum free energy of the structure between i and j
 
     If i and j don't bp, store and return INF.
@@ -736,13 +714,16 @@ def _v(
 
     # the ends must basepair for V(i,j)
     if DNA_COMPLEMENT[seq[i]] != seq[j]:
-        v_cache[i][j] = (math.inf, "")
+        v_cache[i][j] = (math.inf, "", [])
         return v_cache[i][j]
 
     # E1 = FH(i, j); hairpin
-    e1, e1_type = _hairpin(seq, i, j, temp), "HAIRPIN"
+    pair = seq[i] + seq[i + 1] + "/" + seq[j] + seq[j - 1]
+    e1, e1_type = _hairpin(seq, i, j, temp), "HAIRPIN:" + pair
+    e1_ij: List[Tuple[int, int]] = []
     if j - i == 4:  # small hairpin; 4bp
-        v_cache[i][j] = (e1, e1_type)
+        v_cache[i][j] = (e1, e1_type, [])
+        w_cache[i][j] = (e1, e1_type, [])
         return v_cache[i][j]
 
     # E2 = min{FL(i, j, i', j') + V(i', j')}, i<i'<j'<j
@@ -750,6 +731,7 @@ def _v(
     # j-i=d>4; various pairs i',j' for j'-i'<d
     e2 = math.inf
     e2_type = ""
+    e2_ij: List[Tuple[int, int]] = []
     for i_1 in range(i + 1, j - 4):
         for j_1 in range(i_1 + 4, j):
             pair = seq[i] + seq[i_1] + "/" + seq[j] + seq[j_1]
@@ -761,25 +743,34 @@ def _v(
             bulge_left = i_1 > i + 1 and pair in DNA_NN
             bulge_right = j_1 < j - 1 and pair in DNA_NN
 
-            e2_test, e2_test_type = math.inf, None
+            loop_left = seq[i : i_1 + 1]
+            loop_right = seq[j_1 : j + 1]
+
+            e2_test, e2_test_type = math.inf, ""
             if stack:
                 # it's a neighboring/stacking pair in a helix
                 e2_test = _pair(pair, seq, i, j, temp)
-                e2_test_type = "STACK"
+                e2_test_type = "STACK:" + pair
+
+                if i > 0 and j == len(seq) - 1 or i == 0 and j < len(seq) - 1:
+                    # there's a dangling end
+                    e2_test_type = "STACK_DE:" + pair
             elif bulge_left and bulge_right and not pair_outer:
                 # it's an interior loop
-                loop_left = seq[i : i_1 + 1]
-                loop_right = seq[j_1 : j + 1]
                 e2_test = _internal_loop(seq, i, j, loop_left, loop_right, temp)
                 e2_test_type = "INTERIOR_LOOP"
+
+                if len(loop_left) == 3 and len(loop_right) == 3:
+                    # technically an interior loop of 1. really 1bp mismatch
+                    e2_test_type = "STACK:" + loop_left + "/" + loop_right[::-1]
             elif bulge_left and not bulge_right:
                 # it's a bulge on the left side
-                e2_test = _bulge(pair, seq, i, i_1, temp)
-                e2_test_type = "BULGE"
+                e2_test = _bulge(pair, seq, i, j, loop_left, temp)
+                e2_test_type = "BULGE:" + str(i) + "-" + str(i_1)
             elif bulge_right and not bulge_left:
                 # it's a bulge on the right side
-                e2_test = _bulge(pair, seq, j_1, j, temp)
-                e2_test_type = "BULGE"
+                e2_test = _bulge(pair, seq, i, j, loop_right, temp)
+                e2_test_type = "BULGE:" + str(j_1) + "-" + str(j)
             else:
                 # it's basically a hairpin, only outside bp match
                 continue
@@ -787,25 +778,32 @@ def _v(
             # add V(i', j')
             e2_test += _v(seq, i_1, j_1, temp, v_cache, w_cache)[0]
             if e2_test < e2:
-                e2, e2_type = e2_test, e2_test_type
+                e2, e2_type, e2_ij = e2_test, e2_test_type, [(i_1, j_1)]
 
     # E3 = min{W(i+1,i') + W(i'+1,j-1)}, i+1<i'<j-2
     e3, e3_type = math.inf, "BIFURCATION"
+    e3_ij: List[Tuple[int, int]] = []
     for i_1 in range(i + 2, j - 2):
-        e3_left, e3_left_type = _w(seq, i + 1, i_1, temp, v_cache, w_cache)
-        e3_right, e3_right_type = _w(seq, i_1 + 1, j - 1, temp, v_cache, w_cache)
-        e3_test = e3_left + e3_right
-        if e3_test < e3 and e3_left_type and e3_right_type:
-            e3 = e3_test
+        e3_test, unpaired, helixes = _multi_branch(
+            seq, i + 1, i_1, j - 1, temp, v_cache, w_cache, True
+        )
 
-    e = min([(e1, e1_type), (e2, e2_type), (e3, e3_type)], key=lambda x: x[0])
+        if e3_test < e3:
+            e3 = e3_test
+            e3_ij = [(i + 1, i_1), (i_1 + 1, j - 1)]
+            e3_type = "BIFURCATION:" + str(unpaired) + "n/" + str(helixes) + "h"
+
+    e = min(
+        [(e1, e1_type, e1_ij), (e2, e2_type, e2_ij), (e3, e3_type, e3_ij)],
+        key=lambda x: x[0],
+    )
     v_cache[i][j] = e
     return e
 
 
 def _w(
     seq: str, i: int, j: int, temp: float, v_cache: Cache, w_cache: Cache
-) -> Tuple[float, str]:
+) -> Tuple[float, str, List[Tuple[int, int]]]:
     """Find and return the lowest free energy structure in Sij subsequence
 
     Figure 2B
@@ -826,7 +824,7 @@ def _w(
         return w_cache[i][j]
 
     if j - i < 4:
-        w_cache[i][j] = (0.0, "")
+        w_cache[i][j] = (math.inf, "", [])
         return w_cache[i][j]
 
     w1 = _w(seq, i + 1, j, temp, v_cache, w_cache)
@@ -834,14 +832,18 @@ def _w(
     w3 = _v(seq, i, j, temp, v_cache, w_cache)
 
     w4, w4_type = math.inf, "BIFURCATION"
+    w4_ij: List[Tuple[int, int]] = []
     for i_1 in range(i + 1, j - 1):
-        w4_left, w4_left_type = _w(seq, i, i_1, temp, v_cache, w_cache)
-        w4_right, w4_right_type = _w(seq, i_1 + 1, j, temp, v_cache, w_cache)
-        if w4_left_type and w4_right_type:
-            w4_test = w4_left + w4_right
-            w4 = min([w4, w4_test])
+        w4_test, unpaired, helixes = _multi_branch(
+            seq, i, i_1, j, temp, v_cache, w_cache, False
+        )
 
-    w = min([w1, w2, w3, (w4, w4_type)], key=lambda x: x[0])
+        if w4_test < w4:
+            w4 = w4_test
+            w4_ij = [(i, i_1), (i_1 + 1, j)]
+            w4_type = "BIFURCATION:" + str(unpaired) + "n/" + str(helixes) + "h"
+
+    w = min([w1, w2, w3, (w4, w4_type, w4_ij)], key=lambda x: x[0])
     w_cache[i][j] = w
     return w
 
@@ -882,12 +884,23 @@ def _j_s(query_len: int, known_len: int, d_g_x: float, temp: float) -> float:
     return d_g_x + 2.44 * gas_constant * temp * math.log(query_len / float(known_len))
 
 
+def _gc(seq: str) -> float:
+    """Return the GC ratio of a sequence."""
+
+    seq = seq.upper()
+    return float(seq.count("G") + seq.count("C")) / float(len(seq))
+
+
 def _pair(pair: str, seq: str, i: int, j: int, temp: float) -> float:
     """Get the free energy for a pair.
 
     Using the indexes i and j, check whether it's at the end of
     the sequence or internal. Then check whether it's a match
     or mismatch, and return.
+
+    Two edge-cases are terminal mismatches and dangling ends.
+    The energy of a dangling end is added to the energy of a pair
+    where i XOR j is at the sequence's end.
 
     Args:
         pair: The pair sequence, ex: (AG/TC)
@@ -905,9 +918,30 @@ def _pair(pair: str, seq: str, i: int, j: int, temp: float) -> float:
         d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_INTERNAL_MM[pair]
         return _d_g(d_h, d_s, temp)
 
-    # it's terminal
-    d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_TERMINAL_MM[pair]
-    return _d_g(d_h, d_s, temp)
+    if i == 0 and j == len(seq) - 1:
+        # it's terminal
+        d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_TERMINAL_MM[pair]
+        return _d_g(d_h, d_s, temp)
+
+    if i > 0 and j == len(seq) - 1:
+        # it's dangling on left
+        d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_TERMINAL_MM[pair]
+        d_g = _d_g(d_h, d_s, temp)
+
+        pair_de = seq[i - 1] + seq[i] + "/." + seq[j]
+        d_h, d_s = DNA_DE[pair_de]
+        return d_g + _d_g(d_h, d_s, temp)
+
+    if i == 0 and j < len(seq) - 1:
+        # it's dangling on right
+        d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_TERMINAL_MM[pair]
+        d_g = _d_g(d_h, d_s, temp)
+
+        pair_de = "." + seq[i] + "/" + seq[j + 1] + seq[j]
+        d_h, d_s = DNA_DE[pair_de]
+        return d_g + _d_g(d_h, d_s, temp)
+
+    raise RuntimeError
 
 
 def _hairpin(seq: str, i: int, j: int, temp: float) -> float:
@@ -929,6 +963,9 @@ def _hairpin(seq: str, i: int, j: int, temp: float) -> float:
     hairpin = seq[i : j + 1]
     hairpin_len = len(hairpin) - 2
     pair = hairpin[0] + hairpin[1] + "/" + hairpin[-1] + hairpin[-2]
+
+    # if pair in DNA_NN:
+    #     return math.inf
 
     if DNA_COMPLEMENT[hairpin[0]] != hairpin[-1]:
         # not known terminal pair, nothing to close "hairpin"
@@ -953,9 +990,9 @@ def _hairpin(seq: str, i: int, j: int, temp: float) -> float:
 
     # add penalty for a terminal mismatch
     if hairpin_len > 3 and (pair in DNA_TERMINAL_MM or pair in DNA_NN):
-        if pair in DNA_NN:
-            d_h, d_s = DNA_NN[pair]
-            d_g += _d_g(d_h, d_s, temp)
+        # if pair in DNA_NN:
+        #     d_h, d_s = DNA_NN[pair]
+        #     d_g += _d_g(d_h, d_s, temp)
         if pair in DNA_TERMINAL_MM:
             d_h, d_s = DNA_TERMINAL_MM[pair]
             d_g += _d_g(d_h, d_s, temp)
@@ -967,7 +1004,7 @@ def _hairpin(seq: str, i: int, j: int, temp: float) -> float:
     return d_g
 
 
-def _bulge(pair: str, seq: str, i: int, j: int, temp: float) -> float:
+def _bulge(pair: str, seq: str, i: int, j: int, bulge: str, temp: float) -> float:
     """Calculate the free energy associated with a bulge.
 
     Args:
@@ -975,13 +1012,14 @@ def _bulge(pair: str, seq: str, i: int, j: int, temp: float) -> float:
         seq: The full folding DNA sequence
         i: The start index of the bulge
         j: The end index of the bulge
+        loop: The sequence of the bulge
         temp: Temperature in Kelvin
 
     Returns:
         float: The increment in free energy from the bulge
     """
 
-    loop_len = j - i - 1
+    loop_len = len(bulge) - 2  # bulge seq includes edges
     if loop_len <= 0:
         return math.inf
 
@@ -1038,7 +1076,7 @@ def _internal_loop(
     loop_len = loop_left + loop_right
 
     # single bp mismatch, sum up the two single mismatch pairs
-    if loop_len == 2:
+    if loop_left == 1 and loop_right == 1:
         if pair_left_mm in DNA_NN or pair_right_mm in DNA_NN:
             raise RuntimeError()
 
@@ -1071,10 +1109,82 @@ def _internal_loop(
     return d_g
 
 
-def _traceback(v_cache: Cache, w_cache: Cache):
-    """Traceback thru the V(i,j) and W(i,j) caches to find the structure
+def _multi_branch(
+    seq: str,
+    i: int,
+    k: int,
+    j: int,
+    temp: float,
+    v_cache: Cache,
+    w_cache: Cache,
+    helix: bool = False,
+) -> Tuple[float, int, int]:
+    """Calculate a multi-branch energy penalty using linear formula.
+
+    From Jaeger, Turner, and Zuker, 1989.
+    Found to be better than logarithmic in Ward, et al. 2017
 
     Args:
+        seq: The sequence being folded
+        i: The left starting index
+        k: The mid-point in the search
+        j: The right ending index
+        temp: Folding temp
+        v_cache: Cache of energies where V(i,j) bond
+        w_cache: Cache of min energy of substructures between W(i,j)
+        helix: Whether this multibranch is enclosed by another helix
+
+    Returns:
+        float: The energy of the multi-branch penalty
+    """
+
+    e_left, e_ltype, e_lpairs = _w(seq, i, k, temp, v_cache, w_cache)
+    e_right, e3_rtype, e_rpairs = _w(seq, k + 1, j, temp, v_cache, w_cache)
+
+    # at least three multi-loops here; Fig 2A
+    helixes = 3 if helix else 2
+    if "BIFURCATION" in e_ltype:  # TODO: recurse to go higher
+        helixes += 1
+    if "BIFURCATION" in e3_rtype:
+        helixes += 1
+
+    # add up the unpaired bp count
+    unpaired = 0
+    i2_1 = 0
+    if e_lpairs:
+        i2, i2_1 = e_lpairs[0]
+        unpaired += i2 - i - 1
+
+    if e_rpairs:
+        i3, i3_1 = e_rpairs[0]
+        unpaired += i3 - k - 2
+        unpaired += j - i3_1 - 1
+        if i2_1:
+            unpaired += i3 - k - 2
+
+    # penalty for unmatched bp and multi-branch
+    e_multibranch = 4.6 + 0.4 * unpaired + 0.1 * helixes
+
+    # energy of min-energy neighbors
+    e = e_multibranch + e_left + e_right
+
+    return e, unpaired, helixes
+
+
+def _traceback(
+    i: int, j: int, v_cache: Cache, w_cache: Cache
+) -> List[Tuple[int, int, str, float]]:
+    """Traceback thru the V(i,j) and W(i,j) caches to find the structure
+
+    For each step, get to the lowest energy W(i,j) within that block
+    Store the structure in W(i,j)
+    Inc i and j
+    If the next structure is viable according to V(i,j), store as well
+    Repeat
+
+    Args:
+        i: The leftmost index to start searching in
+        j: The rightmost index to start searching in
         v_cache: Energies/structures where i and j bond
         w_cache: Energies/sub-structures between or with i and j
 
@@ -1082,33 +1192,128 @@ def _traceback(v_cache: Cache, w_cache: Cache):
         A list of pairs (i, j) and the type of structure enclosed
     """
 
-    # _debug(v_cache, w_cache)
-
-    end = len(v_cache) - 1
-    min_e, _ = w_cache[0][end]
-    i, j = 0, end
-
-    while True:
-        while w_cache[i + 1][j][0] and w_cache[i + 1][j][0] == min_e:
+    # move i,j down-left to start coordinates
+    _, desc, ij = w_cache[i][j]
+    if "HAIRPIN" not in desc:
+        while w_cache[i + 1][j][2] == ij:
             i += 1
-        while w_cache[i][j - 1][0] and w_cache[i][j - 1][0] == min_e:
+        while w_cache[i][j - 1][2] == ij:
             j -= 1
 
-        if w_cache[i][j][0] == math.inf:
-            return
+    structs: List[Tuple[int, int, str, float]] = []
+    while True:
+        e, desc, ij = v_cache[i][j]
 
-        struct_w, struct_type = w_cache[i][j]
-        min_e, struct_next_type = w_cache[i + 1][j - 1]
+        # it's a hairpin, end of structure
+        if not ij:
+            # set the energy of everything relative to the hairpin
+            structs.append((i, j, desc, e))
+            return _trackback_energy(structs)
 
-        yield (i, j, round(struct_w - min_e, 2), struct_type)
+        # it's a stack, bulge, etc
+        # there's another single structure beyond this
+        if len(ij) == 1:
+            structs.append((i, j, desc, e))
+            i, j = ij[0]
+            continue
 
-        if struct_type == "HAIRPIN" or not struct_next_type or min_e == math.inf:
-            return
-    return
+        # it's a bifurcation
+        (i1, j1), (i2, j2) = ij
+        structs.append((i, j, desc, e))
+
+        # next structure might not exist; Figure 2A
+        while v_cache[i1][j1][0] == math.inf:
+            i1 += 1
+
+        while v_cache[i2][j2][0] == math.inf:
+            i2 += 1
+
+        structs = _trackback_energy(structs)
+        traceback_left = _traceback(i1, j1, v_cache, w_cache)
+        traceback_right = _traceback(i2, j2, v_cache, w_cache)
+
+        e_sum = 0.0
+        if traceback_left:
+            left_i, left_j, _, _ = traceback_left[0]
+            e_sum += w_cache[left_i][left_j][0]
+        if traceback_right:
+            right_i, right_j, _, _ = traceback_right[0]
+            e_sum += w_cache[right_i][right_j][0]
+
+        if structs:
+            last_i, last_j, last_desc, last_e = structs[-1]
+            structs[-1] = (last_i, last_j, last_desc, round(last_e - e_sum, 2))
+
+        return structs + traceback_left + traceback_right
+
+    return _trackback_energy(structs)
 
 
-def _gc(seq: str) -> float:
-    """Return the GC ratio of a sequence."""
+def _trackback_energy(
+    structs: List[Tuple[int, int, str, float]]
+) -> List[Tuple[int, int, str, float]]:
+    """Add energy to each structure, based on how it's W(i,j) differs from the one after
+    
+    Args:
+        structs: The structures for whom energy is being calculated
+    
+    Returns:
+        List[Tuple[int, int, str, float]]: Structures in the folded DNA with energy
+    """
 
-    seq = seq.upper()
-    return float(seq.count("G") + seq.count("C")) / float(len(seq))
+    structs_e: List[Tuple[int, int, str, float]] = []
+    for index, struct in enumerate(structs):
+        i, j, desc, e = struct
+        e_next = 0.0
+        if index < len(structs) - 1:
+            e_next = structs[index + 1][3]
+        structs_e.append((i, j, desc, round(e - e_next, 2)))
+    return structs_e
+
+
+def _debug(v_cache, w_cache):
+    """Temporary _debug function for logging energies
+
+    Args:
+        v_cache: V(i, j)
+        w_cache: W(i,j)
+    """
+
+    print("\n")
+    print(",".join([str(n) for n in range(len(w_cache))]))
+    for i, row in enumerate(w_cache):
+        print(
+            ",".join([str(round(r, 1)) if r is not None else "." for r, _, _ in row])
+            + ","
+            + str(i)
+        )
+
+    print("\n")
+    print(",".join([str(n) for n in range(len(v_cache))]))
+    for i, row in enumerate(v_cache):
+        print(
+            ",".join([str(round(r, 1)) if r is not None else "." for r, _, _ in row])
+            + ","
+            + str(i)
+        )
+
+    print("\n")
+    print(",".join([str(n) for n in range(len(w_cache))]))
+    for i, row in enumerate(w_cache):
+        print(",".join([str(ij).replace(", ", "-") for _, _, ij in row]) + "," + str(i))
+
+    print("\n")
+    print(",".join([str(n) for n in range(len(v_cache))]))
+    for i, row in enumerate(v_cache):
+        print(",".join([str(ij).replace(", ", "-") for _, _, ij in row]) + "," + str(i))
+
+    print("\n")
+    print(",".join([str(n) for n in range(len(w_cache))]))
+    for i, row in enumerate(w_cache):
+        print(",".join([t if t else "." for _, t, _ in row]) + "," + str(i))
+
+    print("\n")
+    print(",".join([str(n) for n in range(len(v_cache))]))
+    for i, row in enumerate(v_cache):
+        print(",".join([t if t else "." for _, t, _ in row]) + "," + str(i))
+
