@@ -15,14 +15,14 @@ DNA_NN = {
     "sym": (0, -1.4),
     "AA/TT": (-7.6, -21.3),
     "AT/TA": (-7.2, -20.4),
-    "TA/AT": (-7.2, -21.3),
+    "TA/AT": (-7.2, -20.4),
     "CA/GT": (-8.5, -22.7),
     "GT/CA": (-8.4, -22.4),
     "CT/GA": (-7.8, -21.0),
     "GA/CT": (-8.2, -22.2),
     "CG/GC": (-10.6, -27.2),
     "GC/CG": (-9.8, -24.4),
-    "GG/CC": (-8.0, -19.9),
+    "GG/CC": (-8.0, -19.0),
 }
 """
 SantaLucia (1998)
@@ -65,21 +65,21 @@ DNA_INTERNAL_MM = {
     "GC/CA": (-0.7, -3.8),
     "TA/AC": (3.4, 8.0),
     "TC/AA": (7.6, 20.2),
-    "AA/TA": (1.2, 1.9),
-    "CA/GA": (-0.9, -4.3),
-    "GA/CA": (-2.9, -9.9),
+    "AA/TA": (1.2, 1.7),
+    "CA/GA": (-0.9, -4.2),
+    "GA/CA": (-2.9, -9.8),
     "TA/AA": (4.7, 12.9),
-    "AC/TC": (0, -4.3),
-    "CC/GC": (-1.5, -7.1),
-    "GC/CC": (3.6, 9.1),
-    "TC/AC": (6.1, 16.3),
-    "AG/TG": (-3.1, -9.6),
-    "CG/GG": (-4.9, -15.4),
-    "GG/CG": (-6, -15.8),
-    "TG/AG": (1.6, 3.7),
-    "AT/TT": (-2.7, -10.9),
-    "CT/GT": (-5, -15.7),
-    "GT/CT": (-2.2, -8.5),
+    "AC/TC": (0.0, -4.4),
+    "CC/GC": (-1.5, -7.2),
+    "GC/CC": (3.6, 8.9),
+    "TC/AC": (6.1, 16.4),
+    "AG/TG": (-3.1, -9.5),
+    "CG/GG": (-4.9, -15.3),
+    "GG/CG": (-6.0, -15.8),
+    "TG/AG": (1.6, 3.6),
+    "AT/TT": (-2.7, -10.8),
+    "CT/GT": (-5.0, -15.8),
+    "GT/CT": (-2.2, -8.4),
     "TT/AT": (0.2, -1.5),
 }
 """
@@ -743,15 +743,20 @@ def _v(
             bulge_left = i_1 > i + 1 and pair in DNA_NN
             bulge_right = j_1 < j - 1 and pair in DNA_NN
 
+            loop_left = seq[i : i_1 + 1]
+            loop_right = seq[j_1 : j + 1]
+
             e2_test, e2_test_type = math.inf, None
             if stack:
                 # it's a neighboring/stacking pair in a helix
                 e2_test = _pair(pair, seq, i, j, temp)
                 e2_test_type = "STACK:" + pair
+
+                if i > 0 and j == len(seq) - 1 or i == 0 and j < len(seq) - 1:
+                    # there's a dangling end
+                    e2_test_type = "STACK_DE:" + pair
             elif bulge_left and bulge_right and not pair_outer:
                 # it's an interior loop
-                loop_left = seq[i : i_1 + 1]
-                loop_right = seq[j_1 : j + 1]
                 e2_test = _internal_loop(seq, i, j, loop_left, loop_right, temp)
                 e2_test_type = "INTERIOR_LOOP"
 
@@ -760,11 +765,11 @@ def _v(
                     e2_test_type = "STACK:" + loop_left + "/" + loop_right[::-1]
             elif bulge_left and not bulge_right:
                 # it's a bulge on the left side
-                e2_test = _bulge(pair, seq, i, i_1, temp)
+                e2_test = _bulge(pair, seq, i, j, loop_left, temp)
                 e2_test_type = "BULGE"
             elif bulge_right and not bulge_left:
                 # it's a bulge on the right side
-                e2_test = _bulge(pair, seq, j_1, j, temp)
+                e2_test = _bulge(pair, seq, i, j, loop_right, temp)
                 e2_test_type = "BULGE"
             else:
                 # it's basically a hairpin, only outside bp match
@@ -905,9 +910,30 @@ def _pair(pair: str, seq: str, i: int, j: int, temp: float) -> float:
         d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_INTERNAL_MM[pair]
         return _d_g(d_h, d_s, temp)
 
-    # it's terminal
-    d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_TERMINAL_MM[pair]
-    return _d_g(d_h, d_s, temp)
+    if i == 0 and j == len(seq) - 1:
+        # it's terminal
+        d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_TERMINAL_MM[pair]
+        return _d_g(d_h, d_s, temp)
+
+    if i > 0 and j == len(seq) - 1:
+        # it's dangling on left
+        d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_TERMINAL_MM[pair]
+        d_g = _d_g(d_h, d_s, temp)
+
+        pair_de = seq[i - 1] + seq[i] + "/." + seq[j]
+        d_h, d_s = DNA_DE[pair_de]
+        return d_g + _d_g(d_h, d_s, temp)
+
+    if i == 0 and j < len(seq) - 1:
+        # it's dangling on right
+        d_h, d_s = DNA_NN[pair] if pair in DNA_NN else DNA_TERMINAL_MM[pair]
+        d_g = _d_g(d_h, d_s, temp)
+
+        pair_de = "." + seq[i] + "/" + seq[j + 1] + seq[j]
+        d_h, d_s = DNA_DE[pair_de]
+        return d_g + _d_g(d_h, d_s, temp)
+
+    raise RuntimeError
 
 
 def _hairpin(seq: str, i: int, j: int, temp: float) -> float:
@@ -970,7 +996,7 @@ def _hairpin(seq: str, i: int, j: int, temp: float) -> float:
     return d_g
 
 
-def _bulge(pair: str, seq: str, i: int, j: int, temp: float) -> float:
+def _bulge(pair: str, seq: str, i: int, j: int, bulge: str, temp: float) -> float:
     """Calculate the free energy associated with a bulge.
 
     Args:
@@ -978,13 +1004,14 @@ def _bulge(pair: str, seq: str, i: int, j: int, temp: float) -> float:
         seq: The full folding DNA sequence
         i: The start index of the bulge
         j: The end index of the bulge
+        loop: The sequence of the bulge
         temp: Temperature in Kelvin
 
     Returns:
         float: The increment in free energy from the bulge
     """
 
-    loop_len = j - i - 1
+    loop_len = len(bulge) - 2  # bulge seq includes edges
     if loop_len <= 0:
         return math.inf
 

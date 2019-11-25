@@ -35,10 +35,9 @@ class TestOligos(unittest.TestCase):
             "TGAGACGGAAGGGGATGATTGTCCCCTTCCGTCTCA": -18.1,
             "AAGGGGTTGGTCGCCTCGACTAAGCGGCTGGATTCC": -3.5,  # unafold == -2.5
             "TAGCTCAGCTGGGAGAGCGCCTGCTTTGCACGCAGGAGGT": -6.85,  # bifurcation
-            "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA": -3.65,
-            # getting -2.21 because more bearish on a 4bp hairpin w/ pre-computed energy
+            "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA": -3.06,  # unafold == -3.65
             # the below is a three branched structure
-            # "GGGAGGTCGTTACATCTGGGTAACACCGGTACTGATCCGGTGACCTCCC": -10.94,
+            "GGGAGGTCGTTACATCTGGGTAACACCGGTACTGATCCGGTGACCTCCC": -10.94,
             # "TGTCAGAAGTTTCCAAATGGCCAGCAATCAACCCATTCCATTGGGGATACAATGGTACAGTTTCGCATATTGTCGGTGAAAATGGTTCCATTAAACTCC": -9.35
         }
 
@@ -58,7 +57,7 @@ class TestOligos(unittest.TestCase):
         pair = "CT/GA"
         seq = "ACCCCCTCCTTCCTTGGATCAAGGGGCTCAA"  # nonsense sequence
 
-        pair_dg = _bulge(pair, seq, 5, 7, 310.15)
+        pair_dg = _bulge(pair, seq, 5, 7, "CTC", 310.15)
         self.assertAlmostEqual(3.22, pair_dg, delta=0.4)
 
         # self.assertEqual(_bulge("CT/GA", seq, 5, 22, 310.15), 0.0)
