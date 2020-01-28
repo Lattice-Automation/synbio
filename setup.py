@@ -8,7 +8,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="synbio",
-    version="0.6.13",
+    version="0.6.14",
     python_requires=">=3",
     author="JJTimmons",
     author_email="jtimmons@latticeautomation.com",
