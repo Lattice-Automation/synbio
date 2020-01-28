@@ -22,7 +22,7 @@ requirements:
     - python >=3.0
     - biopython >=1.74
     - networkx >=2.3
-    - primer3-py
+    - primers >=0.2.4
 
 test:
   files:
