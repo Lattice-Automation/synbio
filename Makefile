@@ -14,10 +14,6 @@ docs:
 	git add .
 	git commit -m "update docs"
 
-build:
-	conda build . -c jtimmons
-	conda build purge
-
 reset:
 	rm -f data/features/**/dna*
 	rm -f data/features/**/protein*
@@ -36,10 +32,8 @@ minor: test
 	bumpversion minor
 	python3 setup.py sdist bdist_wheel
 	python3 -m twine upload dist/* --skip-existing
-	$(MAKE) build
 
 patch: test
 	bumpversion patch
 	python3 setup.py sdist bdist_wheel
 	python3 -m twine upload dist/* --skip-existing
-	$(MAKE) build

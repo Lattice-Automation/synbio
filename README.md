@@ -7,11 +7,7 @@ Documentation is available at [https://lattice-automation.github.io/synbio](http
 ## Installation
 
 ```bash
-# with pip
 pip install synbio
-
-# OR with conda
-conda install -c jtimmons synbio
 ```
 
 ## Models
