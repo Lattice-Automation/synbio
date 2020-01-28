@@ -38,20 +38,3 @@ class TestPrimers(unittest.TestCase):
         self.assertEqual(record_primers, str_primers)
         self.assertIn(fwd_padding, primers_with_padding.fwd)
         self.assertIn(rev_padding, primers_with_padding.rev)
-
-    def test_primers_specific(self):
-        """Test primer specificity for a template sequence."""
-
-        primers_valid = Primers(
-            "AAGTCAGATTTATGCAGGGATT", 57.4, "GTACTTTCCTGATTCCAGCACT", 58.0
-        )
-        primers_offtarget = Primers(
-            "TTAGTGGGAAAATTGAATTGGG", 57.4, "GTACTTTCCTGATTCCAGCACT", 58.0
-        )  # see         ttgaattcgg in the seq
-        primers_random = Primers(
-            "TTAGTGGGAAAATGGACCAGAT", 57.4, "GTACTTTCCTGATTCCAGCACT", 58.0
-        )
-
-        self.assertTrue(primers_valid.specific(self.mock1))
-        self.assertFalse(primers_offtarget.specific(self.mock1))  # dup binding
-        self.assertFalse(primers_random.specific(self.mock1))  # random fwd

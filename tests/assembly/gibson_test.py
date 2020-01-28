@@ -8,7 +8,6 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 
 from synbio.assembly import gibson
-from synbio.primers import MIN_PRIMER_LEN, MAX_PRIMER_LEN
 
 DIR_NAME = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(DIR_NAME, "..", "..", "data", "gibson")
@@ -73,19 +72,12 @@ class TestGibson(unittest.TestCase):
         self.assertIn(str(plasmid.seq), doubled_seq)
 
         for i, primers in enumerate(primer_pairs):
-            self.assertGreater(len(primers.fwd), MIN_PRIMER_LEN)
-            self.assertGreater(len(primers.rev), MIN_PRIMER_LEN)
-            self.assertLess(len(primers.fwd), MAX_PRIMER_LEN)
-            self.assertLess(len(primers.rev), MAX_PRIMER_LEN)
-
             # primers' sequences are in the final plasmid
             self.assertIn(primers.fwd, plasmid.seq)
             self.assertIn(primers.rev.reverse_complement(), plasmid.seq + plasmid.seq)
 
             record = records[i]
-            self.assertIn(primers.fwd[-MIN_PRIMER_LEN:], record.seq)
-            self.assertIn(
-                primers.rev[-MIN_PRIMER_LEN:].reverse_complement(), record.seq
-            )
+            self.assertIn(primers.fwd[-15:], record.seq)
+            self.assertIn(primers.rev[-15:].reverse_complement(), record.seq)
 
         return plasmid, primer_pairs

@@ -7,7 +7,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from ..designs import Combinatorial
-from ..primers import Primers, MIN_PRIMER_LEN, MAX_PRIMER_LEN
+from ..primers import Primers
 from ..seq import mutate
 
 
@@ -105,15 +105,6 @@ def gibson(
 
     # extend primers in 5' direction to avoid duplicate junctions
     _fix_duplicate_junctions(records, primers)
-
-    # extend primers in 3' direction to avoid ectopic binding sites
-    _fix_offtarget_primers(records, primers)
-
-    # sanity check
-    # TODO: add many more tests so this is unnecessary
-    for primer_pair in primers:
-        assert len(primer_pair.fwd) <= MAX_PRIMER_LEN
-        assert len(primer_pair.rev) <= MAX_PRIMER_LEN
 
     return plasmid, primers
 
@@ -318,46 +309,6 @@ def _has_offtarget_junction(f_end: Seq, ends: List[Seq], end_of_record: bool) ->
     return False
 
 
-def _fix_offtarget_primers(records: List[SeqRecord], primers: List[Primers]):
-    """Checks if primers can bind to multiple regions in record's sequence.
-    If they do, mutate primers until they do not. Primers should only anneal
-    to start and end of record.
-
-    Args:
-        records: all the SeqRecords to account for
-        primers: all the primers to amplify the SeqRecords
-    """
-
-    for record, primer_pair in zip(records, primers):
-        # forward primer check and fix
-        seq = record.seq
-        new_primer = primer_pair.fwd.upper()
-        bp_index = _bp_to_add_index(new_primer, seq)
-        while bp_index > 0:
-            new_primer += seq[bp_index]
-            bp_index = _bp_to_add_index(new_primer, seq)
-
-            # we've fixed too many sites, give up and log
-            if len(new_primer) >= MAX_PRIMER_LEN:
-                new_primer = primer_pair.fwd.upper()
-                break
-        primer_pair.fwd = new_primer
-
-        # reverse primer check and fix
-        seq = seq.reverse_complement()
-        new_primer = primer_pair.rev.upper()
-        bp_index = _bp_to_add_index(new_primer, seq)
-        while bp_index > 0:
-            new_primer += seq[bp_index]
-            bp_index = _bp_to_add_index(new_primer, seq)
-
-            # we've fixed too many sites, give up and log
-            if len(new_primer) >= MAX_PRIMER_LEN:
-                new_primer = primer_pair.rev.upper()
-                break
-        primer_pair.rev = new_primer
-
-
 def _bp_to_add_index(primer: Seq, seq: Seq) -> int:
     """Check for an offtarget. If there is one, expand primer in 3' dir and return True
 
@@ -371,9 +322,9 @@ def _bp_to_add_index(primer: Seq, seq: Seq) -> int:
             if no fix for an off-target primer is needed
     """
 
-    primer_end = primer[-MIN_PRIMER_LEN:]
+    primer_end = primer[-10:]
 
-    next_non_primer_bp = str(seq).index(str(primer_end)) + MIN_PRIMER_LEN
+    next_non_primer_bp = str(seq).index(str(primer_end)) + 10
 
     assert next_non_primer_bp > 0
 
