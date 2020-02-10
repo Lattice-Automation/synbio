@@ -8,7 +8,6 @@ from Bio.SeqRecord import SeqRecord
 
 from ..designs import Combinatorial
 from ..primers import Primers
-from ..seq import mutate
 
 
 MIN_HOMOLOGY = 20
@@ -307,35 +306,3 @@ def _has_offtarget_junction(f_end: Seq, ends: List[Seq], end_of_record: bool) ->
                 return True
         revcomp = not revcomp
     return False
-
-
-def _bp_to_add_index(primer: Seq, seq: Seq) -> int:
-    """Check for an offtarget. If there is one, expand primer in 3' dir and return True
-
-    Args:
-        primer: the primer to mutate if it has ectopic binding
-        seq: the sequence of the SeqRecord being checked for
-            off-target binding sites
-
-    Returns:
-        index of next bp in seq to add to primer if needed, -1
-            if no fix for an off-target primer is needed
-    """
-
-    primer_end = primer[-10:]
-
-    next_non_primer_bp = str(seq).index(str(primer_end)) + 10
-
-    assert next_non_primer_bp > 0
-
-    off_by_one_set = mutate(str(primer[-OFFTARGET_CHECK_LEN:]), edit_distance=1)
-
-    for i in range(len(primer), len(seq)):
-        # check record sequence $OFFTARGET_CHECK_LEN bp at a time
-        stretch = seq[i : i + OFFTARGET_CHECK_LEN]
-        if (
-            str(stretch) in off_by_one_set
-            or str(stretch.reverse_complement()) in off_by_one_set
-        ):
-            return next_non_primer_bp
-    return -1
