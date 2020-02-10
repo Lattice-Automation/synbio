@@ -108,7 +108,7 @@ W;;;;;;;;;
 
 ## Annotation
 
-In addition to DNA assembly, `synbio` exposes a plasmid annotation function in `synbio.features`. An example below shows a SeqRecord being augmented additional SeqFeatures from a curated database of common plasmid features.
+In addition to DNA assembly, `synbio` exposes a plasmid annotation function in `synbio.features`. An example below shows a SeqRecord being augmented with additional SeqFeatures from a curated database of common plasmid features.
 
 ```python
 from Bio.SeqIO import parse
