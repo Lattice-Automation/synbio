@@ -31,7 +31,7 @@ project = "synbio"
 author = "jjtimmons"
 
 # The full version, including alpha/beta/rc tags
-release = "0.6.16"
+release = "0.6.17"
 
 
 # -- General configuration ---------------------------------------------------
