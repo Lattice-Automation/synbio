@@ -92,6 +92,7 @@ def clone_many_combinatorial(
     include: List[str] = None,
     min_count: int = -1,
     linear: bool = True,
+    stop_condition: bool = False,
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
@@ -118,9 +119,8 @@ def clone_many_combinatorial(
     all_plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
     for record_set in design:
         for plasmids, fragments in clone_combinatorial(
-            record_set, enzymes, include=include, min_count=min_count, linear=linear
+            record_set, enzymes, include=include, min_count=min_count, linear=linear, stop_condition=stop_condition
         ):
-
             # we don't want to re-use the fragment combination more than once
             fragment_ids = _hash_fragments(fragments)
             if fragment_ids in seen_fragment_ids:
@@ -137,6 +137,7 @@ def clone_combinatorial(
     include: List[str] = None,
     min_count: int = -1,
     linear: bool = True,
+    stop_condition = False,
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
@@ -160,11 +161,12 @@ def clone_combinatorial(
     """
 
     graph = nx.MultiDiGraph()
-
+    all_ids = []
     seen_seqs: Set[str] = set()  # stored list of input seqs (not new combinations)
     for record in record_set:
         seen_seqs.add(str(record.seq + record.seq).upper())
         seen_seqs.add(str((record.seq + record.seq).reverse_complement().upper()))
+        all_ids.append(record.id)
 
         for left, frag, right in _catalyze(record, enzymes, linear):
             graph.add_node(left)
@@ -192,6 +194,7 @@ def clone_combinatorial(
                 src, dest, index = out_edge
                 if src != overhang or dest != next_overhang:
                     continue
+
                 record_bin.append(graph.edges[src, dest, index]["frag"])
             combinations.append(record_bin)
 
@@ -227,7 +230,11 @@ def clone_combinatorial(
         for i, plasmid in enumerate(plasmids):
             plasmid.id = "+".join(f.id for f in fragments if f.id != "<unknown id>")
             plasmid.description = f"cloned from {', '.join(str(e) for e in enzymes)}"
-
+            split_ids = plasmid.id.split("+")
+            if stop_condition:
+                for item in all_ids:
+                    if item not in split_ids:
+                        raise Exception(f"Error during assembly: record {item} did not assemble.")
             if len(plasmids) > 1:
                 plasmid.id += f"({i + 1})"
         plasmids_and_fragments.append((plasmids, fragments))
