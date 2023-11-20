@@ -39,6 +39,8 @@ class Clone(Protocol):
         mix: the assembly mix to use when mixing the assemblies with enzymes
         min_count: the minimum number of SeqRecords in an assembly for it to
             be considered valid. smaller assemblies are ignored
+        stop_condition: Whether an error should be raised if an input SeqRecord is missing from
+        the final assembly
     """
 
     def __init__(
