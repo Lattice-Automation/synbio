@@ -90,8 +90,7 @@ def clone_many_combinatorial(
     enzymes: List[RestrictionType],
     include: List[str] = None,
     min_count: int = -1,
-    linear: bool = True,
-    stop_condition: bool = False,
+    linear: bool = True
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
@@ -120,7 +119,7 @@ def clone_many_combinatorial(
     all_plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
     for record_set in design:
         for plasmids, fragments in clone_combinatorial(
-            record_set, enzymes, include=include, min_count=min_count, linear=linear, stop_condition=stop_condition
+            record_set, enzymes, include=include, min_count=min_count, linear=linear
         ):
             # we don't want to re-use the fragment combination more than once
             fragment_ids = _hash_fragments(fragments)
@@ -150,7 +149,7 @@ def find_assembly_error(
 
     record_order = [x.id for x in record_set]
     errors = []
-    print(track_frags)
+
     # If the backbone record has overhangs but all other records do not, or vice-versa,
     # it's a problem with backbone + component compatibility or from using the wrong restriction enzyme
     test_backbone = [key for key,val in track_frags.items() if val['left'] and val['right']]
@@ -184,8 +183,7 @@ def clone_combinatorial(
     enzymes: List[RestrictionType],
     include: List[str] = None,
     min_count: int = -1,
-    linear: bool = True,
-    stop_condition = False,
+    linear: bool = True
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
@@ -229,7 +227,6 @@ def clone_combinatorial(
             graph.add_edge(left, right, frag=frag)
 
     # Checks if the overhangs for each component can ligate together
-    
     find_assembly_error(track_frags, record_set)
             
     try:  # find all circularizable cycles

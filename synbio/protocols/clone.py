@@ -51,8 +51,7 @@ class Clone(Protocol):
         mix: Mix = CLONING_MIX,
         include: List[str] = None,
         min_count: int = -1,
-        separate_reagents: bool = False,
-        stop_condition: bool = False
+        separate_reagents: bool = False
     ):
         super().__init__(name=name, design=design, separate_reagents=separate_reagents)
 
@@ -61,7 +60,6 @@ class Clone(Protocol):
         self.mix = mix
         self.min_count = min_count
         self.wells_to_construct: Dict[Container, Container] = {}
-        self.stop_condition = stop_condition
 
     def run(self):
         """Filter designs to those that will form valid and new plasmids.
@@ -111,8 +109,7 @@ class Clone(Protocol):
             enzymes=self.enzymes,
             include=self.include,
             min_count=self.min_count,
-            linear=self.design.linear,
-            stop_condition=self.stop_condition
+            linear=self.design.linear
         ):
             # add reaction mix and water
             well_contents, well_volumes = self.mix(fragments + self.enzymes)
