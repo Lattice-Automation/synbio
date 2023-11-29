@@ -2,7 +2,6 @@
 
 from typing import Tuple, List, Optional, Iterable
 
-from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
@@ -100,7 +99,7 @@ def gibson(
             _mutate_primers(primers[i], primers[j], MIN_HOMOLOGY // 2)
 
     plasmid.id = "+".join(r.id for r in records if r.id != "<unknown id>")
-    plasmid.seq = Seq(str(plasmid.seq.upper()), alphabet=IUPACUnambiguousDNA())
+    plasmid.seq = Seq(str(plasmid.seq.upper()), annotations={"molecule_type": "DNA"})
 
     # extend primers in 5' direction to avoid duplicate junctions
     _fix_duplicate_junctions(records, primers)

@@ -3,7 +3,6 @@
 from collections import defaultdict
 from typing import Dict, List, Set, Tuple, Iterable, Optional
 
-from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Restriction import RestrictionBatch, BsaI, BpiI
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.Seq import Seq
@@ -14,7 +13,7 @@ from networkx.exception import NetworkXNoCycle
 
 from ..containers import content_id
 from ..designs import CombinatorialBins
-
+from typing import List, Dict, Tuple
 
 CATALYZE_CACHE: Dict[str, List[Tuple[str, SeqRecord, str]]] = {}
 """Store the catalyze results of each SeqRecord. Avoid lots of string searches."""
@@ -132,6 +131,53 @@ def clone_many_combinatorial(
             all_plasmids_and_fragments.append((plasmids, fragments))
     return all_plasmids_and_fragments
 
+def find_assembly_error(
+    track_frags: object,
+    record_set: List[SeqRecord]
+):
+    """Finds the specific components of the construct where an assembly error occurs.
+    Overhangs of each components are compared based on the way the record_set is ordered.
+    It is assumed that the record_set is ordered where each subsequent component should
+    ligate to the previous component, it is also assumed that the last record of the record_set
+    is the backbone record. Raises an exception if a component is unable to ligate to another.
+    The exception contains a list of components that cannot ligate.
+
+    Args:
+        track_frags: object containing record ids as keys and objects as values
+        where the value object contains lists of left overhangs and right overhangs
+        record_set: single record set that might circularize
+    """
+
+    record_order = [x.id for x in record_set]
+    errors = []
+    print(track_frags)
+    # If the backbone record has overhangs but all other records do not, or vice-versa,
+    # it's a problem with backbone + component compatibility or from using the wrong restriction enzyme
+    test_backbone = [key for key,val in track_frags.items() if val['left'] and val['right']]
+    if test_backbone[0] == record_order[-1] or record_order[-1] not in test_backbone:
+        raise Exception(f'Incorrect assembly junction: {record_order[-1]} - {record_order[0]}')
+
+    for index, record_id in enumerate(record_order):
+        if index == 0:
+            prev_record_id = record_order[-1]
+        else:
+            prev_record_id = record_order[index - 1]
+
+        prev_record = track_frags[prev_record_id]
+        current_record = track_frags[record_id]
+
+        prev_right_overhangs = [oh[1:] for oh in prev_record['right'] if oh.startswith('^')]
+        current_left_overhangs = [oh[1:] for oh in current_record['left'] if oh.startswith('^')]
+
+        # Check for reverse complement match
+        if prev_right_overhangs and current_left_overhangs:
+            compatible = any(str(Seq(prev_oh).reverse_complement()) == curr_oh for prev_oh in prev_right_overhangs for curr_oh in current_left_overhangs)
+            if not compatible:
+                errors.append(f"Incorrect assembly junction: {prev_record_id} - {record_id}")
+
+    if errors:
+        raise Exception('Assembly errors found:\n' + '\n'.join(errors))
+
 
 def clone_combinatorial(
     record_set: List[SeqRecord],
@@ -167,16 +213,25 @@ def clone_combinatorial(
     graph = nx.MultiDiGraph()
     all_ids = []
     seen_seqs: Set[str] = set()  # stored list of input seqs (not new combinations)
+    track_frags = {x.id: {'left': [], 'right':[]} for x in record_set}
+    
     for record in record_set:
         seen_seqs.add(str(record.seq + record.seq).upper())
         seen_seqs.add(str((record.seq + record.seq).reverse_complement().upper()))
         all_ids.append(record.id)
 
         for left, frag, right in _catalyze(record, enzymes, linear):
+            track_frags[record.id]['left'].append(left)
+            track_frags[record.id]['right'].append(right)
+
             graph.add_node(left)
             graph.add_node(right)
             graph.add_edge(left, right, frag=frag)
 
+    # Checks if the overhangs for each component can ligate together
+    
+    find_assembly_error(track_frags, record_set)
+            
     try:  # find all circularizable cycles
         cycles = simple_cycles(graph)
     except NetworkXNoCycle:
@@ -204,7 +259,7 @@ def clone_combinatorial(
 
         for fragments in combinations:
             # create the composite plasmid
-            plasmid = SeqRecord(Seq("", IUPACUnambiguousDNA()))
+            plasmid = SeqRecord(Seq(""))
             for fragment in fragments:
                 plasmid += fragment.upper()
 
@@ -216,10 +271,10 @@ def clone_combinatorial(
             # filter for plasmids that have an 'include' feature
             if not _has_features(plasmid, include):
                 continue
-
+            
             # re-order the fragments to try and match the input order
             fragments = _reorder_fragments(record_set, fragments)
-
+ 
             seen_seqs.add(str(plasmid.seq + plasmid.seq))
             seen_seqs.add(str((plasmid.seq + plasmid.seq).reverse_complement()))
 
@@ -234,11 +289,7 @@ def clone_combinatorial(
         for i, plasmid in enumerate(plasmids):
             plasmid.id = "+".join(f.id for f in fragments if f.id != "<unknown id>")
             plasmid.description = f"cloned from {', '.join(str(e) for e in enzymes)}"
-            split_ids = plasmid.id.split("+")
-            if stop_condition:
-                for item in all_ids:
-                    if item not in split_ids:
-                        raise Exception(f"Error during assembly: record {item} did not assemble.")
+
             if len(plasmids) > 1:
                 plasmid.id += f"({i + 1})"
         plasmids_and_fragments.append((plasmids, fragments))
@@ -322,6 +373,7 @@ def _catalyze(
 
     # list of left/right overhangs for each fragment
     frag_w_overhangs: List[Tuple[str, SeqRecord, str]] = []
+
     for i, (enzyme, cut) in enumerate(enzyme_cuts):
         if i == len(enzyme_cuts) - 1 and linear:
             continue
@@ -384,7 +436,7 @@ def _catalyze(
                 cut_rc : next_cut_rc + len(record)
             ].reverse_complement()
             frag_rc.id = record.id
-
+        
         frag_w_overhangs.append((left, frag, right))
         frag_w_overhangs.append((left_rc, frag_rc, right_rc))
 
