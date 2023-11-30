@@ -149,7 +149,7 @@ def find_assembly_error(
 
     record_order = [x.id for x in record_set]
     errors = []
-    print(track_frags)
+
     # If there are no overhangs for a component it's either the the wrong restriction enzyme being passed in
     # or the restriction enzyme isn't present in the sequence
     test_restriction_site = [key for key,val in track_frags.items() if not val['left'] and not val['right']]
