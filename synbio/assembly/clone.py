@@ -149,12 +149,10 @@ def find_assembly_error(
 
     record_order = [x.id for x in record_set]
     errors = []
-
-    # If the backbone record has overhangs but all other records do not, or vice-versa,
-    # it's a problem with backbone + component compatibility or from using the wrong restriction enzyme
-    test_backbone = [key for key,val in track_frags.items() if val['left'] and val['right']]
-    if test_backbone[0] == record_order[-1] or record_order[-1] not in test_backbone:
-        raise Exception(f'Incorrect assembly junction: {record_order[-1]} - {record_order[0]}')
+    print(track_frags)
+    # If there are no overhangs for a component it's either the the wrong restriction enzyme being passed in
+    # or the restriction enzyme isn't present in the sequence
+    test_restriction_site = [key for key,val in track_frags.items() if not val['left'] and not val['right']]
 
     for index, record_id in enumerate(record_order):
         if index == 0:
@@ -172,11 +170,14 @@ def find_assembly_error(
         if prev_right_overhangs and current_left_overhangs:
             compatible = any(str(Seq(prev_oh).reverse_complement()) == curr_oh for prev_oh in prev_right_overhangs for curr_oh in current_left_overhangs)
             if not compatible:
-                errors.append(f"Incorrect assembly junction: {prev_record_id} - {record_id}")
+                errors.append(f"{prev_record_id} - {record_id}")
 
-    if errors:
-        raise Exception('Assembly errors found:\n' + '\n'.join(errors))
-
+    if errors and test_restriction_site:
+        raise Exception('Incorrect assembly junction for parts: \n' + '\n'.join(errors) + '\n\nMissing restriction site for parts: \n' + '\n'.join(test_restriction_site))
+    elif errors:
+        raise Exception('Incorrect assembly junction for parts: \n' + '\n'.join(errors))
+    elif test_restriction_site:
+        raise Exception(f'Missing restriction site for parts: \n' + '\n'.join(test_restriction_site))
 
 def clone_combinatorial(
     record_set: List[SeqRecord],
