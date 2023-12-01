@@ -13,7 +13,6 @@ from networkx.exception import NetworkXNoCycle
 
 from ..containers import content_id
 from ..designs import CombinatorialBins
-from typing import List, Dict, Tuple
 
 CATALYZE_CACHE: Dict[str, List[Tuple[str, SeqRecord, str]]] = {}
 """Store the catalyze results of each SeqRecord. Avoid lots of string searches."""
@@ -90,7 +89,8 @@ def clone_many_combinatorial(
     enzymes: List[RestrictionType],
     include: List[str] = None,
     min_count: int = -1,
-    linear: bool = True
+    linear: bool = True,
+    strict=False
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
@@ -119,7 +119,7 @@ def clone_many_combinatorial(
     all_plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
     for record_set in design:
         for plasmids, fragments in clone_combinatorial(
-            record_set, enzymes, include=include, min_count=min_count, linear=linear
+            record_set, enzymes, include=include, min_count=min_count, linear=linear, strict=strict
         ):
             # we don't want to re-use the fragment combination more than once
             fragment_ids = _hash_fragments(fragments)
@@ -184,7 +184,8 @@ def clone_combinatorial(
     enzymes: List[RestrictionType],
     include: List[str] = None,
     min_count: int = -1,
-    linear: bool = True
+    linear: bool = True,
+    strict=False
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
@@ -228,7 +229,8 @@ def clone_combinatorial(
             graph.add_edge(left, right, frag=frag)
 
     # Checks if the overhangs for each component can ligate together
-    find_assembly_error(track_frags, record_set)
+    if strict:
+        find_assembly_error(track_frags, record_set)
             
     try:  # find all circularizable cycles
         cycles = simple_cycles(graph)
@@ -397,6 +399,7 @@ def _catalyze(
         right = record[next_cut : next_cut + next_enzyme_len]
         left_rc = right.reverse_complement()
         right_rc = left.reverse_complement()
+        
 
         left = str(left.seq)
         right = str(right.seq)

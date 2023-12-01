@@ -8,7 +8,6 @@ from Bio.SeqRecord import SeqRecord
 from ..designs import Combinatorial
 from ..primers import Primers
 
-
 MIN_HOMOLOGY = 20
 """The minimum homology (bp) between two adjacent SeqRecords."""
 
@@ -99,7 +98,7 @@ def gibson(
             _mutate_primers(primers[i], primers[j], MIN_HOMOLOGY // 2)
 
     plasmid.id = "+".join(r.id for r in records if r.id != "<unknown id>")
-    plasmid.seq = Seq(str(plasmid.seq.upper()), annotations={"molecule_type": "DNA"})
+    plasmid.seq = Seq(str(plasmid.seq.upper()))
 
     # extend primers in 5' direction to avoid duplicate junctions
     _fix_duplicate_junctions(records, primers)
