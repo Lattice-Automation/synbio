@@ -90,7 +90,7 @@ def clone_many_combinatorial(
     include: List[str] = None,
     min_count: int = -1,
     linear: bool = True,
-    strict=False
+    strict=True
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
@@ -185,7 +185,7 @@ def clone_combinatorial(
     include: List[str] = None,
     min_count: int = -1,
     linear: bool = True,
-    strict=False
+    strict=True
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 

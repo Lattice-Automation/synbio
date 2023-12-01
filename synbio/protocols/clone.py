@@ -52,7 +52,7 @@ class Clone(Protocol):
         include: List[str] = None,
         min_count: int = -1,
         separate_reagents: bool = False,
-        strict=False
+        strict=True
     ):
         super().__init__(name=name, design=design, separate_reagents=separate_reagents)
 
