@@ -106,8 +106,7 @@ def clone_many_combinatorial(
         include: List of strings to filter assemblies against
         min_count: The mininum number of SeqRecords for an assembly to be considered
         linear: Whether the individual SeqRecords are assumed to be linear
-        stop_condition: Whether an error should be raised if an input SeqRecord is missing from
-        the final assembly
+        strict: Whether an error should be raised if a specific input SeqRecord cannot assemble
 
     Returns:
         List[Tuple[List[SeqRecord], List[SeqRecord]]] -- list of tuples with:
@@ -201,8 +200,7 @@ def clone_combinatorial(
         include: the include to filter assemblies
         min_count: mininum number of SeqRecords for an assembly to be considered
         linear: Whether the individual SeqRecords are assumed to be linear
-        stop_condition: Whether an error should be raised if an input SeqRecord is missing from
-        the final assembly
+        strict: Whether an error should be raised if a specific input SeqRecord cannot assemble
 
     Returns:
         A list of tuples with:
