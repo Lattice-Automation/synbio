@@ -2,6 +2,7 @@
 
 from typing import Union
 
+from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from primers import primers
@@ -54,9 +55,9 @@ class Primers:
         fwd, rev = primers(template, add_fwd=fwd_padding, add_rev=rev_padding)
 
         return Primers(
-            Seq(fwd.seq),
+            Seq(fwd.seq, alphabet=IUPACUnambiguousDNA()),
             fwd.tm,
-            Seq(rev.seq),
+            Seq(rev.seq, alphabet=IUPACUnambiguousDNA()),
             rev.tm,
         )
 

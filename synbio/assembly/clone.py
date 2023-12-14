@@ -3,6 +3,7 @@
 from collections import defaultdict
 from typing import Dict, List, Set, Tuple, Iterable, Optional
 
+from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Restriction import RestrictionBatch, BsaI, BpiI
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.Seq import Seq
@@ -257,7 +258,7 @@ def clone_combinatorial(
 
         for fragments in combinations:
             # create the composite plasmid
-            plasmid = SeqRecord(Seq(""))
+            plasmid = SeqRecord(Seq("", IUPACUnambiguousDNA()))
             for fragment in fragments:
                 plasmid += fragment.upper()
 
