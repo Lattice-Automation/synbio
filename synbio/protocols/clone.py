@@ -39,8 +39,7 @@ class Clone(Protocol):
         mix: the assembly mix to use when mixing the assemblies with enzymes
         min_count: the minimum number of SeqRecords in an assembly for it to
             be considered valid. smaller assemblies are ignored
-        stop_condition: Whether an error should be raised if an input SeqRecord is missing from
-        the final assembly
+        strict: Whether an error should be raised if a specific input SeqRecord cannot assemble
     """
 
     def __init__(
@@ -52,7 +51,7 @@ class Clone(Protocol):
         include: List[str] = None,
         min_count: int = -1,
         separate_reagents: bool = False,
-        stop_condition: bool = False
+        strict=True
     ):
         super().__init__(name=name, design=design, separate_reagents=separate_reagents)
 
@@ -61,7 +60,7 @@ class Clone(Protocol):
         self.mix = mix
         self.min_count = min_count
         self.wells_to_construct: Dict[Container, Container] = {}
-        self.stop_condition = stop_condition
+        self.strict = strict
 
     def run(self):
         """Filter designs to those that will form valid and new plasmids.
@@ -112,7 +111,7 @@ class Clone(Protocol):
             include=self.include,
             min_count=self.min_count,
             linear=self.design.linear,
-            stop_condition=self.stop_condition
+            strict=self.strict
         ):
             # add reaction mix and water
             well_contents, well_volumes = self.mix(fragments + self.enzymes)

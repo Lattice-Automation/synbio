@@ -3,7 +3,6 @@
 from collections import defaultdict
 from typing import Dict, List, Set, Tuple, Iterable, Optional
 
-from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from Bio.Restriction import RestrictionBatch, BsaI, BpiI
 from Bio.Restriction.Restriction import RestrictionType
 from Bio.Seq import Seq
@@ -14,7 +13,6 @@ from networkx.exception import NetworkXNoCycle
 
 from ..containers import content_id
 from ..designs import CombinatorialBins
-
 
 CATALYZE_CACHE: Dict[str, List[Tuple[str, SeqRecord, str]]] = {}
 """Store the catalyze results of each SeqRecord. Avoid lots of string searches."""
@@ -92,7 +90,7 @@ def clone_many_combinatorial(
     include: List[str] = None,
     min_count: int = -1,
     linear: bool = True,
-    stop_condition: bool = False,
+    strict=True
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
@@ -108,8 +106,7 @@ def clone_many_combinatorial(
         include: List of strings to filter assemblies against
         min_count: The mininum number of SeqRecords for an assembly to be considered
         linear: Whether the individual SeqRecords are assumed to be linear
-        stop_condition: Whether an error should be raised if an input SeqRecord is missing from
-        the final assembly
+        strict: Whether an error should be raised if a specific input SeqRecord cannot assemble
 
     Returns:
         List[Tuple[List[SeqRecord], List[SeqRecord]]] -- list of tuples with:
@@ -121,7 +118,7 @@ def clone_many_combinatorial(
     all_plasmids_and_fragments: List[Tuple[List[SeqRecord], List[SeqRecord]]] = []
     for record_set in design:
         for plasmids, fragments in clone_combinatorial(
-            record_set, enzymes, include=include, min_count=min_count, linear=linear, stop_condition=stop_condition
+            record_set, enzymes, include=include, min_count=min_count, linear=linear, strict=strict
         ):
             # we don't want to re-use the fragment combination more than once
             fragment_ids = _hash_fragments(fragments)
@@ -132,6 +129,54 @@ def clone_many_combinatorial(
             all_plasmids_and_fragments.append((plasmids, fragments))
     return all_plasmids_and_fragments
 
+def find_assembly_error(
+    track_frags: object,
+    record_set: List[SeqRecord]
+):
+    """Finds the specific components of the construct where an assembly error occurs.
+    Overhangs of each components are compared based on the way the record_set is ordered.
+    It is assumed that the record_set is ordered where each subsequent component should
+    ligate to the previous component, it is also assumed that the last record of the record_set
+    is the backbone record. Raises an exception if a component is unable to ligate to another.
+    The exception contains a list of components that cannot ligate.
+
+    Args:
+        track_frags: object containing record ids as keys and objects as values
+        where the value object contains lists of left overhangs and right overhangs
+        record_set: single record set that might circularize
+    """
+
+    record_order = [x.id for x in record_set]
+    errors = []
+
+    # If there are no overhangs for a component it's either the the wrong restriction enzyme being passed in
+    # or the restriction enzyme isn't present in the sequence
+    test_restriction_site = [key for key,val in track_frags.items() if not val['left'] and not val['right']]
+
+    for index, record_id in enumerate(record_order):
+        if index == 0:
+            prev_record_id = record_order[-1]
+        else:
+            prev_record_id = record_order[index - 1]
+
+        prev_record = track_frags[prev_record_id]
+        current_record = track_frags[record_id]
+
+        prev_right_overhangs = [oh[1:] for oh in prev_record['right'] if oh.startswith('^')]
+        current_left_overhangs = [oh[1:] for oh in current_record['left'] if oh.startswith('^')]
+
+        # Check for reverse complement match
+        if prev_right_overhangs and current_left_overhangs:
+            compatible = any(str(Seq(prev_oh).reverse_complement()) == curr_oh for prev_oh in prev_right_overhangs for curr_oh in current_left_overhangs)
+            if not compatible:
+                errors.append(f"{prev_record_id} - {record_id}")
+
+    if errors and test_restriction_site:
+        raise Exception('Incorrect assembly junction for parts: \n' + '\n'.join(errors) + '\n\nMissing restriction site for parts: \n' + '\n'.join(test_restriction_site))
+    elif errors:
+        raise Exception('Incorrect assembly junction for parts: \n' + '\n'.join(errors))
+    elif test_restriction_site:
+        raise Exception(f'Missing restriction site for parts: \n' + '\n'.join(test_restriction_site))
 
 def clone_combinatorial(
     record_set: List[SeqRecord],
@@ -139,7 +184,7 @@ def clone_combinatorial(
     include: List[str] = None,
     min_count: int = -1,
     linear: bool = True,
-    stop_condition = False,
+    strict=True
 ) -> List[Tuple[List[SeqRecord], List[SeqRecord]]]:
     """Parse a single list of SeqRecords to find all circularizable plasmids.
 
@@ -155,8 +200,7 @@ def clone_combinatorial(
         include: the include to filter assemblies
         min_count: mininum number of SeqRecords for an assembly to be considered
         linear: Whether the individual SeqRecords are assumed to be linear
-        stop_condition: Whether an error should be raised if an input SeqRecord is missing from
-        the final assembly
+        strict: Whether an error should be raised if a specific input SeqRecord cannot assemble
 
     Returns:
         A list of tuples with:
@@ -167,16 +211,25 @@ def clone_combinatorial(
     graph = nx.MultiDiGraph()
     all_ids = []
     seen_seqs: Set[str] = set()  # stored list of input seqs (not new combinations)
+    track_frags = {x.id: {'left': [], 'right':[]} for x in record_set}
+    
     for record in record_set:
         seen_seqs.add(str(record.seq + record.seq).upper())
         seen_seqs.add(str((record.seq + record.seq).reverse_complement().upper()))
         all_ids.append(record.id)
 
         for left, frag, right in _catalyze(record, enzymes, linear):
+            track_frags[record.id]['left'].append(left)
+            track_frags[record.id]['right'].append(right)
+
             graph.add_node(left)
             graph.add_node(right)
             graph.add_edge(left, right, frag=frag)
 
+    # Checks if the overhangs for each component can ligate together
+    if strict:
+        find_assembly_error(track_frags, record_set)
+            
     try:  # find all circularizable cycles
         cycles = simple_cycles(graph)
     except NetworkXNoCycle:
@@ -204,7 +257,7 @@ def clone_combinatorial(
 
         for fragments in combinations:
             # create the composite plasmid
-            plasmid = SeqRecord(Seq("", IUPACUnambiguousDNA()))
+            plasmid = SeqRecord(Seq(""))
             for fragment in fragments:
                 plasmid += fragment.upper()
 
@@ -216,10 +269,10 @@ def clone_combinatorial(
             # filter for plasmids that have an 'include' feature
             if not _has_features(plasmid, include):
                 continue
-
+            
             # re-order the fragments to try and match the input order
             fragments = _reorder_fragments(record_set, fragments)
-
+ 
             seen_seqs.add(str(plasmid.seq + plasmid.seq))
             seen_seqs.add(str((plasmid.seq + plasmid.seq).reverse_complement()))
 
@@ -234,11 +287,7 @@ def clone_combinatorial(
         for i, plasmid in enumerate(plasmids):
             plasmid.id = "+".join(f.id for f in fragments if f.id != "<unknown id>")
             plasmid.description = f"cloned from {', '.join(str(e) for e in enzymes)}"
-            split_ids = plasmid.id.split("+")
-            if stop_condition:
-                for item in all_ids:
-                    if item not in split_ids:
-                        raise Exception(f"Error during assembly: record {item} did not assemble.")
+
             if len(plasmids) > 1:
                 plasmid.id += f"({i + 1})"
         plasmids_and_fragments.append((plasmids, fragments))
@@ -322,6 +371,7 @@ def _catalyze(
 
     # list of left/right overhangs for each fragment
     frag_w_overhangs: List[Tuple[str, SeqRecord, str]] = []
+
     for i, (enzyme, cut) in enumerate(enzyme_cuts):
         if i == len(enzyme_cuts) - 1 and linear:
             continue
@@ -347,6 +397,7 @@ def _catalyze(
         right = record[next_cut : next_cut + next_enzyme_len]
         left_rc = right.reverse_complement()
         right_rc = left.reverse_complement()
+        
 
         left = str(left.seq)
         right = str(right.seq)
@@ -384,7 +435,7 @@ def _catalyze(
                 cut_rc : next_cut_rc + len(record)
             ].reverse_complement()
             frag_rc.id = record.id
-
+        
         frag_w_overhangs.append((left, frag, right))
         frag_w_overhangs.append((left_rc, frag_rc, right_rc))
 
