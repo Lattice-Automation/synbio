@@ -1,4 +1,4 @@
-biopython>=1.74.0
+biopython==1.7.7
 networkx>=2.3.0
 fuzzywuzzy
 primers>=0.2.4
