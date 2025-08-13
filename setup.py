@@ -9,7 +9,7 @@ with open("requirements.txt") as f:
 setup(
     name="synbio",
     version="0.6.17",
-    python_requires=">=3",
+    python_requires=">=3,<3.12",
     author="JJTimmons",
     author_email="jtimmons@latticeautomation.com",
     url="https://github.com/Lattice-Automation/synbio",
